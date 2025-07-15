@@ -21,10 +21,10 @@ export class TestAppHelper {
 
     this.app = this.moduleFixture.createNestApplication();
     await this.app.init();
-    
+
     // Get the DataSource for proper cleanup
     this.dataSource = this.moduleFixture.get<DataSource>(DataSource);
-    
+
     return this.app;
   }
 

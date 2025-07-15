@@ -39,4 +39,4 @@ import { YemotHandlerService } from './yemot-handler.service';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

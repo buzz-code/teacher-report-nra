@@ -5,7 +5,12 @@ import { EventType } from 'src/db/entities/EventType.entity';
 import { Gift } from 'src/db/entities/Gift.entity';
 import { Event } from 'src/db/entities/Event.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-import { formatHebrewDateForIVR, gematriyaLetters, getGregorianDateFromHebrew, getHebrewMonthsList } from '@shared/utils/formatting/hebrew.util';
+import {
+  formatHebrewDateForIVR,
+  gematriyaLetters,
+  getGregorianDateFromHebrew,
+  getHebrewMonthsList,
+} from '@shared/utils/formatting/hebrew.util';
 import { Class } from 'src/db/entities/Class.entity';
 import { StudentClass } from 'src/db/entities/StudentClass.entity';
 
@@ -48,7 +53,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       eventTypeReferenceId: eventType.id,
       eventDate: eventDate,
       name: `${student.name} - ${eventType.name}`,
-      eventGifts: gifts.map(gift => ({
+      eventGifts: gifts.map((gift) => ({
         userId: this.user.id,
         giftReferenceId: gift.id,
       })),
@@ -79,7 +84,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
       min_digits: 1,
-      max_digits: 9
+      max_digits: 9,
     });
     const student = await this.fetchStudentByTz(tz);
 
@@ -95,7 +100,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Fetching student by TZ: ${tz}`);
     const student = await this.dataSource.getRepository(Student).findOneBy({
       userId: this.user.id,
-      tz
+      tz,
     });
     if (!student) {
       this.logger.log(`No student found with TZ: ${tz}`);
@@ -107,11 +112,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Loading event types`);
     this.eventTypes = await this.dataSource.getRepository(EventType).find({
       where: {
-        userId: this.user.id
+        userId: this.user.id,
       },
       order: {
-        key: 'ASC'
-      }
+        key: 'ASC',
+      },
     });
     this.logger.log(`Event types loaded: ${this.eventTypes.length}`);
   }
@@ -120,11 +125,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Loading gifts`);
     this.gifts = await this.dataSource.getRepository(Gift).find({
       where: {
-        userId: this.user.id
+        userId: this.user.id,
       },
       order: {
-        key: 'ASC'
-      }
+        key: 'ASC',
+      },
     });
     this.logger.log(`Gifts loaded: ${this.gifts.length}`);
   }
@@ -138,10 +143,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
     this.logger.log(`Event type selected: ${eventType.name}`);
 
-    const isConfirmed = await this.askConfirmation(
-      'EVENT.CONFIRM_TYPE',
-      { name: eventType.name }
-    );
+    const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_TYPE', { name: eventType.name });
 
     if (!isConfirmed) {
       this.logger.log(`Event type not confirmed, selecting again`);
@@ -157,7 +159,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     let continueSelection = true;
 
     while (continueSelection && selectedGifts.length < MAX_GIFTS) {
-      const availableGifts = this.gifts.filter(g => !selectedGifts.some(sg => sg.id === g.id));
+      const availableGifts = this.gifts.filter((g) => !selectedGifts.some((sg) => sg.id === g.id));
 
       const promptKey = selectedGifts.length === 0 ? 'EVENT.GIFT_SELECTION' : 'EVENT.ADDITIONAL_GIFT_SELECTION';
       const gift = await this.askForMenu(promptKey, availableGifts);
@@ -175,9 +177,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       }
     }
 
-    const giftNames = selectedGifts.map(g => g.name).join(', ');
+    const giftNames = selectedGifts.map((g) => g.name).join(', ');
     this.logger.log(`Gifts selected: ${giftNames}`);
-    const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_GIFTS', { gifts: giftNames, count: selectedGifts.length });
+    const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_GIFTS', {
+      gifts: giftNames,
+      count: selectedGifts.length,
+    });
 
     if (!isConfirmed) {
       this.logger.log(`Gift selection not confirmed, starting over`);
@@ -208,10 +213,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     this.logger.log(`Event date selected: ${eventDate.toISOString()}`);
 
     const hebrewDate = formatHebrewDateForIVR(eventDate);
-    const isConfirmed = await this.askConfirmation(
-      'DATE.CONFIRM_DATE',
-      { date: hebrewDate },
-    );
+    const isConfirmed = await this.askConfirmation('DATE.CONFIRM_DATE', { date: hebrewDate });
 
     if (!isConfirmed) {
       return this.getEventDate();
@@ -227,7 +229,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const daysDifference = Math.floor((today.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysDifference > 100) {
-      this.logger.log(`Selected date ${eventDate.toISOString()} is more than 100 days ago (${daysDifference} days), using next year`);
+      this.logger.log(
+        `Selected date ${eventDate.toISOString()} is more than 100 days ago (${daysDifference} days), using next year`,
+      );
       eventDate = getGregorianDateFromHebrew(year + 1, monthIndex, dayNumber);
     }
 
@@ -253,13 +257,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getGradeForCelebrations(): Promise<string> {
     this.logger.log(`Getting grade for celebrations`);
 
-    const gradeInput = await this.askForInput(
-      await this.getTextByUserId('CELEBRATIONS.GRADE_PROMPT'),
-      {
-        min_digits: 1,
-        max_digits: 2
-      }
-    );
+    const gradeInput = await this.askForInput(await this.getTextByUserId('CELEBRATIONS.GRADE_PROMPT'), {
+      min_digits: 1,
+      max_digits: 2,
+    });
 
     const grade = parseInt(gradeInput);
 
@@ -276,13 +277,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getClassNumber(grade: string): Promise<Class> {
     this.logger.log(`Getting class number for grade ${grade}`);
 
-    const classNumberInput = await this.askForInput(
-      await this.getTextByUserId('CELEBRATIONS.CLASS_PROMPT'),
-      {
-        min_digits: 1,
-        max_digits: 2
-      }
-    );
+    const classNumberInput = await this.askForInput(await this.getTextByUserId('CELEBRATIONS.CLASS_PROMPT'), {
+      min_digits: 1,
+      max_digits: 2,
+    });
 
     const classNumber = parseInt(classNumberInput);
     const expectedClassName = `${grade}${classNumber}`;
@@ -291,8 +289,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       where: {
         userId: this.user.id,
         name: expectedClassName,
-        gradeLevel: grade
-      }
+        gradeLevel: grade,
+      },
     });
 
     if (!classEntity) {
@@ -321,7 +319,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async readClassCelebrations(classEntity: Class, currentYear: number, monthName: string): Promise<void> {
     this.logger.log(`Reading celebrations for class ${classEntity.name} month ${monthName}`);
 
-    const events = await this.dataSource.getRepository(Event)
+    const events = await this.dataSource
+      .getRepository(Event)
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.eventType', 'eventType')
       .innerJoin(Student, 'student', 'student.id = event.studentReferenceId')
@@ -335,21 +334,24 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       .getMany();
 
     if (events.length === 0) {
-      this.hangupWithMessage(await this.getTextByUserId('CELEBRATIONS.NO_CELEBRATIONS_FOUND', {
-        className: classEntity.name,
-        month: monthName
-      }));
+      this.hangupWithMessage(
+        await this.getTextByUserId('CELEBRATIONS.NO_CELEBRATIONS_FOUND', {
+          className: classEntity.name,
+          month: monthName,
+        }),
+      );
       return;
     }
 
-    const studentsWithEvents = await this.dataSource.getRepository(Student)
+    const studentsWithEvents = await this.dataSource
+      .getRepository(Student)
       .createQueryBuilder('student')
       .where('student.id IN (:...studentIds)', {
-        studentIds: events.map(e => e.studentReferenceId)
+        studentIds: events.map((e) => e.studentReferenceId),
       })
       .getMany();
 
-    const studentMap = new Map(studentsWithEvents.map(s => [s.id, s]));
+    const studentMap = new Map(studentsWithEvents.map((s) => [s.id, s]));
 
     const eventsByStudent = events.reduce((acc, event) => {
       const student = studentMap.get(event.studentReferenceId);
@@ -363,20 +365,24 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return acc;
     }, {} as Record<string, Event[]>);
 
-    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_START', {
-      className: classEntity.name,
-      month: monthName,
-      count: events.length.toString()
-    }));
+    this.sendMessage(
+      await this.getTextByUserId('CELEBRATIONS.READING_START', {
+        className: classEntity.name,
+        month: monthName,
+        count: events.length.toString(),
+      }),
+    );
 
     for (const [studentName, studentEvents] of Object.entries(eventsByStudent)) {
       this.sendMessage(await this.getTextByUserId('CELEBRATIONS.STUDENT_NAME', { name: studentName }));
 
       for (const event of studentEvents) {
-        this.sendMessage(await this.getTextByUserId('CELEBRATIONS.EVENT_DETAIL', {
-          eventType: event.eventType.name,
-          date: formatHebrewDateForIVR(event.eventDate)
-        }));
+        this.sendMessage(
+          await this.getTextByUserId('CELEBRATIONS.EVENT_DETAIL', {
+            eventType: event.eventType.name,
+            date: formatHebrewDateForIVR(event.eventDate),
+          }),
+        );
       }
     }
 

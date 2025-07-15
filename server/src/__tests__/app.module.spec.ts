@@ -133,8 +133,10 @@ describe('AppModule', () => {
     const imports = Reflect.getMetadata('imports', AppModule);
     const yemotConfig = imports.find((imp: any) => {
       // Check if this is a dynamic module with YemotModule
-      return imp && (imp.module === YemotModule || 
-        (typeof imp === 'object' && imp.module && imp.module.name === 'YemotModule'));
+      return (
+        imp &&
+        (imp.module === YemotModule || (typeof imp === 'object' && imp.module && imp.module.name === 'YemotModule'))
+      );
     });
     expect(yemotConfig).toBeDefined();
     expect(yemotConfig.module).toBe(YemotModule);

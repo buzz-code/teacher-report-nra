@@ -32,24 +32,24 @@ describe('reportData.util', () => {
   describe('calcSum', () => {
     it('should calculate sum correctly', () => {
       const items = [{ value: 10 }, { value: 20 }, { value: 30 }];
-      const result = calcSum(items, item => item.value);
+      const result = calcSum(items, (item) => item.value);
       expect(result).toBe(60);
     });
 
     it('should handle null values', () => {
       const items = [{ value: 10 }, { value: null }, { value: 30 }];
-      const result = calcSum(items, item => item.value);
+      const result = calcSum(items, (item) => item.value);
       expect(result).toBe(40);
     });
 
     it('should handle empty array', () => {
-      const result = calcSum([], item => item.value);
+      const result = calcSum([], (item) => item.value);
       expect(result).toBe(0);
     });
 
     it('should handle undefined values', () => {
       const items = [{ value: 10 }, { value: undefined }, { value: 30 }];
-      const result = calcSum(items, item => item.value);
+      const result = calcSum(items, (item) => item.value);
       expect(result).toBe(40);
     });
   });
@@ -57,30 +57,30 @@ describe('reportData.util', () => {
   describe('calcAvg', () => {
     it('should calculate average correctly', () => {
       const items = [{ value: 10 }, { value: 20 }, { value: 30 }];
-      const result = calcAvg(items, item => item.value);
+      const result = calcAvg(items, (item) => item.value);
       expect(result).toBe(20);
     });
 
     it('should handle null values by excluding them', () => {
       const items = [{ value: 10 }, { value: null }, { value: 30 }];
-      const result = calcAvg(items, item => item.value);
+      const result = calcAvg(items, (item) => item.value);
       expect(result).toBe(20);
     });
 
     it('should handle undefined values by excluding them', () => {
       const items = [{ value: 10 }, { value: undefined }, { value: 30 }];
-      const result = calcAvg(items, item => item.value);
+      const result = calcAvg(items, (item) => item.value);
       expect(result).toBe(20);
     });
 
     it('should return 0 for empty array', () => {
-      const result = calcAvg([], item => item.value);
+      const result = calcAvg([], (item) => item.value);
       expect(result).toBe(0);
     });
 
     it('should return 0 when all values are null', () => {
       const items = [{ value: null }, { value: null }];
-      const result = calcAvg(items, item => item.value);
+      const result = calcAvg(items, (item) => item.value);
       expect(result).toBe(0);
     });
   });
@@ -126,14 +126,8 @@ describe('reportData.util', () => {
 
   describe('getUniqueValues', () => {
     it('should return unique values', () => {
-      const items = [
-        { category: 'A' },
-        { category: 'B' },
-        { category: 'A' },
-        { category: 'C' },
-        { category: 'B' },
-      ];
-      const result = getUniqueValues(items, item => item.category);
+      const items = [{ category: 'A' }, { category: 'B' }, { category: 'A' }, { category: 'C' }, { category: 'B' }];
+      const result = getUniqueValues(items, (item) => item.category);
       expect(result).toEqual(['A', 'B', 'C']);
     });
 
@@ -146,12 +140,12 @@ describe('reportData.util', () => {
         { category: '' },
         { category: 'A' },
       ];
-      const result = getUniqueValues(items, item => item.category);
+      const result = getUniqueValues(items, (item) => item.category);
       expect(result).toEqual(['A', 'B']);
     });
 
     it('should handle empty array', () => {
-      const result = getUniqueValues([], item => item.category);
+      const result = getUniqueValues([], (item) => item.category);
       expect(result).toEqual([]);
     });
   });
@@ -181,11 +175,11 @@ describe('reportData.util', () => {
       ];
       const result = groupDataByKeys(data, ['category', 'type']);
       expect(result).toEqual({
-        'A_X': [
+        A_X: [
           { category: 'A', type: 'X', value: 1 },
           { category: 'A', type: 'X', value: 3 },
         ],
-        'A_Y': [{ category: 'A', type: 'Y', value: 2 }],
+        A_Y: [{ category: 'A', type: 'Y', value: 2 }],
       });
     });
 
@@ -202,11 +196,7 @@ describe('reportData.util', () => {
         { category: 'B', value: 2 },
         { category: 'A', value: 3 },
       ];
-      const result = groupDataByKeysAndCalc(
-        data,
-        ['category'],
-        items => items.length
-      );
+      const result = groupDataByKeysAndCalc(data, ['category'], (items) => items.length);
       expect(result).toEqual({
         A: 2,
         B: 1,
@@ -219,10 +209,8 @@ describe('reportData.util', () => {
         { category: 'B', value: 2 },
         { category: 'A', value: 3 },
       ];
-      const result = groupDataByKeysAndCalc(
-        data,
-        ['category'],
-        items => items.reduce((sum, item) => sum + item.value, 0)
+      const result = groupDataByKeysAndCalc(data, ['category'], (items) =>
+        items.reduce((sum, item) => sum + item.value, 0),
       );
       expect(result).toEqual({
         A: 4,

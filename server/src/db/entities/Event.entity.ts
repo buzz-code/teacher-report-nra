@@ -51,7 +51,19 @@ export class Event implements IHasUserId {
 
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([EventType, Teacher, Student, User, LevelType, StudentClass, Class, EventNote, Event, EventGift, Gift]);
+      dataSource = await getDataSource([
+        EventType,
+        Teacher,
+        Student,
+        User,
+        LevelType,
+        StudentClass,
+        Class,
+        EventNote,
+        Event,
+        EventGift,
+        Gift,
+      ]);
 
       this.eventTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -87,9 +99,9 @@ export class Event implements IHasUserId {
           where: {
             studentReferenceId: this.studentReferenceId,
             year: this.year ?? getCurrentHebrewYear(),
-            userId: this.userId
+            userId: this.userId,
           },
-          order: { id: 'ASC' } // Get the first class (oldest entry)
+          order: { id: 'ASC' }, // Get the first class (oldest entry)
         });
 
         if (studentClass && studentClass.classReferenceId) {

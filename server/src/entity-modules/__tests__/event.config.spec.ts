@@ -8,7 +8,7 @@ describe('EventConfig', () => {
 
   it('should have correct export headers', () => {
     const headers = eventConfig.exporter.getExportHeaders([]);
-    
+
     expect(headers).toContainEqual({ value: 'id', label: 'מזהה', readOnly: true });
     expect(headers).toContainEqual({ value: 'student.tz', label: 'תז תלמיד' });
     expect(headers).toContainEqual({ value: 'student.name', label: 'שם תלמידה', readOnly: true });
@@ -33,15 +33,15 @@ describe('EventConfig', () => {
     const mockReq = {
       options: {
         query: {
-          join: {}
-        }
-      }
+          join: {},
+        },
+      },
     };
-    
+
     const mockInnerFunc = jest.fn().mockReturnValue('result');
-    
+
     const result = eventConfig.exporter.processReqForExport(mockReq as any, mockInnerFunc);
-    
+
     expect(mockReq.options.query.join).toEqual({
       eventType: { eager: true },
       teacher: { eager: true },
@@ -51,7 +51,7 @@ describe('EventConfig', () => {
       notes: { eager: true },
       eventGifts: { eager: true },
     });
-    
+
     expect(mockInnerFunc).toHaveBeenCalledWith(mockReq);
     expect(result).toBe('result');
   });

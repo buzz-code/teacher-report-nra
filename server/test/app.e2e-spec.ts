@@ -17,10 +17,7 @@ describe('AppController (e2e)', () => {
 
   describe('Health Check', () => {
     it('/ (GET) should return Hello World!', async () => {
-      return httpUtils
-        .get('/')
-        .expect(200)
-        .expect('Hello World!');
+      return httpUtils.get('/').expect(200).expect('Hello World!');
     });
   });
 });

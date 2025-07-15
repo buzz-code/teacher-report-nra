@@ -57,7 +57,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'student.fatherName', label: 'שם האב', readOnly: true },
           { value: 'student.fatherContact', label: 'טלפון האב', readOnly: true },
           { value: 'student.motherPreviousName', label: 'שם משפחה קודם של האם', readOnly: true },
-          { value: (row: any) => row.notes.map(note => note.noteText).join('\r\n'), label: 'הערות', readOnly: true },
+          { value: (row: any) => row.notes.map((note) => note.noteText).join('\r\n'), label: 'הערות', readOnly: true },
           { value: (_) => '', label: 'הערה חדשה' },
         ];
       },

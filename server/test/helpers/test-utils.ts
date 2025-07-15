@@ -62,8 +62,10 @@ export class TestDataGenerator {
   /**
    * Generate a random string
    */
-  static randomString(length: number = 8): string {
-    return Math.random().toString(36).substring(2, length + 2);
+  static randomString(length = 8): string {
+    return Math.random()
+      .toString(36)
+      .substring(2, length + 2);
   }
 
   /**
@@ -76,7 +78,7 @@ export class TestDataGenerator {
   /**
    * Generate a random number within a range
    */
-  static randomNumber(min: number = 1, max: number = 100): number {
+  static randomNumber(min = 1, max = 100): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 }
@@ -90,7 +92,7 @@ export class TestAssertions {
    */
   static expectResponseStructure(response: any, expectedKeys: string[]) {
     expect(response).toBeDefined();
-    expectedKeys.forEach(key => {
+    expectedKeys.forEach((key) => {
       expect(response).toHaveProperty(key);
     });
   }
