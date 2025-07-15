@@ -23,15 +23,15 @@ import studentClassConfig from './entity-modules/student-class.config';
 import studentByYearConfig from './entity-modules/student-by-year.config';
 
 // Teacher Report System entities
-import teacherTypeConfig from './entity-modules/teacher-type.config';
-import attReportConfig from './entity-modules/att-report.config';
-import attTypeConfig from './entity-modules/att-type.config';
-import priceConfig from './entity-modules/price.config';
-import questionConfig from './entity-modules/question.config';
-import questionTypeConfig from './entity-modules/question-type.config';
-import answerConfig from './entity-modules/answer.config';
-import workingDateConfig from './entity-modules/working-date.config';
-import salaryReportConfig from './entity-modules/salary-report.config';
+import { TeacherType } from './db/entities/TeacherType.entity';
+import { AttReport } from './db/entities/AttReport.entity';
+import { AttType } from './db/entities/AttType.entity';
+import { Price } from './db/entities/Price.entity';
+import { Question } from './db/entities/Question.entity';
+import { QuestionType } from './db/entities/QuestionType.entity';
+import { Answer } from './db/entities/Answer.entity';
+import { WorkingDate } from './db/entities/WorkingDate.entity';
+import { SalaryReport } from './db/entities/SalaryReport.entity';
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -57,15 +57,15 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register(studentByYearConfig),
 
     // Teacher Report System entities
-    BaseEntityModule.register(teacherTypeConfig),
-    BaseEntityModule.register(attReportConfig),
-    BaseEntityModule.register(attTypeConfig),
-    BaseEntityModule.register(priceConfig),
-    BaseEntityModule.register(questionConfig),
-    BaseEntityModule.register(questionTypeConfig),
-    BaseEntityModule.register(answerConfig),
-    BaseEntityModule.register(workingDateConfig),
-    BaseEntityModule.register(salaryReportConfig),
+    BaseEntityModule.register({ entity: TeacherType }),
+    BaseEntityModule.register({ entity: AttReport }),
+    BaseEntityModule.register({ entity: AttType }),
+    BaseEntityModule.register({ entity: Price }),
+    BaseEntityModule.register({ entity: Question }),
+    BaseEntityModule.register({ entity: QuestionType }),
+    BaseEntityModule.register({ entity: Answer }),
+    BaseEntityModule.register({ entity: WorkingDate }),
+    BaseEntityModule.register({ entity: SalaryReport }),
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),
