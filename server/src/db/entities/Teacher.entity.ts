@@ -44,6 +44,50 @@ export class Teacher implements IHasUserId {
   @Column({ length: 255 })
   name: string;
 
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(50, { always: true })
+  @Column({ length: 50, nullable: true })
+  phone: string;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  email: string;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true })
+  school: string;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'teacher_type_id', nullable: true })
+  teacherTypeId: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  price: number;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true, name: 'training_teacher' })
+  trainingTeacher: string;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'special_question', nullable: true })
+  specialQuestion: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'student_count', nullable: true })
+  studentCount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
