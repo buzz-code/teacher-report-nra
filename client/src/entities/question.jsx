@@ -22,7 +22,7 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 const filters = [
     ...commonAdminFilters,
     <TextInput source="content:$cont" alwaysOn />,
-    <NumberInput source="teacherTypeId" />,
+    <CommonReferenceInputFilter source="teacherTypeId" reference="teacher_type" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="questionTypeId" reference="question_type" dynamicFilter={filterByUserId} />,
     <BooleanInput source="isStandalone" />,
     <DateInput source="startDate:$gte" />,
@@ -35,7 +35,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <NumberField source="teacherTypeId" />
+            <ReferenceField source="teacherTypeId" reference="teacher_type" />
             <ReferenceField source="questionTypeId" reference="question_type" />
             <TextField source="content" />
             <TextField source="allowedDigits" />
@@ -52,7 +52,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <NumberInput source="teacherTypeId" />
+        <CommonReferenceInput source="teacherTypeId" reference="teacher_type" dynamicFilter={filterByUserId} />
         <CommonReferenceInput source="questionTypeId" reference="question_type" dynamicFilter={filterByUserId} />
         <TextInput source="content" validate={[required()]} multiline />
         <TextInput source="allowedDigits" validate={[maxLength(255)]} helperText="רשימת ספרות מותרות, מופרדות בפסיק" />
