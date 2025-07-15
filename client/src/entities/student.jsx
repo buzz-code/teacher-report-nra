@@ -12,6 +12,8 @@ const filters = [
     ...commonAdminFilters,
     <TextInput source="tz" />,
     <TextInput source="name:$cont" alwaysOn />,
+    <TextInput source="phone" />,
+    <TextInput source="email" />,
     <TextInput source="address:$cont" />,
     <TextInput source="motherName:$cont" />,
     <TextInput source="motherContact:$cont" />,
@@ -28,6 +30,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <TextField source="tz" />
             <TextField source="name" />
+            <TextField source="phone" />
+            <TextField source="email" />
             <TextField source="address" />
             <TextField source="motherName" />
             <TextField source="motherContact" />
@@ -48,6 +52,8 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="tz" validate={[required(), maxLength(9), unique()]} />
         <TextInput source="name" validate={[required(), maxLength(510)]} />
+        <TextInput source="phone" validate={[maxLength(50)]} />
+        <TextInput source="email" validate={[maxLength(255)]} />
         <TextInput source="address" validate={[maxLength(1000)]} multiline />
         <TextInput source="motherName" validate={[maxLength(255)]} />
         <TextInput source="motherContact" validate={[maxLength(255)]} />
@@ -62,7 +68,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'name', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName'],
+    fields: ['tz', 'name', 'phone', 'email', 'address', 'motherName', 'motherContact', 'fatherName', 'fatherContact', 'motherPreviousName'],
 }
 
 const entity = {

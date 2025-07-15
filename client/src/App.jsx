@@ -36,6 +36,17 @@ import studentByYear from './entities/student-by-year'; // Added import
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
 
+// Teacher Report System Entities
+import teacherType from "src/entities/teacher-type";
+import attReport from "src/entities/att-report";
+import attType from "src/entities/att-type";
+import price from "src/entities/price";
+import question from "src/entities/question";
+import questionType from "src/entities/question-type";
+import answer from "src/entities/answer";
+import workingDate from "src/entities/working-date";
+import salaryReport from "src/entities/salary-report";
+
 // Common entities and utilities
 import text from "@shared/components/common-entities/text";
 import textByUser from "@shared/components/common-entities/text-by-user";
@@ -80,6 +91,13 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import RouteIcon from '@mui/icons-material/Route';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import WorkIcon from '@mui/icons-material/Work';
+import PaymentIcon from '@mui/icons-material/Payment';
+import PersonIcon from '@mui/icons-material/Person';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -87,7 +105,7 @@ const App = () => (
   <BrowserRouter>
     <RTLStyle>
       <Admin dataProvider={dataProvider} i18nProvider={i18nProvider} authProvider={authProvider}
-        theme={appTheme} title='ניהול אירועים'
+        theme={appTheme} title='ניהול דוחות מורים'
         dashboard={Dashboard} layout={Layout} loginPage={LoginPage}
         requireAuth>
         {permissions => (
@@ -106,6 +124,17 @@ const App = () => (
             <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+            
+            {/* Teacher Report System Resources */}
+            <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
+            <Resource name="att_report" {...attReport} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="att_type" {...attType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
+            <Resource name="price" {...price} options={{ menuGroup: 'reports' }} icon={PaymentIcon} />
+            <Resource name="question" {...question} options={{ menuGroup: 'reports' }} icon={QuestionAnswerIcon} />
+            <Resource name="question_type" {...questionType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
+            <Resource name="answer" {...answer} options={{ menuGroup: 'reports' }} icon={RateReviewIcon} />
+            <Resource name="working_date" {...workingDate} options={{ menuGroup: 'reports' }} icon={CalendarTodayIcon} />
+            <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
 
             {/* Common settings and utilities */}
             <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />
