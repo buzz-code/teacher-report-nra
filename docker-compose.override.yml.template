@@ -1,0 +1,27 @@
+version: "3"
+name: teacher-report-nra-dev
+services:
+    client:
+        container_name: client-dev
+        build:
+            target: development
+        ports:
+          - "30013:80"
+
+    server:
+        container_name: server-dev
+        build:
+            target: development
+            args:
+                CLIENT_PORT: 30013
+        ports:
+          - "30014:3000"
+
+    database:
+        container_name: database-dev
+
+    phpmyadmin:
+        container_name: phpmyadmin-dev
+        ports:
+          - "30015:80"
+

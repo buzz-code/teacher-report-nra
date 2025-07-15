@@ -1,0 +1,101 @@
+version: "3"
+services:
+    client:
+        container_name: client
+        restart: unless-stopped
+        depends_on:
+            - server
+        build:
+            context: ./client
+            target: production
+        pull_policy: build
+        environment:
+            PORT: 80
+            YARN_CACHE_FOLDER: /yarn-cache
+        labels:
+            caddy: $DOMAIN_NAME
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        volumes:
+            - ./client:/app
+        networks:
+            - private-network
+            - caddy
+            - elknet
+
+
+    server:
+        container_name: server
+        restart: unless-stopped
+        build:
+            context: ./server
+            target: production
+        pull_policy: build
+        environment:
+            DOMAIN_NAME: $DOMAIN_NAME
+            MYSQL_HOST: $MYSQL_HOST
+            MYSQL_USER: $MYSQL_USER
+            MYSQL_PASSWORD: $MYSQL_PASSWORD
+            MYSQL_DATABASE: $MYSQL_DATABASE
+            JWT_SECRET: $JWT_SECRET
+            ADMIN_USER: $ADMIN_USER
+            SMTP_USER: $SMTP_USER
+            SMTP_PASSWORD: $SMTP_PASSWORD
+            YARN_CACHE_FOLDER: /yarn-cache
+        depends_on:
+            - database
+        labels:
+            caddy: api.$DOMAIN_NAME
+            caddy.reverse_proxy: "{{upstreams 3000}}"
+        volumes: 
+            - ./server:/app
+        networks:
+            - private-network
+            - caddy
+            - elknet
+
+    database:
+        container_name: database
+        restart: unless-stopped
+        build:
+            context: ./db
+        cap_add:
+            - SYS_NICE
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        environment:
+            MYSQL_DATABASE: $MYSQL_DATABASE
+            MYSQL_USER: $MYSQL_USER
+            MYSQL_PASSWORD: $MYSQL_PASSWORD
+            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+        volumes:
+            - "db_data:/var/lib/mysql"
+        networks:
+            - private-network
+
+    phpmyadmin:
+        container_name: phpmyadmin
+        restart: unless-stopped
+        depends_on:
+            - database
+        image: phpmyadmin:5.2.1
+        labels:
+            caddy: sql.$DOMAIN_NAME
+            caddy.reverse_proxy: "{{upstreams 80}}"
+        environment:
+            PMA_HOST: $MYSQL_HOST
+            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+        # ports:
+        #   - "80"
+        networks:
+            - private-network
+            - caddy
+
+
+volumes:
+    db_data:
+
+networks:
+    private-network:
+    caddy:
+        external: true
+    elknet:
+        external: true
