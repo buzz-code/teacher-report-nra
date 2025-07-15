@@ -1,16 +1,10 @@
-# Teacher Report NRA - Entity Migration Tasks
+# Teacher Report NRA - Entity Implementation Tasks
 
-## Mission: Migrate entities from wolf-teacher-reports system to match system requirements
+## Mission: Implement all entities from wolf-teacher-reports system with CRUD configs and migrations
 
-### Core Teacher Reports Entities to Implement
+### Entity Implementation (Following AGENT_WORKFLOW.md patterns)
 
-#### 1. Enhanced User Entity
-- [ ] Extend existing User entity with teacher reports fields:
-  - [ ] Add `phone_number` field for phone system integration
-  - [ ] Add `active` boolean field (default false)
-  - [ ] Ensure bcrypt password hashing is configured
-
-#### 2. Enhanced Teacher Entity  
+#### 1. Enhanced Teacher Entity  
 - [ ] Extend existing Teacher entity with wolf-teacher-reports fields:
   - [ ] Add `phone` field (VARCHAR)
   - [ ] Add `email` field (VARCHAR) 
@@ -20,23 +14,25 @@
   - [ ] Add `training_teacher` field (VARCHAR)
   - [ ] Add `special_question` field (INTEGER, references questions.id)
   - [ ] Add `student_count` field (INTEGER)
+- [ ] Update teacher.config.ts CRUD configuration
 
-#### 3. Enhanced Student Entity
+#### 2. Enhanced Student Entity
 - [ ] Extend existing Student entity:
   - [ ] Add `phone` field (VARCHAR)
   - [ ] Add `email` field (VARCHAR)
-  - [ ] Ensure `tz` field is unique per user (already implemented)
+- [ ] Update student.config.ts CRUD configuration
 
-#### 4. Teacher Types Entity
-- [ ] Create TeacherType entity:
+#### 3. TeacherType Entity
+- [ ] Create TeacherType entity in `server/src/db/entities/TeacherType.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `key` (INTEGER) - Type identifier (1-7)
   - [ ] `name` (VARCHAR) - Hebrew name
-  - [ ] Predefined types: Seminar Kita, Training Teacher, Manha Teacher, Responsible, PDS Teacher, Kindergarten, Special Education
+- [ ] Create teacher-type.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 5. Attendance Reports Entity (Core reporting table)
-- [ ] Create AttReport entity:
+#### 4. AttReport Entity (Core reporting table)
+- [ ] Create AttReport entity in `server/src/db/entities/AttReport.entity.ts`:
   - [ ] Basic fields: id, user_id, teacher_id, report_date, update_date, year, is_confirmed
   - [ ] Salary fields: salaryReport (links to salary_reports.id), salary_month, comment
   - [ ] Activity fields: how_many_students, how_many_methodic, four_last_digits_of_teacher_phone
@@ -45,23 +41,28 @@
   - [ ] Boolean flags: was_discussing, was_kamal, was_students_good, was_students_enter_on_time, was_students_exit_on_time
   - [ ] Special fields: activity_type (references att_types.id), teacher_to_report_for, was_collective_watch
   - [ ] Tariff fields: is_taarif_hulia, is_taarif_hulia2, is_taarif_hulia3
+- [ ] Create att-report.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 6. Attendance Types Entity
-- [ ] Create AttType entity:
+#### 5. AttType Entity
+- [ ] Create AttType entity in `server/src/db/entities/AttType.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `name` (VARCHAR)
+- [ ] Create att-type.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 7. Prices Configuration Entity
-- [ ] Create Price entity:
+#### 6. Price Entity
+- [ ] Create Price entity in `server/src/db/entities/Price.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `key` (INTEGER) - Price identifier
   - [ ] `price` (DECIMAL)
-  - [ ] Predefined keys for different price types (11-15, 24-28, 40-42, 51-60)
+- [ ] Create price.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 8. Questions System Entity
-- [ ] Create Question entity:
+#### 7. Question Entity
+- [ ] Create Question entity in `server/src/db/entities/Question.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `teacher_type_id` (INTEGER)
@@ -71,16 +72,20 @@
   - [ ] `is_standalone` (BOOLEAN)
   - [ ] `start_date` (DATE)
   - [ ] `end_date` (DATE)
+- [ ] Create question.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 9. Question Types Entity
-- [ ] Create QuestionType entity:
+#### 8. QuestionType Entity
+- [ ] Create QuestionType entity in `server/src/db/entities/QuestionType.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `key` (INTEGER) - Type identifier (1-4)
-  - [ ] Types: Always ask if no answer, Ask if no "yes" answer, Ask if no "no" answer, Special question
+  - [ ] `name` (VARCHAR) - Type name
+- [ ] Create question-type.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 10. Answers Entity
-- [ ] Create Answer entity:
+#### 9. Answer Entity
+- [ ] Create Answer entity in `server/src/db/entities/Answer.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `teacher_id` (FOREIGN KEY to teachers.id)
@@ -88,139 +93,62 @@
   - [ ] `report_id` (FOREIGN KEY to att_reports.id)
   - [ ] `answer` (INTEGER) - 0 or 1
   - [ ] `answer_date` (DATE)
+- [ ] Create answer.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 11. Working Dates Entity
-- [ ] Create WorkingDate entity:
+#### 10. WorkingDate Entity
+- [ ] Create WorkingDate entity in `server/src/db/entities/WorkingDate.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `teacher_type_id` (INTEGER)
   - [ ] `working_date` (DATE)
+- [ ] Create working-date.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-#### 12. Salary Reports Entity
-- [ ] Create SalaryReport entity:
+#### 11. SalaryReport Entity
+- [ ] Create SalaryReport entity in `server/src/db/entities/SalaryReport.entity.ts`:
   - [ ] `id` (PRIMARY KEY, AUTO_INCREMENT)
   - [ ] `user_id` (FOREIGN KEY to users.id)
   - [ ] `ids` (TEXT) - Comma-separated att_report IDs
   - [ ] `date` (DATETIME)
   - [ ] `name` (VARCHAR) - Optional name
+- [ ] Create salary-report.config.ts CRUD configuration
+- [ ] Register in entities.module.ts
 
-### Backend API Implementation
+### Database Migration Generation
 
-#### 13. CRUD Controllers for New Entities
-- [ ] Create TeacherTypeController with CRUD operations
-- [ ] Create AttReportController with CRUD operations
-- [ ] Create AttTypeController with CRUD operations  
-- [ ] Create PriceController with CRUD operations
-- [ ] Create QuestionController with CRUD operations
-- [ ] Create QuestionTypeController with CRUD operations
-- [ ] Create AnswerController with CRUD operations
-- [ ] Create WorkingDateController with CRUD operations
-- [ ] Create SalaryReportController with CRUD operations
-
-#### 14. Specialized Report Endpoints
-- [ ] Implement getSeminarKitaReport endpoint
-- [ ] Implement getTrainingReport endpoint (if needed)
-- [ ] Implement getManhaReport endpoint
-- [ ] Implement getResponsibleReport endpoint (if needed)
-- [ ] Implement getPdsReport endpoint
-- [ ] Implement getSpecialEducationReport endpoint
-- [ ] Implement getKindergartenReport endpoint
-- [ ] Implement getTotalPayMonthlyReport endpoint
-
-#### 15. Report Management Endpoints
-- [ ] Implement updateSalaryMonth endpoint
-- [ ] Implement updateSalaryComment endpoint  
-- [ ] Implement createSalaryReport endpoint
-- [ ] Implement export-pdf endpoint for reports
-
-#### 16. Enhanced Yemot Integration
-- [ ] Update YemotHandler to support teacher reports workflow
-- [ ] Implement teacher identification by phone number
-- [ ] Add support for all teacher types in phone system
-- [ ] Implement dynamic question system for phone calls
-- [ ] Add Hebrew date confirmation functionality
-- [ ] Implement report validation during phone input
-- [ ] Add support for reviewing previous unconfirmed reports
+#### 12. Generate TypeORM Migrations
+- [ ] Generate migration for all new entities:
+  ```bash
+  cd server && yarn typeorm:generate src/migrations/AddTeacherReportEntities
+  ```
+- [ ] Review generated migration file
+- [ ] Run migration to apply schema changes:
+  ```bash
+  yarn typeorm:run
+  ```
 
 ### Frontend React Admin Implementation
 
-#### 17. Entity Components for New Tables
-- [ ] Create teacher-type.jsx component
-- [ ] Create att-report.jsx component  
-- [ ] Create att-type.jsx component
-- [ ] Create price.jsx component
-- [ ] Create question.jsx component
-- [ ] Create question-type.jsx component
-- [ ] Create answer.jsx component
-- [ ] Create working-date.jsx component
-- [ ] Create salary-report.jsx component
+#### 13. Entity Components for New Tables
+- [ ] Create teacher-type.jsx component in `client/src/entities/`
+- [ ] Create att-report.jsx component in `client/src/entities/`
+- [ ] Create att-type.jsx component in `client/src/entities/`
+- [ ] Create price.jsx component in `client/src/entities/`
+- [ ] Create question.jsx component in `client/src/entities/`
+- [ ] Create question-type.jsx component in `client/src/entities/`
+- [ ] Create answer.jsx component in `client/src/entities/`
+- [ ] Create working-date.jsx component in `client/src/entities/`
+- [ ] Create salary-report.jsx component in `client/src/entities/`
 
-#### 18. Specialized Report Components
+#### 14. App.jsx Updates
+- [ ] Add new resources to React Admin in `client/src/App.jsx`
+- [ ] Update `client/src/domainTranslations.js` with Hebrew translations
+
+#### 15. Specialized Report Components
 - [ ] Create seminar-kita-reports.jsx component
 - [ ] Create manha-reports.jsx component
 - [ ] Create pds-reports.jsx component
 - [ ] Create special-education-reports.jsx component
 - [ ] Create kindergarten-reports.jsx component
 - [ ] Create monthly-reports.jsx component
-
-#### 19. App.jsx Updates
-- [ ] Add new resources to React Admin with appropriate icons
-- [ ] Update navigation structure for teacher reports
-- [ ] Add Reports dropdown menu with specialized report views
-- [ ] Add Tables dropdown menu with configuration entities
-
-#### 20. Hebrew Language Support
-- [ ] Update domainTranslations.js with Hebrew translations for all new entities
-- [ ] Add Hebrew calendar support using jewish-date library
-- [ ] Ensure RTL support for all new components
-- [ ] Add Hebrew year system (academic year starting July 1st)
-
-### Salary Calculation System
-
-#### 21. Business Logic Implementation
-- [ ] Implement salary calculation for Type 1 (Seminar Kita) teachers
-- [ ] Implement salary calculation for Type 3 (Manha) teachers  
-- [ ] Implement salary calculation for Type 5 (PDS) teachers
-- [ ] Implement salary calculation for Type 6 (Kindergarten) teachers
-- [ ] Implement salary calculation for Type 7 (Special Education) teachers
-- [ ] Add extra pay calculation from special questions
-- [ ] Implement salary month assignment functionality
-
-#### 22. Validation Rules
-- [ ] Add absence limit validation (max 10 per month)
-- [ ] Add lesson count validation for Seminar Kita
-- [ ] Add working day validation
-- [ ] Add report confirmation requirements
-- [ ] Add salary report lock validation
-
-### Database Migration and Setup
-
-#### 23. Database Schema Migration
-- [ ] Create migration for new teacher reports entities
-- [ ] Add indexes for performance optimization  
-- [ ] Create database views for salary calculations
-- [ ] Set up foreign key constraints
-- [ ] Add unique constraints where needed
-
-#### 24. Initial Data Seeding
-- [ ] Seed teacher_types with predefined types (1-7)
-- [ ] Seed question_types with standard types (1-4)
-- [ ] Seed default price configurations
-- [ ] Create sample working dates
-- [ ] Add default system messages for phone integration
-
-### Testing and Documentation
-
-#### 25. Testing Implementation
-- [ ] Create unit tests for salary calculation logic
-- [ ] Add integration tests for phone system workflow
-- [ ] Test Hebrew date handling and calendar functionality
-- [ ] Validate report generation and PDF export
-- [ ] Test multi-language support
-
-#### 26. Documentation Updates
-- [ ] Update project-index.md with teacher reports functionality
-- [ ] Document API endpoints in Swagger
-- [ ] Create user guide for phone system integration
-- [ ] Document salary calculation formulas
-- [ ] Add Hebrew year system documentation
