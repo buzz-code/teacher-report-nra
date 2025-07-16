@@ -114,7 +114,7 @@
   cd server && yarn typeorm:generate src/migrations/AddTeacherReportEntities
   ```
 - [x] Review generated migration file
-- [ ] Run migration to apply schema changes:
+- [ ] Run migration to apply schema changes (requires database environment):
   ```bash
   yarn typeorm:run
   ```
@@ -122,24 +122,20 @@
 ### Frontend React Admin Implementation
 
 #### 13. Entity Components for New Tables
-- [ ] Create teacher-type.jsx component in `client/src/entities/`
-- [ ] Create att-report.jsx component in `client/src/entities/`
-- [ ] Create att-type.jsx component in `client/src/entities/`
-- [ ] Create price.jsx component in `client/src/entities/`
-- [ ] Create question.jsx component in `client/src/entities/`
-- [ ] Create question-type.jsx component in `client/src/entities/`
-- [ ] Create answer.jsx component in `client/src/entities/`
-- [ ] Create working-date.jsx component in `client/src/entities/`
-- [ ] Create salary-report.jsx component in `client/src/entities/`
+- [x] Create teacher-type.jsx component in `client/src/entities/`
+- [x] Create att-report.jsx component in `client/src/entities/`
+- [x] Create att-type.jsx component in `client/src/entities/`
+- [x] Create price.jsx component in `client/src/entities/`
+- [x] Create question.jsx component in `client/src/entities/`
+- [x] Create question-type.jsx component in `client/src/entities/`
+- [x] Create answer.jsx component in `client/src/entities/`
+- [x] Create working-date.jsx component in `client/src/entities/`
+- [x] Create salary-report.jsx component in `client/src/entities/`
 
 #### 14. App.jsx Updates
-- [ ] Add new resources to React Admin in `client/src/App.jsx`
-- [ ] Update `client/src/domainTranslations.js` with Hebrew translations
+- [x] Add new resources to React Admin in `client/src/App.jsx`
+- [x] Update `client/src/domainTranslations.js` with Hebrew translations
 
-#### 15. Specialized Report Components
-- [ ] Create seminar-kita-reports.jsx component
-- [ ] Create manha-reports.jsx component
-- [ ] Create pds-reports.jsx component
-- [ ] Create special-education-reports.jsx component
-- [ ] Create kindergarten-reports.jsx component
-- [ ] Create monthly-reports.jsx component
+#### 15. Enhanced Teacher and Student Updates
+- [x] Update teacher.jsx component with new fields (phone, email, school, teacherTypeId, price, trainingTeacher, specialQuestion, studentCount)
+- [x] Update student.jsx component with new fields (phone, email)

@@ -4,6 +4,7 @@ export default {
     menu_groups: {
         events: 'אירועים',
         data: 'נתונים',
+        reports: 'דוחות מורים',
         settings: 'הגדרות',
         admin: 'ניהול',
     },
@@ -109,6 +110,8 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
+                phone: 'טלפון',
+                email: 'דואל',
                 address: 'כתובת',
                 'address:$cont': 'חיפוש בכתובת',
                 motherName: 'שם האם',
@@ -129,6 +132,137 @@ export default {
                 ...generalResourceFieldsTranslation,
                 ownUserId: 'משתמש משויך',
                 tz: 'תעודת זהות',
+                phone: 'טלפון',
+                email: 'דואל',
+                school: 'בית ספר',
+                teacherTypeId: 'סוג מורה',
+                price: 'מחיר לשעה',
+                trainingTeacher: 'מורה מכשירה',
+                specialQuestion: 'שאלה מיוחדת',
+                studentCount: 'מספר תלמידות',
+            }
+        },
+        
+        // Teacher Report System Entities
+        teacher_type: {
+            name: 'סוג מורה |||| סוגי מורות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                key: 'מזהה',
+                name: 'שם',
+                'name:$cont': 'חיפוש בשם',
+            }
+        },
+        att_report: {
+            name: 'דוח נוכחות |||| דוחות נוכחות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherId: 'מורה',
+                reportDate: 'תאריך דוח',
+                'reportDate:$gte': 'תאריך דוח מ-',
+                'reportDate:$lte': 'תאריך דוח עד-',
+                updateDate: 'תאריך עדכון',
+                year: 'שנה',
+                isConfirmed: 'מאושר',
+                salaryReport: 'דוח שכר',
+                salaryMonth: 'חודש שכר',
+                comment: 'הערה',
+                howManyStudents: 'כמה תלמידות',
+                howManyMethodic: 'כמה מתודיקה',
+                fourLastDigitsOfTeacherPhone: '4 ספרות אחרונות של טלפון',
+                teachedStudentTz: 'תלמידות שנלמדו (ת.ז.)',
+                howManyYalkutLessons: 'כמה שיעורי ילקוט',
+                howManyDiscussingLessons: 'כמה שיעורי דיון',
+                howManyStudentsHelpTeached: 'כמה תלמידות עזרו ללמד',
+                howManyLessonsAbsence: 'כמה שיעורי היעדרות',
+                howManyWatchedLessons: 'כמה שיעורי צפייה',
+                wasDiscussing: 'היה דיון',
+                wasKamal: 'היה כמל',
+                wasStudentsGood: 'התלמידות היו טובות',
+                wasStudentsEnterOnTime: 'התלמידות נכנסו בזמן',
+                wasStudentsExitOnTime: 'התלמידות יצאו בזמן',
+                activityType: 'סוג פעילות',
+                teacherToReportFor: 'מורה לדווח עליה',
+                wasCollectiveWatch: 'היתה צפייה קבוצתית',
+                isTaarifHulia: 'תעריף חוליה',
+                isTaarifHulia2: 'תעריף חוליה 2',
+                isTaarifHulia3: 'תעריף חוליה 3',
+            }
+        },
+        att_type: {
+            name: 'סוג פעילות |||| סוגי פעילויות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם',
+                'name:$cont': 'חיפוש בשם',
+            }
+        },
+        price: {
+            name: 'מחיר |||| מחירים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                key: 'מזהה',
+                price: 'מחיר',
+            }
+        },
+        question: {
+            name: 'שאלה |||| שאלות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherTypeId: 'סוג מורה',
+                questionTypeId: 'סוג שאלה',
+                content: 'תוכן השאלה',
+                'content:$cont': 'חיפוש בתוכן',
+                allowedDigits: 'ספרות מותרות',
+                isStandalone: 'שאלה עצמאית',
+                startDate: 'תאריך התחלה',
+                'startDate:$gte': 'תאריך התחלה מ-',
+                endDate: 'תאריך סיום',
+                'endDate:$lte': 'תאריך סיום עד-',
+            }
+        },
+        question_type: {
+            name: 'סוג שאלה |||| סוגי שאלות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                key: 'מזהה',
+                name: 'שם',
+                'name:$cont': 'חיפוש בשם',
+            }
+        },
+        answer: {
+            name: 'תשובה |||| תשובות',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherId: 'מורה',
+                questionId: 'שאלה',
+                reportId: 'דוח',
+                answer: 'תשובה',
+                answerDate: 'תאריך תשובה',
+                'answerDate:$gte': 'תאריך תשובה מ-',
+                'answerDate:$lte': 'תאריך תשובה עד-',
+            }
+        },
+        working_date: {
+            name: 'תאריך עבודה |||| תאריכי עבודה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherTypeId: 'סוג מורה',
+                workingDate: 'תאריך עבודה',
+                'workingDate:$gte': 'תאריך עבודה מ-',
+                'workingDate:$lte': 'תאריך עבודה עד-',
+            }
+        },
+        salary_report: {
+            name: 'דוח שכר |||| דוחות שכר',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                ids: 'מזהי דוחות',
+                date: 'תאריך',
+                'date:$gte': 'תאריך מ-',
+                'date:$lte': 'תאריך עד-',
+                name: 'שם',
+                'name:$cont': 'חיפוש בשם',
             }
         },
         
