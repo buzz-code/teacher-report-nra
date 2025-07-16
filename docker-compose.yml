@@ -1,7 +1,7 @@
 version: "3"
 services:
     client:
-        container_name: client
+        container_name: teacher-report-client
         restart: unless-stopped
         depends_on:
             - server
@@ -24,7 +24,7 @@ services:
 
 
     server:
-        container_name: server
+        container_name: teacher-report-server
         restart: unless-stopped
         build:
             context: ./server
@@ -54,7 +54,7 @@ services:
             - elknet
 
     database:
-        container_name: database
+        container_name: teacher-report-database
         restart: unless-stopped
         build:
             context: ./db
@@ -72,7 +72,7 @@ services:
             - private-network
 
     phpmyadmin:
-        container_name: phpmyadmin
+        container_name: teacher-report-phpmyadmin
         restart: unless-stopped
         depends_on:
             - database

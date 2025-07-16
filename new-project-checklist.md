@@ -50,6 +50,20 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
   sed -i 's/event_management_nra/new_project_name/g' docker-compose.yml
   sed -i 's/event_management_nra/new_project_name/g' docker-compose.override.yml.template
   ```
+- [ ] Update container names to avoid conflicts with existing containers:
+  ```bash
+  # Update docker-compose.yml container names (add project prefix)
+  sed -i 's/container_name: client/container_name: new-project-client/' docker-compose.yml
+  sed -i 's/container_name: server/container_name: new-project-server/' docker-compose.yml
+  sed -i 's/container_name: database/container_name: new-project-database/' docker-compose.yml
+  sed -i 's/container_name: phpmyadmin/container_name: new-project-phpmyadmin/' docker-compose.yml
+  
+  # Update docker-compose.override.yml container names
+  sed -i 's/container_name: client-dev/container_name: new-project-client-dev/' docker-compose.override.yml
+  sed -i 's/container_name: server-dev/container_name: new-project-server-dev/' docker-compose.override.yml
+  sed -i 's/container_name: database-dev/container_name: new-project-database-dev/' docker-compose.override.yml
+  sed -i 's/container_name: phpmyadmin-dev/container_name: new-project-phpmyadmin-dev/' docker-compose.override.yml
+  ```
 
 ## Configuration Setup
 
