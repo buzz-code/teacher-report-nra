@@ -179,7 +179,7 @@ cd ../client && yarn test
 docker compose down -v && docker compose up -d
 
 # Database reset
-docker compose exec db mysql -u root -p$MYSQL_ROOT_PASSWORD -e "DROP DATABASE IF EXISTS event_management_nra; CREATE DATABASE event_management_nra;"
+docker compose exec db mysql -u root -p$MYSQL_ROOT_PASSWORD -e "DROP DATABASE IF EXISTS \$MYSQL_DATABASE; CREATE DATABASE \$MYSQL_DATABASE;"
 docker compose restart server
 ```
 

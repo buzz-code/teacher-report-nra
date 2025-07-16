@@ -1,8 +1,8 @@
--- Event Management System Database Initialization
+-- Teacher Report System Database Initialization
 
 -- Create and select the database
-CREATE DATABASE IF NOT EXISTS `event_management_nra`;
-USE `event_management_nra`;
+CREATE DATABASE IF NOT EXISTS `teacher_report_nra`;
+USE `teacher_report_nra`;
 
 -- Create essential MySQL system tables if they don't exist
 -- These are minimal tables needed for basic MySQL functionality
@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS `mysql`.`component` (
 
 -- Create initial user for the application
 -- Using environment variables passed from Docker configuration
-CREATE USER IF NOT EXISTS 'event_user'@'%' IDENTIFIED BY 'rootPass';
-GRANT ALL PRIVILEGES ON `event_management_nra`.* TO 'event_user'@'%';
+CREATE USER IF NOT EXISTS 'teacher_report_user'@'%' IDENTIFIED BY 'rootPass';
+GRANT ALL PRIVILEGES ON `teacher_report_nra`.* TO 'teacher_report_user'@'%';
 FLUSH PRIVILEGES;
 
 -- Basic application tables will be created by TypeORM migrations

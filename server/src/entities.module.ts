@@ -9,7 +9,7 @@ import paymentTrackConfig from './entity-modules/payment-track.config';
 import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 import textConfig from './entity-modules/text.config';
 
-// Event Management System entities
+// Teacher Report System event entities
 import eventConfig from './entity-modules/event.config';
 import eventTypeConfig from './entity-modules/event-type.config';
 import eventNoteConfig from './entity-modules/event-note.config';
@@ -43,7 +43,7 @@ import { Image } from '@shared/entities/Image.entity';
   imports: [
     BaseEntityModule.register(userConfig),
 
-    // Event Management System entities
+    // Teacher Report System event entities
     BaseEntityModule.register(eventConfig),
     BaseEntityModule.register(eventTypeConfig),
     BaseEntityModule.register(eventNoteConfig),
