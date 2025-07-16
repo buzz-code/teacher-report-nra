@@ -19,11 +19,9 @@ CREATE TABLE IF NOT EXISTS `mysql`.`component` (
   PRIMARY KEY (`component_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Create initial user for the application
--- Using environment variables passed from Docker configuration
-CREATE USER IF NOT EXISTS 'teacher_user'@'%' IDENTIFIED BY 'rootPass';
-GRANT ALL PRIVILEGES ON `teacher_report_nra`.* TO 'teacher_user'@'%';
-FLUSH PRIVILEGES;
+-- User creation is handled automatically by MySQL Docker container
+-- using MYSQL_USER and MYSQL_PASSWORD environment variables from .env file
+-- This provides secure credential management without hardcoded values
 
 -- Basic application tables will be created by TypeORM migrations
 -- These statements ensure MySQL can initialize properly
