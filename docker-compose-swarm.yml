@@ -28,7 +28,7 @@ services:
         image: 'ghcr.io/buzz-code/teacher-report-nra-server:latest'
         container_name: server
         depends_on:
-            - database
+            - database2
         deploy:
             labels:
                 caddy: api.$DOMAIN_NAME
@@ -57,7 +57,7 @@ services:
             - caddy
             - elknet
 
-    database:
+    database2:
         image: mysql:9.3
         container_name: database2
         cap_add:
@@ -81,7 +81,7 @@ services:
         image: phpmyadmin:5.2.1
         container_name: phpmyadmin
         depends_on:
-            - database
+            - database2
         deploy:
             labels:
                 caddy: sql.$DOMAIN_NAME
@@ -102,7 +102,7 @@ services:
         image: tiredofit/db-backup:4.1.17
         container_name: mysql_dump
         depends_on:
-            - database
+            - database2
         environment:
             DB_TYPE: mysql
             DB_HOST: $MYSQL_HOST
