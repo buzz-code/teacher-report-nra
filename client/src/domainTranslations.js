@@ -9,7 +9,7 @@ export default {
         admin: 'ניהול',
     },
     resources: {
-        // Teacher Report System Event Entities
+        // Event Management System Entities
         event: {
             name: 'אירוע |||| אירועים',
             fields: {

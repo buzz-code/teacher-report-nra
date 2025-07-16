@@ -1,6 +1,29 @@
 -- Teacher Report System Database Initialization
--- This file is executed when the MySQL container starts for the first time
--- The database and user are created automatically from environment variables
 
--- Any additional database setup can be added here
+-- Create and select the database
+CREATE DATABASE IF NOT EXISTS `teacher_report_nra`;
+USE `teacher_report_nra`;
+
+-- Create essential MySQL system tables if they don't exist
+-- These are minimal tables needed for basic MySQL functionality
+CREATE TABLE IF NOT EXISTS `mysql`.`plugin` (
+  `name` varchar(64) NOT NULL,
+  `dl` varchar(128) NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `mysql`.`component` (
+  `component_id` int NOT NULL AUTO_INCREMENT,
+  `component_group_id` int NOT NULL,
+  `component_urn` varchar(255) NOT NULL,
+  PRIMARY KEY (`component_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create initial user for the application
+-- Using environment variables passed from Docker configuration
+CREATE USER IF NOT EXISTS 'teacher_user'@'%' IDENTIFIED BY 'rootPass';
+GRANT ALL PRIVILEGES ON `teacher_report_nra`.* TO 'teacher_user'@'%';
+FLUSH PRIVILEGES;
+
 -- Basic application tables will be created by TypeORM migrations
+-- These statements ensure MySQL can initialize properly

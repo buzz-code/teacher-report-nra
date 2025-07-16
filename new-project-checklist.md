@@ -47,8 +47,8 @@ This checklist serves as a comprehensive guide for an LLM to create a new projec
   ```
 - [ ] Update docker-compose.yml and related files with new service names:
   ```bash
-  sed -i 's/teacher_report_nra/new_project_name/g' docker-compose.yml
-  sed -i 's/teacher_report_nra/new_project_name/g' docker-compose.override.yml.template
+  sed -i 's/event_management_nra/new_project_name/g' docker-compose.yml
+  sed -i 's/event_management_nra/new_project_name/g' docker-compose.override.yml.template
   ```
 
 ## Configuration Setup

@@ -1,8 +1,8 @@
-# Teacher Report NRA Project Index
+# Event Management NRA Project Index
 
 ## Executive Summary
 
-The Teacher Report NRA system is a comprehensive platform designed to track and manage teacher reporting, events, participants, gifts, and related activities. Built with a React Admin frontend and NestJS backend, the system enables organizations to create and organize events, manage attendee registration, track gift distribution, and generate reports. The application features robust entity relationships centered around events and teacher reporting, with support for RTL Hebrew text, customizable settings, and integration with the Yemot telephony system. This dockerized application uses MySQL for data persistence and follows a modular architecture with shared components for extensibility and code reuse.
+The Event Management NRA system is a comprehensive platform designed to track and manage events, participants, gifts, and event-related activities. Built with a React Admin frontend and NestJS backend, the system enables organizations to create and organize events, manage attendee registration, track gift distribution, and generate reports. The application features robust entity relationships centered around events, with support for RTL Hebrew text, customizable settings, and integration with the Yemot telephony system. This dockerized application uses MySQL for data persistence and follows a modular architecture with shared components for extensibility and code reuse.
 
 ## Table of Contents
 - [1. Project Overview](#1-project-overview)
@@ -32,7 +32,7 @@ The Teacher Report NRA system is a comprehensive platform designed to track and 
 ## 1. Project Overview
 
 ### Project Purpose
-This is a teacher reporting system designed to track and manage teacher reports, events, participants, gifts, and related activities. The system focuses on creating and organizing events, managing attendees, and tracking gift distribution.
+This is an event management system designed to track and manage events, participants, gifts, and event-related activities. The system focuses on creating and organizing events, managing attendees, and tracking gift distribution.
 
 ### Entity Relationships
 The system is built around these core relationships:
