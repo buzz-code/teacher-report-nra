@@ -59,7 +59,7 @@ services:
 
     database:
         image: mysql:9.3
-        container_name: database
+        container_name: database2
         cap_add:
             - SYS_NICE
         command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
