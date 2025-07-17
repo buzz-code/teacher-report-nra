@@ -28,6 +28,7 @@ const customMenuItems = [
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
     { name: 'events', icon: <AnalyticsIcon /> },
+    { name: 'reports', icon: <SummarizeIcon /> },
     { name: 'settings', icon: <SettingsIcon /> },
     { name: 'admin', icon: <AdminPanelSettingsIcon /> },
 ];
