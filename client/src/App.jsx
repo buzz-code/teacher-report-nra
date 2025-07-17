@@ -47,6 +47,14 @@ import answer from "src/entities/answer";
 import workingDate from "src/entities/working-date";
 import salaryReport from "src/entities/salary-report";
 
+// Teacher-Type Specific Report Views
+import seminarKitaReports from "src/entities/seminar-kita-reports";
+import manhaReports from "src/entities/manha-reports";
+import pdsReports from "src/entities/pds-reports";
+import specialEducationReports from "src/entities/special-education-reports";
+import kindergartenReports from "src/entities/kindergarten-reports";
+import totalMonthlyReports from "src/entities/total-monthly-reports";
+
 // Common entities and utilities
 import text from "@shared/components/common-entities/text";
 import textByUser from "@shared/components/common-entities/text-by-user";
@@ -128,6 +136,15 @@ const App = () => (
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
             <Resource name="att_report" {...attReport} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            
+            {/* Teacher-Type Specific Report Views */}
+            <Resource name="seminar_kita_reports" {...seminarKitaReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="manha_reports" {...manhaReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="pds_reports" {...pdsReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="special_education_reports" {...specialEducationReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="kindergarten_reports" {...kindergartenReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="total_monthly_reports" {...totalMonthlyReports} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+            
             <Resource name="att_type" {...attType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
             <Resource name="price" {...price} options={{ menuGroup: 'reports' }} icon={PaymentIcon} />
             <Resource name="question" {...question} options={{ menuGroup: 'reports' }} icon={QuestionAnswerIcon} />
