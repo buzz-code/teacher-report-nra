@@ -10,36 +10,38 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 
 const filters = [
     ...commonAdminFilters,
-    <TextInput source="tz" />,
-    <TextInput source="name:$cont" alwaysOn />,
-    <TextInput source="phone" />,
-    <TextInput source="email" />,
-    <TextInput source="address:$cont" />,
-    <TextInput source="motherName:$cont" />,
-    <TextInput source="motherContact:$cont" />,
-    <TextInput source="fatherName:$cont" />,
-    <TextInput source="fatherContact:$cont" />,
-    <TextInput source="motherPreviousName:$cont" />,
+    <TextInput source="tz" label="תעודת זהות" />,
+    <TextInput source="name:$cont" alwaysOn label="שם" />,
+    <TextInput source="phone" label="טלפון" />,
+    <TextInput source="email" label="דואל" />,
+    <TextInput source="address:$cont" label="כתובת" />,
+    <TextInput source="motherName:$cont" label="שם האם" />,
+    <TextInput source="motherContact:$cont" label="יצירת קשר עם האם" />,
+    <TextInput source="fatherName:$cont" label="שם האב" />,
+    <TextInput source="fatherContact:$cont" label="יצירת קשר עם האב" />,
+    <TextInput source="motherPreviousName:$cont" label="שם משפחה קודם של האם" />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
         <CommonDatagrid {...props}>
             {children}
-            {isAdmin && <TextField source="id" />}
-            {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="tz" />
-            <TextField source="name" />
-            <TextField source="phone" />
-            <TextField source="email" />
-            <TextField source="address" />
-            <TextField source="motherName" />
-            <TextField source="motherContact" />
-            <TextField source="fatherName" />
-            <TextField source="fatherContact" />
-            <TextField source="motherPreviousName" />
-            {isAdmin && <DateField showDate showTime source="createdAt" />}
-            {isAdmin && <DateField showDate showTime source="updatedAt" />}
+            {/* Hide internal ID, show meaningful identifier */}
+            <TextField source="tz" label="תעודת זהות" sortable />
+            <TextField source="name" label="שם" sortable />
+            <TextField source="phone" label="טלפון" />
+            <TextField source="email" label="דואל" />
+            <TextField source="address" label="כתובת" />
+            <TextField source="motherName" label="שם האם" />
+            <TextField source="motherContact" label="יצירת קשר עם האם" />
+            <TextField source="fatherName" label="שם האב" />
+            <TextField source="fatherContact" label="יצירת קשר עם האב" />
+            <TextField source="motherPreviousName" label="שם משפחה קודם של האם" />
+            {/* Admin-only fields */}
+            {isAdmin && <TextField source="id" label="מזהה פנימי" />}
+            {isAdmin && <ReferenceField source="userId" reference="user" label="משתמש" />}
+            {isAdmin && <DateField showDate showTime source="createdAt" label="נוצר ב-" />}
+            {isAdmin && <DateField showDate showTime source="updatedAt" label="עודכן ב-" />}
         </CommonDatagrid>
     );
 }
@@ -77,6 +79,8 @@ const entity = {
     Representation,
     filters,
     importer,
+    // Allow deletion only for admin users for sensitive student data
+    deleteResource: 'student',
 };
 
 export default getResourceComponents(entity);

@@ -23,13 +23,13 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 
 const filters = [
     ...commonAdminFilters,
-    <CommonReferenceInputFilter source="teacherId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn />,
-    <DateInput source="reportDate:$gte" />,
-    <DateInput source="reportDate:$lte" />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <BooleanInput source="isConfirmed" />,
-    <CommonReferenceInputFilter source="salaryReport" reference="salary_report" dynamicFilter={filterByUserId} />,
-    <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="teacherId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn label="מורה" />,
+    <DateInput source="reportDate:$gte" label="תאריך דוח מ-" />,
+    <DateInput source="reportDate:$lte" label="תאריך דוח עד-" />,
+    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn label="שנה" />,
+    <BooleanInput source="isConfirmed" label="מאושר" />,
+    <CommonReferenceInputFilter source="salaryReport" reference="salary_report" dynamicFilter={filterByUserId} label="דוח שכר" />,
+    <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} label="סוג פעילות" />,
 ];
 
 const filterDefaultValues = {
@@ -40,81 +40,83 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
         <CommonDatagrid {...props}>
             {children}
-            {isAdmin && <TextField source="id" />}
-            {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <ReferenceField source="teacherId" reference="teacher" />
-            <DateField source="reportDate" />
-            <DateField showDate showTime source="updateDate" />
-            <NumberField source="year" />
-            <BooleanField source="isConfirmed" />
-            <ReferenceField source="salaryReport" reference="salary_report" />
-            <NumberField source="salaryMonth" />
-            <TextField source="comment" />
-            <NumberField source="howManyStudents" />
-            <NumberField source="howManyMethodic" />
-            <TextField source="fourLastDigitsOfTeacherPhone" />
-            <BooleanField source="wasDiscussing" />
-            <BooleanField source="wasKamal" />
-            <BooleanField source="wasStudentsGood" />
-            <ReferenceField source="activityType" reference="att_type" />
-            <BooleanField source="isTaarifHulia" />
-            <BooleanField source="isTaarifHulia2" />
-            <BooleanField source="isTaarifHulia3" />
-            {isAdmin && <DateField showDate showTime source="createdAt" />}
-            {isAdmin && <DateField showDate showTime source="updatedAt" />}
+            {/* Show meaningful identifiers and main fields */}
+            <ReferenceField source="teacherId" reference="teacher" label="מורה" sortBy="teacher.name" />
+            <DateField source="reportDate" label="תאריך דוח" sortable />
+            <DateField showDate showTime source="updateDate" label="תאריך עדכון" sortable />
+            <NumberField source="year" label="שנה" sortable />
+            <BooleanField source="isConfirmed" label="מאושר" />
+            <ReferenceField source="salaryReport" reference="salary_report" label="דוח שכר" />
+            <NumberField source="salaryMonth" label="חודש שכר" />
+            <TextField source="comment" label="הערה" />
+            <NumberField source="howManyStudents" label="כמה תלמידות" />
+            <NumberField source="howManyMethodic" label="כמה מתודיקה" />
+            <TextField source="fourLastDigitsOfTeacherPhone" label="4 ספרות אחרונות" />
+            <BooleanField source="wasDiscussing" label="היה דיון" />
+            <BooleanField source="wasKamal" label="היה כמל" />
+            <BooleanField source="wasStudentsGood" label="התלמידות היו טובות" />
+            <ReferenceField source="activityType" reference="att_type" label="סוג פעילות" sortBy="att_type.name" />
+            <BooleanField source="isTaarifHulia" label="תעריף חוליה" />
+            <BooleanField source="isTaarifHulia2" label="תעריף חוליה 2" />
+            <BooleanField source="isTaarifHulia3" label="תעריף חוליה 3" />
+            {/* Admin-only fields */}
+            {isAdmin && <TextField source="id" label="מזהה פנימי" />}
+            {isAdmin && <ReferenceField source="userId" reference="user" label="משתמש" />}
+            {isAdmin && <DateField showDate showTime source="createdAt" label="נוצר ב-" />}
+            {isAdmin && <DateField showDate showTime source="updatedAt" label="עודכן ב-" />}
         </CommonDatagrid>
     );
 }
 
 const Inputs = ({ isCreate, isAdmin }) => {
     return <>
-        {!isCreate && isAdmin && <TextInput source="id" disabled />}
-        {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <CommonReferenceInput source="teacherId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
-        <DateInput source="reportDate" validate={[required()]} />
-        <DateTimeInput source="updateDate" />
-        <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
-        <BooleanInput source="isConfirmed" />
+        {!isCreate && isAdmin && <TextInput source="id" disabled label="מזהה פנימי" />}
+        {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} label="משתמש" />}
+        <CommonReferenceInput source="teacherId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} label="מורה" />
+        <DateInput source="reportDate" validate={[required()]} label="תאריך דוח" />
+        <DateTimeInput source="updateDate" label="תאריך עדכון" />
+        <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} label="שנה" />
+        <BooleanInput source="isConfirmed" label="מאושר" />
         
         {/* Salary fields */}
-        <CommonReferenceInput source="salaryReport" reference="salary_report" dynamicFilter={filterByUserId} />
-        <NumberInput source="salaryMonth" />
-        <TextInput source="comment" multiline />
+        <CommonReferenceInput source="salaryReport" reference="salary_report" dynamicFilter={filterByUserId} label="דוח שכר" />
+        <NumberInput source="salaryMonth" label="חודש שכר" />
+        <TextInput source="comment" multiline label="הערה" />
         
         {/* Activity fields */}
-        <NumberInput source="howManyStudents" />
-        <NumberInput source="howManyMethodic" />
-        <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
+        <NumberInput source="howManyStudents" label="כמה תלמידות" />
+        <NumberInput source="howManyMethodic" label="כמה מתודיקה" />
+        <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} label="4 ספרות אחרונות של טלפון" />
         
         {/* Teaching fields */}
-        <TextInput source="teachedStudentTz" multiline helperText="תעודות זהות של תלמידים שנלמדו" />
-        <NumberInput source="howManyYalkutLessons" />
-        <NumberInput source="howManyDiscussingLessons" />
+        <TextInput source="teachedStudentTz" multiline helperText="תעודות זהות של תלמידים שנלמדו" label="תלמידות שנלמדו (ת.ז.)" />
+        <NumberInput source="howManyYalkutLessons" label="כמה שיעורי ילקוט" />
+        <NumberInput source="howManyDiscussingLessons" label="כמה שיעורי דיון" />
         
         {/* Assessment fields */}
-        <NumberInput source="howManyStudentsHelpTeached" />
-        <NumberInput source="howManyLessonsAbsence" />
-        <NumberInput source="howManyWatchedLessons" />
+        <NumberInput source="howManyStudentsHelpTeached" label="כמה תלמידות עזרו ללמד" />
+        <NumberInput source="howManyLessonsAbsence" label="כמה שיעורי היעדרות" />
+        <NumberInput source="howManyWatchedLessons" label="כמה שיעורי צפייה" />
         
         {/* Boolean flags */}
-        <BooleanInput source="wasDiscussing" />
-        <BooleanInput source="wasKamal" />
-        <BooleanInput source="wasStudentsGood" />
-        <BooleanInput source="wasStudentsEnterOnTime" />
-        <BooleanInput source="wasStudentsExitOnTime" />
+        <BooleanInput source="wasDiscussing" label="היה דיון" />
+        <BooleanInput source="wasKamal" label="היה כמל" />
+        <BooleanInput source="wasStudentsGood" label="התלמידות היו טובות" />
+        <BooleanInput source="wasStudentsEnterOnTime" label="התלמידות נכנסו בזמן" />
+        <BooleanInput source="wasStudentsExitOnTime" label="התלמידות יצאו בזמן" />
         
         {/* Special fields */}
-        <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} />
-        <NumberInput source="teacherToReportFor" />
-        <BooleanInput source="wasCollectiveWatch" />
+        <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} label="סוג פעילות" />
+        <NumberInput source="teacherToReportFor" label="מורה לדווח עליה" />
+        <BooleanInput source="wasCollectiveWatch" label="היתה צפייה קבוצתית" />
         
         {/* Tariff fields */}
-        <BooleanInput source="isTaarifHulia" />
-        <BooleanInput source="isTaarifHulia2" />
-        <BooleanInput source="isTaarifHulia3" />
+        <BooleanInput source="isTaarifHulia" label="תעריף חוליה" />
+        <BooleanInput source="isTaarifHulia2" label="תעריף חוליה 2" />
+        <BooleanInput source="isTaarifHulia3" label="תעריף חוליה 3" />
         
-        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
+        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled label="נוצר ב-" />}
+        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled label="עודכן ב-" />}
     </>
 }
 
