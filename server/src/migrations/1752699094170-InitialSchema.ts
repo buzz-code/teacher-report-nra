@@ -5,6 +5,10 @@ export class InitialSchema1752699094170 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
+            CREATE TABLE \`typeorm_metadata\` (\`type\` varchar(255) NOT NULL,\`database\` varchar(255) DEFAULT NULL,\`schema\` varchar(255) DEFAULT NULL,\`table\` varchar(255) DEFAULT NULL,\`name\` varchar(255) DEFAULT NULL,\`value\` text) ENGINE=InnoDB
+        `);
+
+        await queryRunner.query(`
             CREATE TABLE \`import_file\` (
                 \`id\` int NOT NULL AUTO_INCREMENT,
                 \`userId\` int NOT NULL,
@@ -1059,6 +1063,9 @@ export class InitialSchema1752699094170 implements MigrationInterface {
         `);
         await queryRunner.query(`
             DROP TABLE \`import_file\`
+        `);
+        await queryRunner.query(`
+            DROP TABLE \`typeorm_metadata\`
         `);
     }
 
