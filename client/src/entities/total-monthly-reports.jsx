@@ -91,8 +91,6 @@ const entity = {
     show: true,
     edit: false,
     create: false,
-    // Override the API endpoint to use att_report but with monthly aggregation
-    basePath: 'att_report',
 };
 
 export default getResourceComponents(entity);

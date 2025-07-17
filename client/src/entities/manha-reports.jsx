@@ -124,8 +124,6 @@ const entity = {
     filters,
     filterDefaultValues,
     importer,
-    // Override the API endpoint to use att_report but with filtering
-    basePath: 'att_report',
 };
 
 export default getResourceComponents(entity);

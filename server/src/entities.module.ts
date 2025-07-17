@@ -33,6 +33,14 @@ import { Answer } from './db/entities/Answer.entity';
 import { WorkingDate } from './db/entities/WorkingDate.entity';
 import { SalaryReport } from './db/entities/SalaryReport.entity';
 
+// Teacher-Type Specific Report Views
+import seminarKitaReportsConfig from './entity-modules/seminar-kita-reports.config';
+import manhaReportsConfig from './entity-modules/manha-reports.config';
+import pdsReportsConfig from './entity-modules/pds-reports.config';
+import specialEducationReportsConfig from './entity-modules/special-education-reports.config';
+import kindergartenReportsConfig from './entity-modules/kindergarten-reports.config';
+import totalMonthlyReportsConfig from './entity-modules/total-monthly-reports.config';
+
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
@@ -66,6 +74,14 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register({ entity: Answer }),
     BaseEntityModule.register({ entity: WorkingDate }),
     BaseEntityModule.register({ entity: SalaryReport }),
+
+    // Teacher-Type Specific Report Views
+    BaseEntityModule.register(seminarKitaReportsConfig),
+    BaseEntityModule.register(manhaReportsConfig),
+    BaseEntityModule.register(pdsReportsConfig),
+    BaseEntityModule.register(specialEducationReportsConfig),
+    BaseEntityModule.register(kindergartenReportsConfig),
+    BaseEntityModule.register(totalMonthlyReportsConfig),
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),
