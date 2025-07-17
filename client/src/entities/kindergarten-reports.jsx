@@ -24,7 +24,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 const kindergartenTeacherFilter = (userFilters) => {
     return {
         ...filterByUserId(userFilters),
-        'teacher.teacherTypeId': 6
+        'teacher.teacherTypeId': () => 6
     };
 };
 
@@ -57,11 +57,11 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="salaryReport" reference="salary_report" />
             
             {/* Kindergarten specific fields */}
-            <BooleanField source="wasCollectiveWatch" label="היתה צפייה קבוצתית" />
-            <NumberField source="howManyStudents" label="כמה תלמידות נצפו" />
-            <BooleanField source="wasStudentsGood" label="התלמידות היו טובות" />
-            <BooleanField source="wasStudentsEnterOnTime" label="התלמידות נכנסו בזמן" />
-            <BooleanField source="wasStudentsExitOnTime" label="התלמידות יצאו בזמן" />
+            <BooleanField source="wasCollectiveWatch" />
+            <NumberField source="howManyStudents" />
+            <BooleanField source="wasStudentsGood" />
+            <BooleanField source="wasStudentsEnterOnTime" />
+            <BooleanField source="wasStudentsExitOnTime" />
             
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -85,11 +85,11 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="comment" multiline />
         
         {/* Kindergarten specific fields */}
-        <BooleanInput source="wasCollectiveWatch" label="היתה צפייה קבוצתית" />
-        <NumberInput source="howManyStudents" label="כמה תלמידות נצפו" />
-        <BooleanInput source="wasStudentsGood" label="התלמידות היו מתנהגות טוב" />
-        <BooleanInput source="wasStudentsEnterOnTime" label="התלמידות נכנסו בזמן" />
-        <BooleanInput source="wasStudentsExitOnTime" label="התלמידות יצאו בזמן" />
+        <BooleanInput source="wasCollectiveWatch" />
+        <NumberInput source="howManyStudents" />
+        <BooleanInput source="wasStudentsGood" />
+        <BooleanInput source="wasStudentsEnterOnTime" />
+        <BooleanInput source="wasStudentsExitOnTime" />
         
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

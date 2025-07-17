@@ -24,7 +24,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 const pdsTeacherFilter = (userFilters) => {
     return {
         ...filterByUserId(userFilters),
-        'teacher.teacherTypeId': 5
+        'teacher.teacherTypeId': () => 5
     };
 };
 
@@ -56,9 +56,9 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="salaryReport" reference="salary_report" />
             
             {/* PDS specific fields */}
-            <NumberField source="howManyWatchedLessons" label="שיעורי צפייה/פרטניים" />
-            <NumberField source="howManyDiscussingLessons" label="שיעורי דיון" />
-            <BooleanField source="wasDiscussing" label="היה דיון" />
+            <NumberField source="howManyWatchedLessons" />
+            <NumberField source="howManyDiscussingLessons" />
+            <BooleanField source="wasDiscussing" />
             
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -82,9 +82,9 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="comment" multiline />
         
         {/* PDS specific fields */}
-        <NumberInput source="howManyWatchedLessons" label="כמה שיעורי צפייה/פרטניים" />
-        <NumberInput source="howManyDiscussingLessons" label="כמה שיעורי דיון (0-1)" />
-        <BooleanInput source="wasDiscussing" label="היה דיון טלפוני" />
+        <NumberInput source="howManyWatchedLessons" />
+        <NumberInput source="howManyDiscussingLessons" />
+        <BooleanInput source="wasDiscussing" />
         
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

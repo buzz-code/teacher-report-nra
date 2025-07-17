@@ -25,7 +25,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 const manhaTeacherFilter = (userFilters) => {
     return {
         ...filterByUserId(userFilters),
-        'teacher.teacherTypeId': 3
+        'teacher.teacherTypeId': () => 3
     };
 };
 
@@ -58,15 +58,15 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="salaryReport" reference="salary_report" />
             
             {/* Manha specific fields */}
-            <NumberField source="howManyMethodic" label="שיעורי מתודיקה" />
-            <TextField source="fourLastDigitsOfTeacherPhone" label="4 ספרות אחרונות של טלפון מורה" />
-            <NumberField source="teacherToReportFor" label="מורה לדווח עליה" />
-            <NumberField source="howManyWatchedLessons" label="שיעורי צפייה חוליה רגילה" />
-            <BooleanField source="isTaarifHulia" label="חוליה גדולה" />
-            <BooleanField source="isTaarifHulia2" label="חוליה 2" />
-            <NumberField source="howManyStudentsHelpTeached" label="תלמידות שלימדו" />
-            <TextField source="teachedStudentTz" label="ת.ז. תלמידות" />
-            <NumberField source="howManyYalkutLessons" label="שיעורי ילקוט הרועים" />
+            <NumberField source="howManyMethodic" />
+            <TextField source="fourLastDigitsOfTeacherPhone" />
+            <NumberField source="teacherToReportFor" />
+            <NumberField source="howManyWatchedLessons" />
+            <BooleanField source="isTaarifHulia" />
+            <BooleanField source="isTaarifHulia2" />
+            <NumberField source="howManyStudentsHelpTeached" />
+            <TextField source="teachedStudentTz" />
+            <NumberField source="howManyYalkutLessons" />
             
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -90,15 +90,15 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="comment" multiline />
         
         {/* Manha specific fields */}
-        <NumberInput source="howManyMethodic" label="כמה שיעורי מתודיקה" />
-        <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} label="4 ספרות אחרונות של טלפון מורה" />
-        <NumberInput source="teacherToReportFor" label="מורה לדווח עליה" />
-        <NumberInput source="howManyWatchedLessons" label="שיעורי צפייה חוליה רגילה" />
-        <BooleanInput source="isTaarifHulia" label="שיעורי צפייה חוליה גדולה" />
-        <BooleanInput source="isTaarifHulia2" label="שיעורי חוליה 2" />
-        <NumberInput source="howManyStudentsHelpTeached" label="כמה תלמידות לימדו שיעורים" />
-        <TextInput source="teachedStudentTz" multiline label="ת.ז. תלמידות שלימדו (מופרד בפסיקים)" />
-        <NumberInput source="howManyYalkutLessons" label="שיעורי ילקוט הרועים" />
+        <NumberInput source="howManyMethodic" />
+        <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
+        <NumberInput source="teacherToReportFor" />
+        <NumberInput source="howManyWatchedLessons" />
+        <BooleanInput source="isTaarifHulia" />
+        <BooleanInput source="isTaarifHulia2" />
+        <NumberInput source="howManyStudentsHelpTeached" />
+        <TextInput source="teachedStudentTz" multiline />
+        <NumberInput source="howManyYalkutLessons" />
         
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

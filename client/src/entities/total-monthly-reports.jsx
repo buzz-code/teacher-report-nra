@@ -53,13 +53,13 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <BooleanField source="isConfirmed" />
             
             {/* Aggregated summary fields for salary calculation */}
-            <NumberField source="howManyMethodic" label="סך שיעורי מתודיקה" />
-            <NumberField source="howManyWatchedLessons" label="סך שיעורי צפייה" />
-            <NumberField source="howManyDiscussingLessons" label="סך שיעורי דיון" />
-            <NumberField source="howManyYalkutLessons" label="סך שיעורי ילקוט" />
-            <NumberField source="howManyStudents" label="סך תלמידות" />
-            <NumberField source="howManyStudentsHelpTeached" label="סך תלמידות שלימדו" />
-            <NumberField source="howManyLessonsAbsence" label="סך שיעורים עם היעדרויות" />
+            <NumberField source="howManyMethodic" />
+            <NumberField source="howManyWatchedLessons" />
+            <NumberField source="howManyDiscussingLessons" />
+            <NumberField source="howManyYalkutLessons" />
+            <NumberField source="howManyStudents" />
+            <NumberField source="howManyStudentsHelpTeached" />
+            <NumberField source="howManyLessonsAbsence" />
             
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}

@@ -25,7 +25,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 const seminarKitaTeacherFilter = (userFilters) => {
     return {
         ...filterByUserId(userFilters),
-        'teacher.teacherTypeId': 1
+        'teacher.teacherTypeId': () => 1
     };
 };
 
@@ -57,12 +57,12 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="salaryReport" reference="salary_report" />
             
             {/* Seminar Kita specific fields */}
-            <NumberField source="howManyStudents" label="מספר תלמידות" />
-            <NumberField source="howManyMethodic" label="כמות שיעורי מתודיקה" />
-            <NumberField source="howManyWatchedLessons" label="שיעורי צפייה/פרטניים" />
-            <NumberField source="howManyLessonsAbsence" label="שיעורים עם היעדרויות" />
-            <NumberField source="howManyDiscussingLessons" label="שיעורי דיון" />
-            <BooleanField source="wasKamal" label="היה כמל" />
+            <NumberField source="howManyStudents" />
+            <NumberField source="howManyMethodic" />
+            <NumberField source="howManyWatchedLessons" />
+            <NumberField source="howManyLessonsAbsence" />
+            <NumberField source="howManyDiscussingLessons" />
+            <BooleanField source="wasKamal" />
             
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -86,12 +86,12 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="comment" multiline />
         
         {/* Seminar Kita specific fields */}
-        <NumberInput source="howManyStudents" label="כמה תלמידות השתתפו היום" />
-        <NumberInput source="howManyMethodic" label="כמה שיעורים לדווח (1-8)" />
-        <NumberInput source="howManyWatchedLessons" label="כמה שיעורי צפייה/פרטניים" />
-        <NumberInput source="howManyLessonsAbsence" label="כמה שיעורים עם היעדרויות תלמידות" />
-        <NumberInput source="howManyDiscussingLessons" label="כמה שיעורי דיון (0-1)" />
-        <BooleanInput source="wasKamal" label="היה כמל (מפגש מיוחד)" />
+        <NumberInput source="howManyStudents" />
+        <NumberInput source="howManyMethodic" />
+        <NumberInput source="howManyWatchedLessons" />
+        <NumberInput source="howManyLessonsAbsence" />
+        <NumberInput source="howManyDiscussingLessons" />
+        <BooleanInput source="wasKamal" />
         
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}

@@ -24,7 +24,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 const specialEdTeacherFilter = (userFilters) => {
     return {
         ...filterByUserId(userFilters),
-        'teacher.teacherTypeId': 7
+        'teacher.teacherTypeId': () => 7
     };
 };
 
@@ -56,12 +56,12 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="salaryReport" reference="salary_report" />
             
             {/* Special Education specific fields */}
-            <NumberField source="howManyMethodic" label="כמות שיעורים סך הכל" />
-            <NumberField source="howManyStudents" label="כמה תלמידות נצפו" />
-            <NumberField source="howManyStudentsHelpTeached" label="כמה תלמידות לימדו" />
-            <BooleanField source="wasDiscussing" label="היה דיון טלפוני" />
-            <ReferenceField source="teacherToReportFor" reference="teacher" label="מורה מכשירה" />
-            <TextField source="comment" label="מה התחום שלך" />
+            <NumberField source="howManyMethodic" />
+            <NumberField source="howManyStudents" />
+            <NumberField source="howManyStudentsHelpTeached" />
+            <BooleanField source="wasDiscussing" />
+            <ReferenceField source="teacherToReportFor" reference="teacher" />
+            <TextField source="comment" />
             
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
@@ -84,12 +84,12 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <NumberInput source="salaryMonth" />
         
         {/* Special Education specific fields */}
-        <NumberInput source="howManyMethodic" label="כמה שיעורים סך הכל" />
-        <NumberInput source="howManyStudents" label="כמה תלמידות נצפו" />
-        <NumberInput source="howManyStudentsHelpTeached" label="כמה תלמידות לימדו" />
-        <BooleanInput source="wasDiscussing" label="היה דיון טלפוני" />
-        <CommonReferenceInput source="teacherToReportFor" reference="teacher" label="מי המורה המכשירה שלך" dynamicFilter={filterByUserId} />
-        <TextInput source="comment" multiline label="מה התחום שלך" />
+        <NumberInput source="howManyMethodic" />
+        <NumberInput source="howManyStudents" />
+        <NumberInput source="howManyStudentsHelpTeached" />
+        <BooleanInput source="wasDiscussing" />
+        <CommonReferenceInput source="teacherToReportFor" reference="teacher" dynamicFilter={filterByUserId} />
+        <TextInput source="comment" multiline />
         
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
