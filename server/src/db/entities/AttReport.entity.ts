@@ -171,6 +171,41 @@ export class AttReport implements IHasUserId {
   @Column('boolean', { name: 'is_taarif_hulia3', default: false })
   isTaarifHulia3: boolean;
 
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'how_many_lessons', nullable: true })
+  howManyLessons: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'how_many_watch_or_individual', nullable: true })
+  howManyWatchOrIndividual: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'how_many_teached_or_interfering', nullable: true })
+  howManyTeachedOrInterfering: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'how_many_students_teached', nullable: true })
+  howManyStudentsTeached: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { name: 'how_many_students_watched', nullable: true })
+  howManyStudentsWatched: number;
+
+  @IsOptional({ always: true })
+  @BooleanType
+  @Column('boolean', { name: 'was_phone_discussing', default: false })
+  wasPhoneDiscussing: boolean;
+
+  @IsOptional({ always: true })
+  @StringType
+  @Column({ type: 'text', name: 'what_is_your_speciality', nullable: true })
+  whatIsYourSpeciality: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

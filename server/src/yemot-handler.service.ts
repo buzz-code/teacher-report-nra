@@ -1,25 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
-import { Student } from 'src/db/entities/Student.entity';
-import { EventType } from 'src/db/entities/EventType.entity';
-import { Gift } from 'src/db/entities/Gift.entity';
-import { Event } from 'src/db/entities/Event.entity';
+import { Teacher } from 'src/db/entities/Teacher.entity';
+import { TeacherType } from 'src/db/entities/TeacherType.entity';
+import { AttReport } from 'src/db/entities/AttReport.entity';
+import { Question } from 'src/db/entities/Question.entity';
+import { Answer } from 'src/db/entities/Answer.entity';
+import { WorkingDate } from 'src/db/entities/WorkingDate.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
+import { Like } from 'typeorm';
 import {
   formatHebrewDateForIVR,
   gematriyaLetters,
   getGregorianDateFromHebrew,
   getHebrewMonthsList,
 } from '@shared/utils/formatting/hebrew.util';
-import { Class } from 'src/db/entities/Class.entity';
-import { StudentClass } from 'src/db/entities/StudentClass.entity';
-
-const MAX_GIFTS = 5;
 
 @Injectable()
 export class YemotHandlerService extends BaseYemotHandlerService {
-  private eventTypes: EventType[] = [];
-  private gifts: Gift[] = [];
+  private teacher: Teacher;
+  private existingReport: AttReport;
+  private reportDate: string;
+  private callParams: any = {}; // Store call parameters
 
   override async processCall(): Promise<void> {
     this.logger.log(`Processing call with ID: ${this.call.callId}`);
@@ -29,363 +30,904 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return this.hangupWithMessage(this.user.additionalData.maintainanceMessage);
     }
 
-    // TODO: should student enter with 99999, or type it here?
-    if (this.call.ApiEnterID && this.call.ApiEnterID.includes('999999')) {
-      this.logger.log(`User requested to listen to class celebrations`);
-      return this.processClassCelebrationsListener();
+
+
+    this.teacher = await this.getTeacherByUserIdAndPhone();
+    if (!this.teacher) {
+      return this.hangupWithMessage(await this.getTextByUserId('TEACHER.PHONE_NOT_RECOGNIZED'));
     }
 
-    this.loadEventTypes();
-    this.loadGifts();
-
-    const student = await this.getStudentByTz();
-    this.logger.log(`Student found: ${student.name}`);
-    this.sendMessage(await this.getTextByUserId('GENERAL.WELCOME', { name: student.name }));
-
-    const eventType = await this.getEventType();
-    const eventDate = await this.getEventDate();
-    const gifts = await this.getGifts();
-
-    const eventRepo = this.dataSource.getRepository(Event);
-    const event = eventRepo.create({
-      userId: this.user.id,
-      studentReferenceId: student.id,
-      eventTypeReferenceId: eventType.id,
-      eventDate: eventDate,
-      name: `${student.name} - ${eventType.name}`,
-      eventGifts: gifts.map((gift) => ({
-        userId: this.user.id,
-        giftReferenceId: gift.id,
-      })),
-    });
-    const savedEvent = await eventRepo.save(event);
-    this.logger.log(`Event created: ${savedEvent.id}`);
-
-    this.sendMessage(await this.getTextByUserId('EVENT.SAVE_SUCCESS'));
-    this.hangupWithMessage(await this.getTextByUserId('EVENT.GIFTS_ADDED', { count: gifts.length }));
-  }
-
-  private async getStudentByTz(): Promise<Student> {
-    this.logger.log(`Getting student by TZ`);
-
-    if (this.call.ApiEnterID) {
-      const matches = this.call.ApiEnterID.match(/\d+$/);
-      if (matches && matches[0]) {
-        const idNumber = matches[0];
-        this.logger.log(`Extracted ID from ApiEnterID: ${idNumber}`);
-        const student = await this.fetchStudentByTz(idNumber);
-
-        if (student) {
-          return student;
-        }
-      }
-      this.logger.log(`No student found with ApiEnterID: ${this.call.ApiEnterID}`);
-    }
-
-    const tz = await this.askForInput(await this.getTextByUserId('STUDENT.TZ_PROMPT'), {
-      min_digits: 1,
-      max_digits: 9,
-    });
-    const student = await this.fetchStudentByTz(tz);
-
-    if (student) {
-      return student;
-    }
-
-    this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
-    return this.getStudentByTz();
-  }
-
-  private async fetchStudentByTz(tz: string): Promise<Student | null> {
-    this.logger.log(`Fetching student by TZ: ${tz}`);
-    const student = await this.dataSource.getRepository(Student).findOneBy({
-      userId: this.user.id,
-      tz,
-    });
-    if (!student) {
-      this.logger.log(`No student found with TZ: ${tz}`);
-    }
-    return student;
-  }
-
-  private async loadEventTypes() {
-    this.logger.log(`Loading event types`);
-    this.eventTypes = await this.dataSource.getRepository(EventType).find({
-      where: {
-        userId: this.user.id,
-      },
-      order: {
-        key: 'ASC',
-      },
-    });
-    this.logger.log(`Event types loaded: ${this.eventTypes.length}`);
-  }
-
-  private async loadGifts() {
-    this.logger.log(`Loading gifts`);
-    this.gifts = await this.dataSource.getRepository(Gift).find({
-      where: {
-        userId: this.user.id,
-      },
-      order: {
-        key: 'ASC',
-      },
-    });
-    this.logger.log(`Gifts loaded: ${this.gifts.length}`);
-  }
-
-  private async getEventType(): Promise<EventType> {
-    this.logger.log(`Getting event type`);
-    const eventType = await this.askForMenu('EVENT.TYPE_SELECTION', this.eventTypes);
-
-    if (!eventType) {
-      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
-    }
-    this.logger.log(`Event type selected: ${eventType.name}`);
-
-    const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_TYPE', { name: eventType.name });
-
-    if (!isConfirmed) {
-      this.logger.log(`Event type not confirmed, selecting again`);
-      return this.getEventType();
-    }
-
-    return eventType;
-  }
-
-  private async getGifts(): Promise<Gift[]> {
-    this.logger.log(`Getting gifts - up to ${MAX_GIFTS} allowed`);
-    const selectedGifts: Gift[] = [];
-    let continueSelection = true;
-
-    while (continueSelection && selectedGifts.length < MAX_GIFTS) {
-      const availableGifts = this.gifts.filter((g) => !selectedGifts.some((sg) => sg.id === g.id));
-
-      const promptKey = selectedGifts.length === 0 ? 'EVENT.GIFT_SELECTION' : 'EVENT.ADDITIONAL_GIFT_SELECTION';
-      const gift = await this.askForMenu(promptKey, availableGifts);
-
-      if (!gift) {
-        this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
-      }
-
-      selectedGifts.push(gift);
-      this.logger.log(`Gift selected: ${gift.name} (${selectedGifts.length} of ${MAX_GIFTS})`);
-
-      if (selectedGifts.length < MAX_GIFTS) {
-        this.logger.log(`Asking if user wants to select another gift`);
-        continueSelection = await this.askConfirmation('EVENT.SELECT_ANOTHER_GIFT');
+    // Get teacher type name
+    let teacherTypeName = 'מורה';
+    if (this.teacher.teacherTypeId) {
+      const teacherType = await this.dataSource.getRepository(TeacherType).findOne({
+        where: { userId: this.user.id, key: this.teacher.teacherTypeId }
+      });
+      if (teacherType) {
+        teacherTypeName = teacherType.name;
       }
     }
 
-    const giftNames = selectedGifts.map((g) => g.name).join(', ');
-    this.logger.log(`Gifts selected: ${giftNames}`);
-    const isConfirmed = await this.askConfirmation('EVENT.CONFIRM_GIFTS', {
-      gifts: giftNames,
-      count: selectedGifts.length,
+    const welcomeMessage = await this.getTextByUserId('TEACHER.WELCOME', { 
+      teacherTypeName,
+      name: this.teacher.name 
     });
+    this.sendMessage(welcomeMessage);
 
-    if (!isConfirmed) {
-      this.logger.log(`Gift selection not confirmed, starting over`);
-      return this.getGifts();
-    }
-
-    return selectedGifts;
+    await this.askForReportDataAndSave();
   }
 
-  private async getEventDate(): Promise<Date> {
-    this.logger.log(`Getting event date`);
-
-    const year = getCurrentHebrewYear();
-    const day = await this.askForInput(await this.getTextByUserId('DATE.DAY_SELECTION'), {
-      min_digits: 1,
-      max_digits: 2,
-    });
-    const dayNumber = parseInt(day);
-
-    const months = getHebrewMonthsList(year);
-    const month = await this.askForMenu('DATE.MONTH_SELECTION', months);
-    if (!month) {
-      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
-    }
-
-    const eventDate = this.createEventDateWithYearAdjustment(year, month.index, dayNumber);
-
-    this.logger.log(`Event date selected: ${eventDate.toISOString()}`);
-
-    const hebrewDate = formatHebrewDateForIVR(eventDate);
-    const isConfirmed = await this.askConfirmation('DATE.CONFIRM_DATE', { date: hebrewDate });
-
-    if (!isConfirmed) {
-      return this.getEventDate();
-    }
-
-    return eventDate;
-  }
-
-  private createEventDateWithYearAdjustment(year: number, monthIndex: number, dayNumber: number): Date {
-    let eventDate = getGregorianDateFromHebrew(year, monthIndex, dayNumber);
-
-    const today = new Date();
-    const daysDifference = Math.floor((today.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (daysDifference > 100) {
-      this.logger.log(
-        `Selected date ${eventDate.toISOString()} is more than 100 days ago (${daysDifference} days), using next year`,
-      );
-      eventDate = getGregorianDateFromHebrew(year + 1, monthIndex, dayNumber);
-    }
-
-    return eventDate;
-  }
-
-  private async processClassCelebrationsListener(): Promise<void> {
-    this.logger.log(`Processing class celebrations listener`);
-
-    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.WELCOME'));
-
-    const grade = await this.getGradeForCelebrations();
-    const classEntity = await this.getClassNumber(grade);
-
-    const currentYear = getCurrentHebrewYear();
-    const month = await this.getMonthForCelebrations(currentYear);
-
-    await this.readClassCelebrations(classEntity, currentYear, month.name);
-
-    this.hangupWithMessage(await this.getTextByUserId('CELEBRATIONS.GOODBYE'));
-  }
-
-  private async getGradeForCelebrations(): Promise<string> {
-    this.logger.log(`Getting grade for celebrations`);
-
-    const gradeInput = await this.askForInput(await this.getTextByUserId('CELEBRATIONS.GRADE_PROMPT'), {
-      min_digits: 1,
-      max_digits: 2,
-    });
-
-    const grade = parseInt(gradeInput);
-
-    if (grade < 9 || grade > 14) {
-      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.INVALID_GRADE'));
-      return this.getGradeForCelebrations();
-    }
-
-    const gradeName = gematriyaLetters(grade, false);
-    this.logger.log(`Grade selected: ${gradeName} (${grade})`);
-    return gradeName;
-  }
-
-  private async getClassNumber(grade: string): Promise<Class> {
-    this.logger.log(`Getting class number for grade ${grade}`);
-
-    const classNumberInput = await this.askForInput(await this.getTextByUserId('CELEBRATIONS.CLASS_PROMPT'), {
-      min_digits: 1,
-      max_digits: 2,
-    });
-
-    const classNumber = parseInt(classNumberInput);
-    const expectedClassName = `${grade}${classNumber}`;
-
-    const classEntity = await this.dataSource.getRepository(Class).findOne({
+  private async getTeacherByUserIdAndPhone(): Promise<Teacher | null> {
+    this.logger.log(`Getting teacher by user ID: ${this.user.id} and phone: ${this.call.ApiPhone}`);
+    const teacher = await this.dataSource.getRepository(Teacher).findOne({
       where: {
         userId: this.user.id,
-        name: expectedClassName,
-        gradeLevel: grade,
+        phone: this.call.ApiPhone,
       },
     });
-
-    if (!classEntity) {
-      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.INVALID_CLASS'));
-      return this.getClassNumber(grade);
+    
+    if (!teacher) {
+      this.logger.log(`No teacher found with phone: ${this.call.ApiPhone}`);
     }
-
-    this.logger.log(`Class selected: ${expectedClassName}`);
-    return classEntity;
+    
+    return teacher;
   }
 
-  private async getMonthForCelebrations(currentYear: number) {
-    this.logger.log(`Getting month for celebrations`);
-
-    const months = getHebrewMonthsList(currentYear);
-    const month = await this.askForMenu('DATE.MONTH_SELECTION', months);
-    if (!month) {
-      this.sendMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
-      return this.getMonthForCelebrations(currentYear);
-    }
-
-    this.logger.log(`Month selected: ${month.name} (${month.index})`);
-    return month;
+  private async askForReportDataAndSave(): Promise<void> {
+    await this.askQuestions();
+    await this.getReportDate();
+    await this.getReportAndSave();
   }
 
-  private async readClassCelebrations(classEntity: Class, currentYear: number, monthName: string): Promise<void> {
-    this.logger.log(`Reading celebrations for class ${classEntity.name} month ${monthName}`);
-
-    const events = await this.dataSource
-      .getRepository(Event)
-      .createQueryBuilder('event')
-      .leftJoinAndSelect('event.eventType', 'eventType')
-      .innerJoin(Student, 'student', 'student.id = event.studentReferenceId')
-      .innerJoin(StudentClass, 'studentClass', 'studentClass.studentReferenceId = student.id')
-      .where('event.userId = :userId', { userId: this.user.id })
-      .andWhere('studentClass.classReferenceId = :classId', { classId: classEntity.id })
-      .andWhere('studentClass.year = :year', { year: currentYear })
-      .andWhere('event.eventHebrewMonth = :monthName', { monthName })
-      .orderBy('student.name', 'ASC')
-      .addOrderBy('event.eventDate', 'ASC')
-      .getMany();
-
-    if (events.length === 0) {
-      this.hangupWithMessage(
-        await this.getTextByUserId('CELEBRATIONS.NO_CELEBRATIONS_FOUND', {
-          className: classEntity.name,
-          month: monthName,
-        }),
-      );
+  private async askQuestions(): Promise<void> {
+    // Check if questions have already been answered
+    if (this.callParams.questionAnswer) {
       return;
     }
 
-    const studentsWithEvents = await this.dataSource
-      .getRepository(Student)
-      .createQueryBuilder('student')
-      .where('student.id IN (:...studentIds)', {
-        studentIds: events.map((e) => e.studentReferenceId),
-      })
-      .getMany();
-
-    const studentMap = new Map(studentsWithEvents.map((s) => [s.id, s]));
-
-    const eventsByStudent = events.reduce((acc, event) => {
-      const student = studentMap.get(event.studentReferenceId);
-      if (student) {
-        const studentName = student.name;
-        if (!acc[studentName]) {
-          acc[studentName] = [];
-        }
-        acc[studentName].push(event);
+    // TODO: Implement question handling - get questions based on teacher type
+    this.logger.log(`Asking questions for teacher type: ${this.teacher.teacherTypeId}`);
+    
+    const questions = await this.getQuestionsForTeacher();
+    for (const question of questions) {
+      const messages = [question.content];
+      if (!question.allowedDigits) {
+        messages.push(await this.getTextByUserId('QUESTION.CHOOSE_ANSWER'));
       }
-      return acc;
-    }, {} as Record<string, Event[]>);
 
-    this.sendMessage(
-      await this.getTextByUserId('CELEBRATIONS.READING_START', {
-        className: classEntity.name,
-        month: monthName,
-        count: events.length.toString(),
-      }),
+      const answer = await this.askForInput(messages.join(','), {
+        max_digits: 1,
+        min_digits: 1,
+        digits_allowed: question.allowedDigits?.split(',') || ['0', '1'],
+      });
+
+      await this.saveAnswerForQuestion(question.id, answer);
+
+      if (question.isStandalone) {
+        await this.createEmptyReportForAnswers();
+        return this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+      }
+    }
+  }
+
+  private async getQuestionsForTeacher(): Promise<Question[]> {
+    // TODO: Implement proper question filtering based on teacher type and special question
+    return await this.dataSource.getRepository(Question).find({
+      where: {
+        userId: this.user.id,
+        teacherTypeId: this.teacher.teacherTypeId,
+      },
+    });
+  }
+
+  private async saveAnswerForQuestion(questionId: number, answer: string): Promise<void> {
+    const answerRepo = this.dataSource.getRepository(Answer);
+    const answerEntity = answerRepo.create({
+      userId: this.user.id,
+      teacherId: this.teacher.id,
+      questionId: questionId,
+      answer: parseInt(answer),
+      answerDate: new Date(),
+    });
+    await answerRepo.save(answerEntity);
+  }
+
+  private async getReportDate(): Promise<void> {
+    if (this.reportDate) {
+      return;
+    }
+
+    const reportDateType = await this.askForInput(
+      await this.getTextByUserId('REPORT.CHOOSE_DATE_TYPE'),
+      {
+        max_digits: 1,
+        min_digits: 1,
+        digits_allowed: ['1', '2', '3'],
+      }
     );
 
-    for (const [studentName, studentEvents] of Object.entries(eventsByStudent)) {
-      this.sendMessage(await this.getTextByUserId('CELEBRATIONS.STUDENT_NAME', { name: studentName }));
+    if (reportDateType === '1') {
+      await this.getAndValidateReportDate(true);
+    } else if (reportDateType === '2') {
+      await this.getAndValidateReportDate(false);
+    } else if (reportDateType === '3') {
+      await this.showReports();
+    } else {
+      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+    }
+  }
 
-      for (const event of studentEvents) {
-        this.sendMessage(
-          await this.getTextByUserId('CELEBRATIONS.EVENT_DETAIL', {
-            eventType: event.eventType.name,
-            date: formatHebrewDateForIVR(event.eventDate),
-          }),
-        );
+  private async getAndValidateReportDate(isToday: boolean): Promise<void> {
+    let reportDate: Date;
+
+    if (!isToday) {
+      const dateInput = await this.askForInput(
+        await this.getTextByUserId('REPORT.CHOOSE_DATE'),
+        {
+          max_digits: 8,
+          min_digits: 8,
+        }
+      );
+      // Parse DD/MM/YYYY format - convert to Date
+      const day = parseInt(dateInput.substr(0, 2));
+      const month = parseInt(dateInput.substr(2, 2)) - 1; // JS months are 0-based
+      const year = parseInt(dateInput.substr(4, 4));
+      reportDate = new Date(year, month, day);
+    } else {
+      reportDate = new Date();
+    }
+
+    // Validate date
+    if (isNaN(reportDate.getTime())) {
+      this.sendMessage(await this.getTextByUserId('VALIDATION.INVALID_DATE'));
+      return this.getAndValidateReportDate(isToday);
+    }
+
+    const reportDateIsFuture = reportDate > new Date();
+    if (reportDateIsFuture) {
+      this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_FUTURE'));
+      return this.getAndValidateReportDate(isToday);
+    }
+
+    // Check for unconfirmed previous reports (not for "מורה מנחה" and not for previous month)
+    const reportDateIsPrevMonth = reportDate < new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    if (this.teacher.teacherTypeId !== 3 && !reportDateIsPrevMonth) {
+      const startReportsDate = new Date('1970-01-01');
+      const endReportsDate = new Date(new Date().getFullYear(), new Date().getMonth(), 0, 23, 59, 59); // Last day of previous month
+      const unconfirmedPreviousReports = await this.getUnconfirmedReportsByDateRange(startReportsDate, endReportsDate);
+      
+      if (unconfirmedPreviousReports.length > 0) {
+        this.sendMessage(await this.getTextByUserId('VALIDATION.HAS_UNCONFIRMED_REPORTS'));
+        this.reportDate = null; // Reset report date
+        return this.getReportDate();
       }
     }
 
-    this.sendMessage(await this.getTextByUserId('CELEBRATIONS.READING_COMPLETE'));
+    // Check if it's a working day
+    const dateStr = reportDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const isWorkingDay = await this.validateWorkingDateForTeacher(dateStr);
+    if (!isWorkingDay) {
+      this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_NON_WORKING_DAY'));
+      return this.getAndValidateReportDate(isToday);
+    }
+
+    // Check for existing reports
+    if (this.teacher.teacherTypeId !== 3) { // Not for "מורה מנחה"
+      const existingReports = await this.getReportsByTeacherIdAndDate(dateStr);
+      
+      const relevantFields = ['howManyStudents', 'howManyMethodic', 'isTaarifHulia', 'howManyWatchOrIndividual', 'wasCollectiveWatch', 'howManyLessons'];
+      this.existingReport = existingReports.find(report => 
+        relevantFields.some(field => report[field] !== null && report[field] !== undefined)
+      );
+
+      if (this.existingReport) {
+        if (this.existingReport.salaryReport) {
+          this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
+          return this.getAndValidateReportDate(isToday);
+        }
+        if (this.existingReport.isConfirmed) {
+          this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
+          return this.getAndValidateReportDate(isToday);
+        }
+        this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
+      }
+    }
+
+    // Hebrew date confirmation
+    const hebrewDate = formatHebrewDateForIVR(reportDate);
+    const isConfirmed = await this.askConfirmation('REPORT.CONFIRM_DATE', { date: hebrewDate });
+    
+    if (!isConfirmed) {
+      return this.getAndValidateReportDate(isToday);
+    }
+
+    this.reportDate = dateStr;
   }
+
+  private async validateWorkingDateForTeacher(date: string): Promise<boolean> {
+    const workingDate = await this.dataSource.getRepository(WorkingDate).findOne({
+      where: {
+        userId: this.user.id,
+        teacherTypeId: this.teacher.teacherTypeId,
+        workingDate: new Date(date),
+      },
+    });
+    return !!workingDate;
+  }
+
+  private async getReportsByTeacherIdAndDate(date: string): Promise<AttReport[]> {
+    return await this.dataSource.getRepository(AttReport).find({
+      where: {
+        userId: this.user.id,
+        teacherId: this.teacher.id,
+        reportDate: new Date(date),
+      },
+    });
+  }
+
+  private async getReportAndSave(): Promise<void> {
+    switch (this.teacher.teacherTypeId) {
+      case 1:
+        // מורה של סמינר כיתה
+        await this.getSeminarKitaReport();
+        break;
+      case 2:
+        // מורה מאמנת - לא בשימוש
+        await this.getTrainingReport();
+        break;
+      case 3:
+        // מורה מנחה
+        await this.getManhaReport();
+        break;
+      case 4:
+        // אחראית בית ספר - לא בשימוש
+        await this.getReponsibleReport();
+        break;
+      case 5:
+        // מורת פידיאס
+        await this.getPdsReport();
+        break;
+      case 6:
+        // גננות
+        await this.getKindergartenReport();
+        break;
+      case 7:
+        // חינוך מיוחד
+        await this.getSpecialEducationReport();
+        break;
+      default:
+        this.hangupWithMessage(await this.getTextByUserId('TEACHER.TYPE_NOT_RECOGNIZED'));
+        break;
+    }
+
+    try {
+      const attReport = {
+        userId: this.user.id,
+        teacherId: this.teacher.id,
+        reportDate: new Date(this.reportDate),
+        updateDate: new Date(),
+        year: getCurrentHebrewYear(),
+        howManyMethodic: this.callParams.howManyMethodic ? parseInt(this.callParams.howManyMethodic) : null,
+        fourLastDigitsOfTeacherPhone: this.callParams.fourLastDigitsOfTeacherPhone,
+        isTaarifHulia: this.callParams.isTaarifHulia === '1',
+        isTaarifHulia2: this.callParams.isTaarifHulia2 === '1',
+        isTaarifHulia3: this.callParams.isTaarifHulia3 === '1',
+        teachedStudentTz: this.callParams.teachedStudentTz,
+        howManyYalkutLessons: this.callParams.howManyYalkutLessons ? parseInt(this.callParams.howManyYalkutLessons) : null,
+        howManyDiscussingLessons: this.callParams.howManyDiscussingLessons ? parseInt(this.callParams.howManyDiscussingLessons) : null,
+        howManyStudentsHelpTeached: this.callParams.howManyStudentsHelpTeached ? parseInt(this.callParams.howManyStudentsHelpTeached) : null,
+        howManyLessonsAbsence: this.callParams.howManyLessonsAbsence ? parseInt(this.callParams.howManyLessonsAbsence) : null,
+        howManyWatchedLessons: this.callParams.howManyWatchedLessons ? parseInt(this.callParams.howManyWatchedLessons) : null,
+        wasDiscussing: this.callParams.wasDiscussing === '1',
+        wasKamal: this.callParams.wasKamal === '1',
+        wasStudentsGood: this.callParams.wasStudentsGood === '1',
+        wasStudentsEnterOnTime: this.callParams.wasStudentsEnterOnTime === '1',
+        wasStudentsExitOnTime: this.callParams.wasStudentsExitOnTime === '1',
+        teacherToReportFor: this.callParams.teacherToReportFor ? parseInt(this.callParams.teacherToReportFor) : null,
+        wasCollectiveWatch: this.callParams.wasCollectiveWatch === '1',
+        howManyStudents: this.callParams.howManyStudents ? parseInt(this.callParams.howManyStudents) : null,
+        howManyLessons: this.callParams.howManyLessons ? parseInt(this.callParams.howManyLessons) : null,
+        howManyWatchOrIndividual: this.callParams.howManyWatchOrIndividual ? parseInt(this.callParams.howManyWatchOrIndividual) : null,
+        howManyTeachedOrInterfering: this.callParams.howManyTeachedOrInterfering ? parseInt(this.callParams.howManyTeachedOrInterfering) : null,
+        howManyStudentsTeached: this.callParams.howManyStudentsTeached ? parseInt(this.callParams.howManyStudentsTeached) : null,
+        howManyStudentsWatched: this.callParams.howManyStudentsWatched ? parseInt(this.callParams.howManyStudentsWatched) : null,
+        wasPhoneDiscussing: this.callParams.wasPhoneDiscussing === '1',
+        whatIsYourSpeciality: this.callParams.whatIsYourSpeciality,
+      };
+
+      const attReportRepo = this.dataSource.getRepository(AttReport);
+      const savedReport = await attReportRepo.save(attReport);
+      
+      if (this.existingReport) {
+        await attReportRepo.remove(this.existingReport);
+        await this.updateReportIdForExistingReportAnswers(this.existingReport.id, savedReport.id);
+      }
+
+      await this.updateReportIdForAnswers(savedReport.id);
+
+      await this.finishSavingReport();
+    } catch (error) {
+      this.logger.error('Error saving report:', error);
+      this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_NOT_SAVED'));
+    }
+  }
+
+  private async getSeminarKitaReport(): Promise<void> {
+    // TODO: Implement seminar kita report logic
+    this.logger.log('Getting seminar kita report');
+    
+    // Use teacher's student count if available, otherwise ask
+    this.callParams.howManyStudents = this.teacher.studentCount?.toString();
+    if (!this.callParams.howManyStudents) {
+      // כמה תלמידות היו אצלך היום
+      this.callParams.howManyStudents = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_SEMINAR_KITA'),
+        { max_digits: 1, min_digits: 1 }
+      );
+    }
+
+    // על כמה שיעורי סמינר כתה תרצי לדווח
+    this.callParams.howManyLessons = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_LESSONS_SEMINAR_KITA'),
+      { max_digits: 1, min_digits: 1, digits_allowed: ['1', '2', '3', '4', '5', '6', '7', '8'] }
+    );
+
+    // מתוכם כמה שיעורי צפיה או פרטני
+    this.callParams.howManyWatchOrIndividual = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_WATCH_OR_INDIVIDUAL'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // כמה שיעורי מסירה או מעורבות
+    this.callParams.howManyTeachedOrInterfering = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_TEACHED_OR_INTERFERING'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // האם היה קמל?
+    this.callParams.wasKamal = await this.askForInput(
+      await this.getTextByUserId('REPORT.WAS_KAMAL'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // כמה שיעורי דיון
+    this.callParams.howManyDiscussingLessons = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_DISCUSSING_LESSONS'),
+      { max_digits: 1, min_digits: 1, digits_allowed: ['0', '1'] }
+    );
+
+    // כמה שיעורים התלמידות חסרו מסיבות אישיות
+    this.callParams.howManyLessonsAbsence = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_LESSONS_ABSENCE_SEMINAR_KITA'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // TODO: Add validation methods
+    await this.validateNoMoreThanTenAbsences();
+    await this.validateSeminarKitaLessonCount();
+  }
+
+  private async getTrainingReport(): Promise<void> {
+    // TODO: Implement training report logic (not in use)
+    this.logger.log('Getting training report - not in use');
+  }
+
+  private async getManhaReport(): Promise<void> {
+    // TODO: Implement manha report logic
+    this.logger.log('Getting manha report');
+    
+    if (!this.callParams.manhaReportType) {
+      // האם מדווחת על עצמה או על מורות אחרות?
+      this.callParams.manhaReportType = await this.askForInput(
+        await this.getTextByUserId('REPORT.MANHA_REPORT_TYPE'),
+        { max_digits: 1, min_digits: 1 }
+      );
+    }
+    
+    if (this.callParams.manhaReportType === '1') {
+      // מדווחת על עצמה - כמה שיעורי מתודיקה היו?
+      this.callParams.howManyMethodic = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_METHODIC'),
+        { max_digits: 1, min_digits: 1 }
+      );
+    } else {
+      // מדווחת על מורות אחרות
+      await this.getTeacherFourLastDigits();
+      
+      // כמה שיעורי צפיה בחוליה רגילה?
+      this.callParams.isTaarifHulia = await this.askForInput(
+        await this.getTextByUserId('REPORT.IS_TAARIF_HULIA'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // כמה שעורי צפיה בחוליה גדולה?
+      this.callParams.isTaarifHulia2 = await this.askForInput(
+        await this.getTextByUserId('REPORT.IS_TAARIF_HULIA2'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // כמה שיעורים היו בחוליה ה 2?
+      this.callParams.isTaarifHulia3 = await this.askForInput(
+        await this.getTextByUserId('REPORT.IS_TAARIF_HULIA3'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // כמה שיעורי צפיה?
+      this.callParams.howManyWatchedLessons = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_WATCHED_LESSONS'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // כמה בנות מסרו היום שיעור?
+      this.callParams.howManyStudentsTeached = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_TEACHED'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // אם התשובה גדולה מ0 אז הקישי את מ.ז. של התלמידה - וחוזר על עצמו כמספר התלמידות שהמורה הקלידה שמסרו
+      const numStudentsTeached = parseInt(this.callParams.howManyStudentsTeached);
+      if (numStudentsTeached > 0) {
+        for (let index = 0; index < numStudentsTeached; index++) {
+          await this.getTeachedStudentTz(index + 1);
+        }
+      }
+
+      // כמה שיעורי ילקוט הרועים?
+      this.callParams.howManyYalkutLessons = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_YALKUT_LESSONS'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // כמה שיעורי מרתון עזרת לתלמידות למסור?
+      this.callParams.howManyStudentsHelpTeached = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_HELP_TEACHED'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // TODO: Add validation method
+      await this.validateManhaReport();
+    }
+  }
+
+  private async getReponsibleReport(): Promise<void> {
+    // TODO: Implement responsible report logic (not in use)
+    this.logger.log('Getting responsible report - not in use');
+  }
+
+  private async getPdsReport(): Promise<void> {
+    // TODO: Implement PDS report logic
+    this.logger.log('Getting PDS report');
+    
+    // כמה שיעורי צפיה או פרטני
+    this.callParams.howManyWatchOrIndividual = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_WATCH_OR_INDIVIDUAL'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // כמה שיעורי מסירה או מעורבות
+    this.callParams.howManyTeachedOrInterfering = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_TEACHED_OR_INTERFERING'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // כמה שיעורי דיון
+    this.callParams.howManyDiscussingLessons = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_DISCUSSING_LESSONS'),
+      { max_digits: 1, min_digits: 1, digits_allowed: ['0', '1'] }
+    );
+
+    // TODO: Add validation method
+    await this.validatePdsReport();
+  }
+
+  private async getKindergartenReport(): Promise<void> {
+    // TODO: Implement kindergarten report logic
+    this.logger.log('Getting kindergarten report');
+    
+    // האם הייתה צפיה קולקטיבית?
+    this.callParams.wasCollectiveWatch = await this.askForInput(
+      await this.getTextByUserId('REPORT.WAS_COLLECTIVE_WATCH'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    if (this.callParams.wasCollectiveWatch !== '1') {
+      // כמה בנות היו בצפיה בגן?
+      this.callParams.howManyStudents = await this.askForInput(
+        await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS'),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      // האם תפקוד הבנות ענה על ציפיותיך?
+      this.callParams.wasStudentsGood = await this.askForInput(
+        await this.getTextByUserId('REPORT.WAS_STUDENTS_GOOD'),
+        { max_digits: 1, min_digits: 1 }
+      );
+    }
+  }
+
+  private async getSpecialEducationReport(): Promise<void> {
+    // TODO: Implement special education report logic
+    this.logger.log('Getting special education report');
+    
+    // כמה שיעורים היו?
+    this.callParams.howManyLessons = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_LESSONS'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // כמה תלמידות צפו?
+    this.callParams.howManyStudentsWatched = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_WATCHED'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // כמה תלמידות מסרו?
+    this.callParams.howManyStudentsTeached = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_TEACHED'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // האם היה דיון טלפוני?
+    this.callParams.wasPhoneDiscussing = await this.askForInput(
+      await this.getTextByUserId('REPORT.WAS_PHONE_DISCUSSING'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // מי המורה המנחה שלך?
+    this.callParams.whoIsYourTrainingTeacher = await this.askForInput(
+      await this.getTextByUserId('REPORT.WHO_IS_YOUR_TRAINING_TEACHER'),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    // מה ההתמחות?
+    this.callParams.whatIsYourSpeciality = await this.askForInput(
+      await this.getTextByUserId('REPORT.WHAT_IS_YOUR_SPECIALITY'),
+      { max_digits: 1, min_digits: 1 }
+    );
+  }
+
+  private async getTeacherFourLastDigits(): Promise<void> {
+    // הקישי 4 ספרות אחרונות של הטלפון של המורה
+    const fourLastDigits = await this.askForInput(
+      await this.getTextByUserId('REPORT.FOUR_LAST_DIGITS_OF_TEACHER_PHONE'),
+      { max_digits: 4, min_digits: 4 }
+    );
+
+    const teachers = await this.getTeachersByFourLastDigits(fourLastDigits);
+    
+    if (teachers.length === 0) {
+      this.sendMessage(await this.getTextByUserId('TEACHER.NO_TEACHER_FOUND_BY_DIGITS'));
+      return this.getTeacherFourLastDigits();
+    } else if (teachers.length > 1) {
+      const teacherList = teachers.map((teacher, index) => `${teacher.name} ${index + 1}`).join(', ');
+      const selection = await this.askForInput(
+        await this.getTextByUserId('TEACHER.CONFIRM_TEACHER_MULTI', { teacherList }),
+        { max_digits: 1, min_digits: 1 }
+      );
+
+      if (selection === '0') {
+        return this.getTeacherFourLastDigits();
+      }
+
+      const selectedIndex = parseInt(selection) - 1;
+      if (selectedIndex < 0 || selectedIndex >= teachers.length) {
+        this.sendMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+        return this.getTeacherFourLastDigits();
+      }
+
+      this.teacherToReportFor = teachers[selectedIndex];
+    } else {
+      this.teacherToReportFor = teachers[0];
+    }
+
+    // Confirm teacher selection
+    const confirmation = await this.askForInput(
+      await this.getTextByUserId('TEACHER.CONFIRM_TEACHER_SINGLE', { 
+        teacherName: this.teacherToReportFor.name 
+      }),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    if (confirmation === '2') {
+      return this.getTeacherFourLastDigits();
+    }
+
+    this.callParams.fourLastDigitsOfTeacherPhone = fourLastDigits;
+  }
+
+  private async getTeachersByFourLastDigits(fourLastDigits: string): Promise<Teacher[]> {
+    return await this.dataSource.getRepository(Teacher).find({
+      where: {
+        userId: this.user.id,
+        // Assuming phone field exists and we check last 4 digits
+        phone: Like(`%${fourLastDigits}`),
+      },
+    });
+  }
+
+  private async getTeachedStudentTz(number: number): Promise<void> {
+    // הקישי את מ.ז. של התלמידה
+    const studentTz = await this.askForInput(
+      await this.getTextByUserId('STUDENT.TZ_PROMPT', { number: number.toString() }),
+      { max_digits: 9, min_digits: 9 }
+    );
+
+    const student = await this.getStudentByTz(studentTz);
+    if (!student) {
+      this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
+      return this.getTeachedStudentTz(number);
+    }
+
+    const confirmation = await this.askForInput(
+      await this.getTextByUserId('STUDENT.CONFIRM', { studentName: student.name }),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    if (confirmation === '2') {
+      return this.getTeachedStudentTz(number);
+    }
+
+    // Add to the TZ collection
+    this.callParams.teachedStudentTz = (this.callParams.teachedStudentTz || '') + studentTz + ',';
+  }
+
+  private async getStudentByTz(tz: string): Promise<any | null> {
+    // TODO: Implement student lookup by TZ
+    // This would require Student entity from shared module
+    return null;
+  }
+
+  private async finishSavingReport(): Promise<void> {
+    const isManhaAndOnOthers = this.teacher.teacherTypeId === 3 && this.callParams.manhaReportType === '2';
+    const isSeminarKita = this.teacher.teacherTypeId === 1;
+    
+    if (isManhaAndOnOthers) {
+      // בסיום האם תרצי לדווח על מורה נוספת
+      this.sendMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+      const anotherTeacherReport = await this.askForInput(
+        await this.getTextByUserId('REPORT.ANOTHER_TEACHER_REPORT'),
+        { max_digits: 1, min_digits: 1 }
+      );
+      
+      if (anotherTeacherReport === '1') {
+        return this.askForReportDataAndSave();
+      } else {
+        this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+      }
+    } else if (isSeminarKita) {
+      // האם תרצי לדווח על יום נוסף
+      this.sendMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+      const anotherDateReport = await this.askForInput(
+        await this.getTextByUserId('REPORT.ANOTHER_DATE_REPORT'),
+        { max_digits: 1, min_digits: 1 }
+      );
+      
+      if (anotherDateReport === '1') {
+        this.reportDate = null; // Reset report date
+        return this.getAndValidateReportDate(false);
+      } else {
+        this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+      }
+    } else {
+      this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+    }
+  }
+
+  private async showReports(): Promise<void> {
+    // TODO: Implement show reports logic
+    this.logger.log('Showing reports');
+    
+    const reportsMonth = await this.askForInput(
+      await this.getTextByUserId('REPORT.CHOOSE_REPORTS_MONTH'),
+      { max_digits: 2, min_digits: 1 }
+    );
+
+    const month = Number(reportsMonth);
+    let year = new Date().getFullYear();
+    if (month > new Date().getMonth() + 1) {
+      year -= 1;
+    }
+
+    const startDate = new Date(year, month - 1, 1); // month is 0-based in JS
+    const endDate = new Date(year, month, 0); // last day of month
+
+    const previousReports = await this.getUnconfirmedReportsByDateRange(startDate, endDate);
+
+    if (previousReports.length === 0) {
+      this.hangupWithMessage(await this.getTextByUserId('REPORT.NO_REPORT_FOUND'));
+    } else {
+      for (const report of previousReports) {
+        const reportConfirm = await this.askForInput(
+          this.getReportMessage(report),
+          { max_digits: 1, min_digits: 1 }
+        );
+
+        if (reportConfirm === '9') {
+          await this.saveReportAsConfirmed(report.id);
+        } else {
+          this.existingReport = report;
+          this.reportDate = report.reportDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+          return this.getReportAndSave();
+        }
+      }
+    }
+
+    this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+  }
+
+  private async createEmptyReportForAnswers(): Promise<void> {
+    const emptyReport = {
+      userId: this.user.id,
+      teacherId: this.teacher.id,
+      reportDate: new Date(),
+      updateDate: new Date(),
+      year: getCurrentHebrewYear(),
+      isConfirmed: true,
+    };
+    const attReportRepo = this.dataSource.getRepository(AttReport);
+    const savedReport = await attReportRepo.save(emptyReport);
+    await this.updateReportIdForAnswers(savedReport.id);
+  }
+
+  private async updateReportIdForAnswers(reportId: number): Promise<void> {
+    await this.dataSource.getRepository(Answer).update(
+      { userId: this.user.id, teacherId: this.teacher.id, reportId: null },
+      { reportId: reportId }
+    );
+  }
+
+  private async updateReportIdForExistingReportAnswers(oldReportId: number, newReportId: number): Promise<void> {
+    await this.dataSource.getRepository(Answer).update(
+      { reportId: oldReportId },
+      { reportId: newReportId }
+    );
+  }
+
+  private async getUnconfirmedReportsByDateRange(startDate: Date, endDate: Date): Promise<AttReport[]> {
+    return await this.dataSource.getRepository(AttReport).find({
+      where: {
+        userId: this.user.id,
+        teacherId: this.teacher.id,
+        reportDate: {
+          $gte: startDate,
+          $lte: endDate,
+        } as any,
+        isConfirmed: false,
+      },
+    });
+  }
+
+  private async saveReportAsConfirmed(reportId: number): Promise<void> {
+    await this.dataSource.getRepository(AttReport).update(
+      { id: reportId },
+      { isConfirmed: true }
+    );
+  }
+
+  private getReportMessage(report: AttReport): string {
+    const reportDate = formatHebrewDateForIVR(report.reportDate);
+    
+    const reportMessages = {
+      1: 'REPORT.SEMINAR_KITA_PREVIOUS',
+      2: '',
+      3: 'REPORT.MANHA_PREVIOUS',
+      4: '',
+      5: 'REPORT.PDS_PREVIOUS',
+      6: 'REPORT.KINDERGARTEN_PREVIOUS',
+      7: 'REPORT.SPECIAL_EDUCATION_PREVIOUS',
+    };
+
+    const messageKey = reportMessages[this.teacher.teacherTypeId];
+    if (!messageKey) {
+      return `דיווח מתאריך ${reportDate} - לחץ 9 לאישור או מספר אחר לעריכה`;
+    }
+
+    const params = {
+      date: reportDate,
+      lessons: report.howManyLessons?.toString() || '0', // Fixed: use correct field name
+      watchIndiv: report.howManyWatchOrIndividual?.toString() || '0', // Fixed: use correct field name
+      teachInterf: report.howManyTeachedOrInterfering?.toString() || '0', // Fixed: use correct field name
+      discuss: report.howManyDiscussingLessons?.toString() || '0',
+      absence: report.howManyLessonsAbsence?.toString() || '0',
+      kamal: report.wasKamal ? '1' : '0',
+      students: report.howManyStudents?.toString() || '0',
+      methodic: report.howManyMethodic?.toString() || '0',
+      phone: report.fourLastDigitsOfTeacherPhone || '',
+      hulia1: report.isTaarifHulia ? '1' : '0',
+      hulia2: report.isTaarifHulia2 ? '1' : '0',
+      watch: report.howManyWatchedLessons?.toString() || '0',
+      teach: report.howManyStudentsTeached?.toString() || '0', // Fixed: use correct field name
+      studentTz: report.teachedStudentTz || '',
+      yalkut: report.howManyYalkutLessons?.toString() || '0',
+      help: report.howManyStudentsHelpTeached?.toString() || '0',
+      hulia3: report.isTaarifHulia3 ? '1' : '0',
+      studentsWatched: report.howManyStudentsWatched?.toString() || '0', // Fixed: use correct field name
+      studentsTeached: report.howManyStudentsTeached?.toString() || '0', // Fixed: use correct field name
+      phoneDiscuss: report.wasPhoneDiscussing ? '1' : '0', // Fixed: use correct field name
+      trainingTeacher: report.teacherToReportFor?.toString() || '',
+      speciality: report.whatIsYourSpeciality?.toString() || '', // Fixed: use correct field name
+      studentsGood: report.wasStudentsGood ? '1' : '0',
+      enterOnTime: report.wasStudentsEnterOnTime ? '1' : '0',
+      exitOnTime: report.wasStudentsExitOnTime ? '1' : '0',
+      collective: report.wasCollectiveWatch ? '1' : '0',
+    };
+
+    // This would ideally use the text system, but for now return a simple message
+    return `דיווח מתאריך ${reportDate} - לחץ 9 לאישור או מספר אחר לעריכה`;
+  }
+
+  private async validateNoMoreThanTenAbsences(): Promise<void> {
+    // לא לאפשר יותר מ 10 חיסורים
+    const existingAbsences = await this.getAbsencesCountForTeacher();
+    const newAbsences = parseInt(this.callParams.howManyLessonsAbsence || '0');
+    const existingReportAbsences = this.existingReport?.howManyLessonsAbsence || 0;
+    
+    if (existingAbsences + newAbsences - existingReportAbsences > 10) {
+      this.hangupWithMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES'));
+    }
+  }
+
+  private async validateSeminarKitaLessonCount(): Promise<void> {
+    // סה"כ שיעורים שמורה מדווחת בפועל צריך להיות תואם למספר שהקישה שרוצה לדווח
+    const totalCount = parseInt(this.callParams.howManyLessons || '0');
+    const reportedCount = parseInt(this.callParams.howManyWatchOrIndividual || '0') +
+      parseInt(this.callParams.howManyTeachedOrInterfering || '0') +
+      parseInt(this.callParams.wasKamal || '0') +
+      parseInt(this.callParams.howManyDiscussingLessons || '0') +
+      parseInt(this.callParams.howManyLessonsAbsence || '0');
+    
+    if (totalCount !== reportedCount) {
+      this.hangupWithMessage(await this.getTextByUserId('VALIDATION.SEMINAR_KITA_LESSON_COUNT'));
+    }
+  }
+
+  private async validateManhaReport(): Promise<void> {
+    const confirmation = await this.askForInput(
+      await this.getTextByUserId('REPORT.VALIDATION_CONFIRM_MANHA', {
+        teacherName: this.teacherToReportFor?.name || 'מורה',
+        hulia1: this.callParams.isTaarifHulia || '0',
+        hulia2: this.callParams.isTaarifHulia2 || '0',
+        watch: this.callParams.howManyWatchedLessons || '0',
+        teach: this.callParams.howManyStudentsTeached || '0',
+        yalkut: this.callParams.howManyYalkutLessons || '0',
+        discuss: this.callParams.howManyDiscussingLessons || '0',
+        help: this.callParams.howManyStudentsHelpTeached || '0',
+        hulia3: this.callParams.isTaarifHulia3 || '0',
+      }),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    if (confirmation === '2') {
+      return this.askForReportDataAndSave();
+    }
+  }
+
+  private async validatePdsReport(): Promise<void> {
+    const confirmation = await this.askForInput(
+      await this.getTextByUserId('REPORT.VALIDATION_CONFIRM_PDS', {
+        watchIndiv: this.callParams.howManyWatchOrIndividual || '0',
+        teachInterf: this.callParams.howManyTeachedOrInterfering || '0',
+        discuss: this.callParams.howManyDiscussingLessons || '0',
+      }),
+      { max_digits: 1, min_digits: 1 }
+    );
+
+    if (confirmation === '2') {
+      return this.askForReportDataAndSave();
+    }
+  }
+
+  private async getAbsencesCountForTeacher(): Promise<number> {
+    const reports = await this.dataSource.getRepository(AttReport).find({
+      where: {
+        userId: this.user.id,
+        teacherId: this.teacher.id,
+      },
+      select: ['howManyLessonsAbsence'],
+    });
+
+    return reports.reduce((total, report) => total + (report.howManyLessonsAbsence || 0), 0);
+  }
+
+  private teacherToReportFor: Teacher;
 }
