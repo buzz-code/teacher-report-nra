@@ -7,6 +7,7 @@ import { Question } from 'src/db/entities/Question.entity';
 import { Answer } from 'src/db/entities/Answer.entity';
 import { WorkingDate } from 'src/db/entities/WorkingDate.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
+import { Like } from 'typeorm';
 import {
   formatHebrewDateForIVR,
   gematriyaLetters,
@@ -36,8 +37,19 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return this.hangupWithMessage(await this.getTextByUserId('TEACHER.PHONE_NOT_RECOGNIZED'));
     }
 
+    // Get teacher type name
+    let teacherTypeName = 'מורה';
+    if (this.teacher.teacherTypeId) {
+      const teacherType = await this.dataSource.getRepository(TeacherType).findOne({
+        where: { userId: this.user.id, key: this.teacher.teacherTypeId }
+      });
+      if (teacherType) {
+        teacherTypeName = teacherType.name;
+      }
+    }
+
     const welcomeMessage = await this.getTextByUserId('TEACHER.WELCOME', { 
-      teacherTypeName: this.teacher.teacherTypeId ? `מורה ${this.teacher.teacherTypeId}` : 'מורה',
+      teacherTypeName,
       name: this.teacher.name 
     });
     this.sendMessage(welcomeMessage);
@@ -315,6 +327,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         wasCollectiveWatch: this.callParams.wasCollectiveWatch === '1',
         howManyStudents: this.callParams.howManyStudents ? parseInt(this.callParams.howManyStudents) : null,
         howManyLessons: this.callParams.howManyLessons ? parseInt(this.callParams.howManyLessons) : null,
+        howManyWatchOrIndividual: this.callParams.howManyWatchOrIndividual ? parseInt(this.callParams.howManyWatchOrIndividual) : null,
+        howManyTeachedOrInterfering: this.callParams.howManyTeachedOrInterfering ? parseInt(this.callParams.howManyTeachedOrInterfering) : null,
+        howManyStudentsTeached: this.callParams.howManyStudentsTeached ? parseInt(this.callParams.howManyStudentsTeached) : null,
+        howManyStudentsWatched: this.callParams.howManyStudentsWatched ? parseInt(this.callParams.howManyStudentsWatched) : null,
+        wasPhoneDiscussing: this.callParams.wasPhoneDiscussing === '1',
+        whatIsYourSpeciality: this.callParams.whatIsYourSpeciality,
       };
 
       const attReportRepo = this.dataSource.getRepository(AttReport);
@@ -622,9 +640,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       where: {
         userId: this.user.id,
         // Assuming phone field exists and we check last 4 digits
-        phone: {
-          $like: `%${fourLastDigits}` as any,
-        },
+        phone: Like(`%${fourLastDigits}`),
       },
     });
   }
@@ -808,9 +824,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const params = {
       date: reportDate,
-      lessons: report.howManyLessons?.toString() || '0',
-      watchIndiv: report.howManyWatchOrIndividual?.toString() || '0',
-      teachInterf: report.howManyTeachedOrInterfering?.toString() || '0',
+      lessons: report.howManyLessons?.toString() || '0', // Fixed: use correct field name
+      watchIndiv: report.howManyWatchOrIndividual?.toString() || '0', // Fixed: use correct field name
+      teachInterf: report.howManyTeachedOrInterfering?.toString() || '0', // Fixed: use correct field name
       discuss: report.howManyDiscussingLessons?.toString() || '0',
       absence: report.howManyLessonsAbsence?.toString() || '0',
       kamal: report.wasKamal ? '1' : '0',
@@ -820,16 +836,16 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       hulia1: report.isTaarifHulia ? '1' : '0',
       hulia2: report.isTaarifHulia2 ? '1' : '0',
       watch: report.howManyWatchedLessons?.toString() || '0',
-      teach: report.howManyStudentsTeached?.toString() || '0',
+      teach: report.howManyStudentsTeached?.toString() || '0', // Fixed: use correct field name
       studentTz: report.teachedStudentTz || '',
       yalkut: report.howManyYalkutLessons?.toString() || '0',
       help: report.howManyStudentsHelpTeached?.toString() || '0',
       hulia3: report.isTaarifHulia3 ? '1' : '0',
-      studentsWatched: report.howManyStudentsWatched?.toString() || '0',
-      studentsTeached: report.howManyStudentsTeached?.toString() || '0',
-      phoneDiscuss: report.wasPhoneDiscussing ? '1' : '0',
+      studentsWatched: report.howManyStudentsWatched?.toString() || '0', // Fixed: use correct field name
+      studentsTeached: report.howManyStudentsTeached?.toString() || '0', // Fixed: use correct field name
+      phoneDiscuss: report.wasPhoneDiscussing ? '1' : '0', // Fixed: use correct field name
       trainingTeacher: report.teacherToReportFor?.toString() || '',
-      speciality: report.whatIsYourSpeciality?.toString() || '',
+      speciality: report.whatIsYourSpeciality?.toString() || '', // Fixed: use correct field name
       studentsGood: report.wasStudentsGood ? '1' : '0',
       enterOnTime: report.wasStudentsEnterOnTime ? '1' : '0',
       exitOnTime: report.wasStudentsExitOnTime ? '1' : '0',
