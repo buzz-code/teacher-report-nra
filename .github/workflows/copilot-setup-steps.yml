@@ -52,18 +52,18 @@ jobs:
         working-directory: ./client
         run: yarn install --frozen-lockfile
 
-      - name: Build server
-        working-directory: ./server
-        run: yarn build
+      # - name: Build server
+      #   working-directory: ./server
+      #   run: yarn build
 
-      - name: Build client
-        working-directory: ./client
-        run: yarn build
+      # - name: Build client
+      #   working-directory: ./client
+      #   run: yarn build
 
-      - name: Verify server tests can run
-        working-directory: ./server
-        run: yarn test --passWithNoTests
+      # - name: Verify server tests can run
+      #   working-directory: ./server
+      #   run: yarn test --passWithNoTests
 
-      - name: Verify client tests can run
-        working-directory: ./client
-        run: yarn test --passWithNoTests
+      # - name: Verify client tests can run
+      #   working-directory: ./client
+      #   run: yarn test --passWithNoTests
