@@ -266,134 +266,44 @@ export default {
             }
         },
         
-        // Teacher-Type Specific Report Views
+        // Teacher-Type Specific Pivot Resources
         seminar_kita_reports: {
             name: 'דוח סמינר כיתה |||| דוחות סמינר כיתה',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
-                reportDate: 'תאריך דוח',
-                'reportDate:$gte': 'תאריך דוח מ-',
-                'reportDate:$lte': 'תאריך דוח עד-',
-                updateDate: 'תאריך עדכון',
-                year: 'שנה',
-                isConfirmed: 'אושר',
-                salaryReport: 'דוח שכר',
-                salaryMonth: 'חודש שכר',
-                comment: 'הערות',
-                howManyStudents: 'כמה תלמידות השתתפו',
-                howManyMethodic: 'כמה שיעורים לדווח',
-                howManyWatchedLessons: 'שיעורי צפייה/פרטניים',
-                howManyLessonsAbsence: 'שיעורים עם היעדרויות',
-                howManyDiscussingLessons: 'שיעורי דיון',
-                wasKamal: 'היה כמל',
             }
         },
         manha_reports: {
             name: 'דוח מנהה |||| דוחות מנהה',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
-                reportDate: 'תאריך דוח',
-                'reportDate:$gte': 'תאריך דוח מ-',
-                'reportDate:$lte': 'תאריך דוח עד-',
-                updateDate: 'תאריך עדכון',
-                year: 'שנה',
-                isConfirmed: 'אושר',
-                salaryReport: 'דוח שכר',
-                salaryMonth: 'חודש שכר',
-                comment: 'הערות',
-                howManyMethodic: 'שיעורי מתודיקה',
-                fourLastDigitsOfTeacherPhone: '4 ספרות אחרונות של טלפון מורה',
-                teacherToReportFor: 'מורה לדווח עליה',
-                howManyWatchedLessons: 'שיעורי צפייה חוליה רגילה',
-                isTaarifHulia: 'חוליה גדולה',
-                isTaarifHulia2: 'חוליה 2',
-                howManyStudentsHelpTeached: 'תלמידות שלימדו',
-                teachedStudentTz: 'ת.ז. תלמידות שלימדו',
-                howManyYalkutLessons: 'שיעורי ילקוט הרועים',
             }
         },
         pds_reports: {
             name: 'דוח פ.ד.ס |||| דוחות פ.ד.ס',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
-                reportDate: 'תאריך דוח',
-                'reportDate:$gte': 'תאריך דוח מ-',
-                'reportDate:$lte': 'תאריך דוח עד-',
-                updateDate: 'תאריך עדכון',
-                year: 'שנה',
-                isConfirmed: 'אושר',
-                salaryReport: 'דוח שכר',
-                salaryMonth: 'חודש שכר',
-                comment: 'הערות',
-                howManyWatchedLessons: 'שיעורי צפייה/פרטניים',
-                howManyDiscussingLessons: 'שיעורי דיון',
-                wasDiscussing: 'היה דיון',
-            }
-        },
-        special_education_reports: {
-            name: 'דוח חינוך מיוחד |||| דוחות חינוך מיוחד',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
-                reportDate: 'תאריך דוח',
-                'reportDate:$gte': 'תאריך דוח מ-',
-                'reportDate:$lte': 'תאריך דוח עד-',
-                updateDate: 'תאריך עדכון',
-                year: 'שנה',
-                isConfirmed: 'אושר',
-                salaryReport: 'דוח שכר',
-                salaryMonth: 'חודש שכר',
-                comment: 'התחום',
-                howManyMethodic: 'כמות שיעורים סך הכל',
-                howManyStudents: 'תלמידות שנצפו',
-                howManyStudentsHelpTeached: 'תלמידות שלימדו',
-                wasDiscussing: 'דיון טלפוני',
-                teacherToReportFor: 'מורה מכשירה',
             }
         },
         kindergarten_reports: {
             name: 'דוח גן |||| דוחות גן',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
-                reportDate: 'תאריך דוח',
-                'reportDate:$gte': 'תאריך דוח מ-',
-                'reportDate:$lte': 'תאריך דוח עד-',
-                updateDate: 'תאריך עדכון',
-                year: 'שנה',
-                isConfirmed: 'אושר',
-                salaryReport: 'דוח שכר',
-                salaryMonth: 'חודש שכר',
-                comment: 'הערות',
-                wasCollectiveWatch: 'צפייה קבוצתית',
-                howManyStudents: 'תלמידות שנצפו',
-                wasStudentsGood: 'התלמידות היו טובות',
-                wasStudentsEnterOnTime: 'התלמידות נכנסו בזמן',
-                wasStudentsExitOnTime: 'התלמידות יצאו בזמן',
             }
         },
-        total_monthly_reports: {
+        special_education_reports: {
+            name: 'דוח חינוך מיוחד |||| דוחות חינוך מיוחד',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+        monthly_reports: {
             name: 'דוח חודשי מרוכז |||| דוחות חודשיים מרוכזים',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
-                year: 'שנה',
-                salaryMonth: 'חודש שכר',
-                salaryReport: 'דוח שכר',
-                isConfirmed: 'אושר',
-                howManyMethodic: 'סך שיעורי מתודיקה',
-                howManyWatchedLessons: 'סך שיעורי צפייה',
-                howManyDiscussingLessons: 'סך שיעורי דיון',
-                howManyYalkutLessons: 'סך שיעורי ילקוט',
-                howManyStudents: 'סך תלמידות',
-                howManyStudentsHelpTeached: 'סך תלמידות שלימדו',
-                howManyLessonsAbsence: 'סך שיעורים עם היעדרויות',
             }
         },
-        
+
         // Common Settings and Utilities - to keep as requested
         settings: {
             name: 'הגדרות',
