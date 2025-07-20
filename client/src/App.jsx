@@ -38,7 +38,14 @@ import teacher from "src/entities/teacher";
 
 // Teacher Report System Entities
 import teacherType from "src/entities/teacher-type";
-import attReport from "src/entities/att-report";
+import attReport, { 
+    seminarKitaReports,
+    manhaReports, 
+    pdsReports,
+    kindergartenReports,
+    specialEducationReports,
+    monthlyReports
+} from "src/entities/att-report";
 import attType from "src/entities/att-type";
 import price from "src/entities/price";
 import question from "src/entities/question";
@@ -128,6 +135,15 @@ const App = () => (
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
             <Resource name="att_report" {...attReport} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            
+            {/* Teacher-Type Specific Pivot Views */}
+            <Resource name="seminar_kita_reports" {...seminarKitaReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="manha_reports" {...manhaReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="pds_reports" {...pdsReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="kindergarten_reports" {...kindergartenReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="special_education_reports" {...specialEducationReports} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
+            <Resource name="monthly_reports" {...monthlyReports} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+            
             <Resource name="att_type" {...attType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
             <Resource name="price" {...price} options={{ menuGroup: 'reports' }} icon={PaymentIcon} />
             <Resource name="question" {...question} options={{ menuGroup: 'reports' }} icon={QuestionAnswerIcon} />

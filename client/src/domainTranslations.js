@@ -266,6 +266,44 @@ export default {
             }
         },
         
+        // Teacher-Type Specific Pivot Resources
+        seminar_kita_reports: {
+            name: 'דוח סמינר כיתה |||| דוחות סמינר כיתה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+        manha_reports: {
+            name: 'דוח מנהה |||| דוחות מנהה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+        pds_reports: {
+            name: 'דוח פ.ד.ס |||| דוחות פ.ד.ס',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+        kindergarten_reports: {
+            name: 'דוח גן |||| דוחות גן',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+        special_education_reports: {
+            name: 'דוח חינוך מיוחד |||| דוחות חינוך מיוחד',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+        monthly_reports: {
+            name: 'דוח חודשי מרוכז |||| דוחות חודשיים מרוכזים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+            }
+        },
+
         // Common Settings and Utilities - to keep as requested
         settings: {
             name: 'הגדרות',
