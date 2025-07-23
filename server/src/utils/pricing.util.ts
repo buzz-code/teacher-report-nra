@@ -1,4 +1,5 @@
 import { AttReport } from '../db/entities/AttReport.entity';
+import { TeacherTypeId, isValidTeacherType } from './fieldsShow.util';
 
 /**
  * Price map interface - either an array of prices with key-value pairs or a Map
@@ -30,15 +31,20 @@ interface PricingConfig {
 /**
  * Calculate the total price for an attendance report based on teacher type and pricing configuration
  * @param attReport - The attendance report data
- * @param teacherTypeId - The teacher type ID to determine pricing structure
+ * @param teacherTypeId - The teacher type ID from TeacherTypeId enum
  * @param priceMap - Either an array of price objects with key-value pairs or a Map of key to price
  * @returns The calculated price as a number
  */
 export function calculateAttendanceReportPrice(
   attReport: AttReport,
-  teacherTypeId: number,
+  teacherTypeId: TeacherTypeId,
   priceMap: PriceMap,
 ): number {
+  // Validate teacher type using shared validation function
+  if (!isValidTeacherType(teacherTypeId)) {
+    throw new Error(`Invalid teacher type ID: ${teacherTypeId}`);
+  }
+
   // Convert priceMap to a consistent format for lookup
   const priceData = convertPriceMapToObject(priceMap);
 
@@ -117,7 +123,10 @@ function convertPriceMapToObject(priceMap: PriceMap): Record<number, number> {
 /**
  * Get pricing configuration based on teacher type ID and available price data
  */
-function getPricingConfigForTeacherType(teacherTypeId: number, priceData: Record<number, number>): PricingConfig {
+function getPricingConfigForTeacherType(
+  teacherTypeId: TeacherTypeId,
+  priceData: Record<number, number>,
+): PricingConfig {
   // Default configuration
   const defaultConfig: PricingConfig = {
     basePrice: 50,

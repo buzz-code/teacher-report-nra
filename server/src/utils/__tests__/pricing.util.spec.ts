@@ -1,5 +1,6 @@
 import { calculateAttendanceReportPrice } from '../pricing.util';
 import { AttReport } from '../../db/entities/AttReport.entity';
+import { TeacherTypeId } from '../fieldsShow.util';
 
 describe('pricing.util', () => {
   describe('calculateAttendanceReportPrice', () => {
@@ -35,7 +36,7 @@ describe('pricing.util', () => {
         { key: 1, price: 10 },
         { key: 2, price: 20 },
       ];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
@@ -52,7 +53,7 @@ describe('pricing.util', () => {
         [101, 100], // base price for teacher type 1
         [102, 8], // student multiplier for teacher type 1
       ]);
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
@@ -73,7 +74,7 @@ describe('pricing.util', () => {
       };
 
       const priceMap = [];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(specialReport as AttReport, teacherTypeId, priceMap);
 
@@ -90,7 +91,7 @@ describe('pricing.util', () => {
       };
 
       const priceMap = [];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(reportWithAbsences as AttReport, teacherTypeId, priceMap);
 
@@ -115,7 +116,7 @@ describe('pricing.util', () => {
       };
 
       const priceMap = [];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(reportWithNulls as AttReport, teacherTypeId, priceMap);
 
@@ -133,7 +134,7 @@ describe('pricing.util', () => {
       };
 
       const priceMap = [];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(reportWithManyAbsences as AttReport, teacherTypeId, priceMap);
 
@@ -144,7 +145,7 @@ describe('pricing.util', () => {
       const priceMap = [
         { key: 101, price: 33.333 }, // This should create decimal results
       ];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
@@ -170,7 +171,7 @@ describe('pricing.util', () => {
 
     it('should handle empty price map', () => {
       const priceMap = [];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
@@ -191,12 +192,21 @@ describe('pricing.util', () => {
       };
 
       const priceMap = [];
-      const teacherTypeId = 1;
+      const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(watchOnlyReport as AttReport, teacherTypeId, priceMap);
 
       // Base price (50) + watched students (10 * 5 * 0.5 = 25) = 75
       expect(result).toBe(75);
+    });
+
+    it('should throw error for invalid teacher type', () => {
+      const priceMap = [];
+      const invalidTeacherTypeId = 99 as TeacherTypeId; // Cast to avoid TypeScript error
+
+      expect(() => {
+        calculateAttendanceReportPrice(mockAttReport as AttReport, invalidTeacherTypeId, priceMap);
+      }).toThrow('Invalid teacher type ID: 99');
     });
   });
 });
