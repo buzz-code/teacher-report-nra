@@ -54,50 +54,45 @@ export function calculateAttendanceReportPrice(
   // Calculate price based on various report metrics
   let totalPrice = config.basePrice;
 
+  // Helper function to add numeric field pricing
+  const addNumericPrice = (value: number | null | undefined, multiplier: number, factor = 1): void => {
+    totalPrice += (value || 0) * multiplier * factor;
+  };
+
+  // Helper function to add boolean field pricing
+  const addBooleanPrice = (condition: boolean | null | undefined, bonus: number): void => {
+    if (condition) {
+      totalPrice += bonus;
+    }
+  };
+
   // Add pricing based on student counts
-  totalPrice += (attReport.howManyStudents || 0) * config.studentMultiplier;
-  totalPrice += (attReport.howManyStudentsTeached || 0) * config.studentMultiplier;
-  totalPrice += (attReport.howManyStudentsWatched || 0) * config.studentMultiplier * 0.5; // Watch is less intensive
-  totalPrice += (attReport.howManyStudentsHelpTeached || 0) * config.helpTeachedMultiplier;
+  addNumericPrice(attReport.howManyStudents, config.studentMultiplier);
+  addNumericPrice(attReport.howManyStudentsTeached, config.studentMultiplier);
+  addNumericPrice(attReport.howManyStudentsWatched, config.studentMultiplier, 0.5); // Watch is less intensive
+  addNumericPrice(attReport.howManyStudentsHelpTeached, config.helpTeachedMultiplier);
 
   // Add pricing based on lesson counts
-  totalPrice += (attReport.howManyLessons || 0) * config.lessonMultiplier;
-  totalPrice += (attReport.howManyYalkutLessons || 0) * config.yalkutLessonMultiplier;
-  totalPrice += (attReport.howManyDiscussingLessons || 0) * config.discussingLessonMultiplier;
-  totalPrice += (attReport.howManyWatchedLessons || 0) * config.watchedLessonMultiplier;
-  totalPrice += (attReport.howManyWatchOrIndividual || 0) * config.individualWatchMultiplier;
-  totalPrice += (attReport.howManyTeachedOrInterfering || 0) * config.interfereTeachMultiplier;
+  addNumericPrice(attReport.howManyLessons, config.lessonMultiplier);
+  addNumericPrice(attReport.howManyYalkutLessons, config.yalkutLessonMultiplier);
+  addNumericPrice(attReport.howManyDiscussingLessons, config.discussingLessonMultiplier);
+  addNumericPrice(attReport.howManyWatchedLessons, config.watchedLessonMultiplier);
+  addNumericPrice(attReport.howManyWatchOrIndividual, config.individualWatchMultiplier);
+  addNumericPrice(attReport.howManyTeachedOrInterfering, config.interfereTeachMultiplier);
 
   // Add pricing based on methodical work
-  totalPrice += (attReport.howManyMethodic || 0) * config.methodicMultiplier;
+  addNumericPrice(attReport.howManyMethodic, config.methodicMultiplier);
 
   // Subtract for absences (negative impact on payment)
-  totalPrice -= (attReport.howManyLessonsAbsence || 0) * config.lessonMultiplier * 0.5;
+  addNumericPrice(attReport.howManyLessonsAbsence, config.lessonMultiplier, -0.5);
 
   // Add bonuses for special activities
-  if (attReport.wasPhoneDiscussing) {
-    totalPrice += config.phoneDiscussingBonus;
-  }
-
-  if (attReport.wasKamal) {
-    totalPrice += config.kamalBonus;
-  }
-
-  if (attReport.wasCollectiveWatch) {
-    totalPrice += config.collectiveWatchBonus;
-  }
-
-  if (attReport.isTaarifHulia) {
-    totalPrice += config.taarifHuliaBonus;
-  }
-
-  if (attReport.isTaarifHulia2) {
-    totalPrice += config.taarifHulia2Bonus;
-  }
-
-  if (attReport.isTaarifHulia3) {
-    totalPrice += config.taarifHulia3Bonus;
-  }
+  addBooleanPrice(attReport.wasPhoneDiscussing, config.phoneDiscussingBonus);
+  addBooleanPrice(attReport.wasKamal, config.kamalBonus);
+  addBooleanPrice(attReport.wasCollectiveWatch, config.collectiveWatchBonus);
+  addBooleanPrice(attReport.isTaarifHulia, config.taarifHuliaBonus);
+  addBooleanPrice(attReport.isTaarifHulia2, config.taarifHulia2Bonus);
+  addBooleanPrice(attReport.isTaarifHulia3, config.taarifHulia3Bonus);
 
   // Ensure the price doesn't go below zero
   return Math.max(0, Math.round(totalPrice * 100) / 100); // Round to 2 decimal places
