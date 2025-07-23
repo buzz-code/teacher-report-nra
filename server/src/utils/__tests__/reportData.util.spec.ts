@@ -106,6 +106,7 @@ describe('reportData.util', () => {
 
     it('should not modify when property does not exist', () => {
       const obj = { name: 'test' };
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - testing edge case
       roundObjectProperty(obj, 'value');
       expect(obj).toEqual({ name: 'test' });
