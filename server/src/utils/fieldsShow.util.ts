@@ -3,6 +3,8 @@
  * Based on YEMOT phone flow requirements for different teacher types
  */
 
+import { AttReport } from '../db/entities/AttReport.entity';
+
 /**
  * Teacher type constants based on the YEMOT flow documentation
  */
@@ -17,17 +19,23 @@ export enum TeacherTypeId {
 }
 
 /**
+ * Type for field names from AttReport entity
+ */
+export type AttReportField = keyof AttReport;
+
+/**
  * Field mapping for each teacher type
  * Based on the YEMOT phone flow documentation requirements
+ * Shared fields are duplicated across teacher types for simplicity
  */
-const TEACHER_TYPE_FIELDS = {
+const TEACHER_TYPE_FIELDS: Record<TeacherTypeId, AttReportField[]> = {
   [TeacherTypeId.SEMINAR_KITA]: [
-    'howManyStudents',
+    'howManyStudents', // shared with KINDERGARTEN
     'howManyLessons',
     'howManyWatchOrIndividual',
     'howManyTeachedOrInterfering',
     'wasKamal',
-    'howManyDiscussingLessons',
+    'howManyDiscussingLessons', // shared with MANHA, PDS
     'howManyLessonsAbsence',
   ],
   [TeacherTypeId.TRAINING]: [], // not in use
@@ -40,38 +48,36 @@ const TEACHER_TYPE_FIELDS = {
     'isTaarifHulia2',
     'isTaarifHulia3',
     'howManyWatchedLessons',
-    'howManyStudentsTeached',
+    'howManyStudentsTeached', // shared with SPECIAL_EDUCATION
     'howManyYalkutLessons',
-    'howManyDiscussingLessons',
+    'howManyDiscussingLessons', // shared with SEMINAR_KITA, PDS
     'howManyStudentsHelpTeached',
     'teacherToReportFor',
   ],
   [TeacherTypeId.RESPONSIBLE]: [], // not in use
-  [TeacherTypeId.PDS]: ['howManyWatchOrIndividual', 'howManyTeachedOrInterfering', 'howManyDiscussingLessons'],
-  [TeacherTypeId.KINDERGARTEN]: ['wasCollectiveWatch', 'howManyStudents', 'wasStudentsGood'],
+  [TeacherTypeId.PDS]: [
+    'howManyWatchOrIndividual',
+    'howManyTeachedOrInterfering',
+    'howManyDiscussingLessons', // shared with SEMINAR_KITA, MANHA
+  ],
+  [TeacherTypeId.KINDERGARTEN]: [
+    'wasCollectiveWatch',
+    'howManyStudents', // shared with SEMINAR_KITA
+    'wasStudentsGood',
+  ],
   [TeacherTypeId.SPECIAL_EDUCATION]: [
     'howManyLessons',
     'howManyStudentsWatched',
-    'howManyStudentsTeached',
+    'howManyStudentsTeached', // shared with MANHA
     'wasPhoneDiscussing',
-    'whoIsYourTrainingTeacher',
     'whatIsYourSpeciality',
   ],
 };
 
 /**
- * Shared fields that are used across multiple teacher types
- */
-const SHARED_FIELDS = {
-  howManyDiscussingLessons: [TeacherTypeId.SEMINAR_KITA, TeacherTypeId.MANHA, TeacherTypeId.PDS],
-  howManyStudents: [TeacherTypeId.SEMINAR_KITA, TeacherTypeId.KINDERGARTEN],
-  howManyStudentsTeached: [TeacherTypeId.MANHA, TeacherTypeId.SPECIAL_EDUCATION],
-};
-
-/**
  * Universal fields that are relevant for all teacher types
  */
-const UNIVERSAL_FIELDS = [
+const UNIVERSAL_FIELDS: AttReportField[] = [
   'id',
   'userId',
   'teacherId',
@@ -92,9 +98,9 @@ const UNIVERSAL_FIELDS = [
  * @param teacherTypeId - The teacher type ID to check against
  * @returns true if the field should be shown, false otherwise
  */
-export function shouldShowField(fieldName: string, teacherTypeId: number): boolean {
+export function shouldShowField(fieldName: AttReportField | string, teacherTypeId: number): boolean {
   // Check if it's a universal field (always shown)
-  if (UNIVERSAL_FIELDS.includes(fieldName)) {
+  if (UNIVERSAL_FIELDS.includes(fieldName as AttReportField)) {
     return true;
   }
 
@@ -105,17 +111,7 @@ export function shouldShowField(fieldName: string, teacherTypeId: number): boole
 
   // Check if the field is explicitly defined for this teacher type
   const teacherFields = TEACHER_TYPE_FIELDS[teacherTypeId] || [];
-  if (teacherFields.includes(fieldName)) {
-    return true;
-  }
-
-  // Check if it's a shared field
-  const sharedFieldTypes = SHARED_FIELDS[fieldName];
-  if (sharedFieldTypes && sharedFieldTypes.includes(teacherTypeId)) {
-    return true;
-  }
-
-  return false;
+  return teacherFields.includes(fieldName as AttReportField);
 }
 
 /**
@@ -132,17 +128,13 @@ export function isValidTeacherType(teacherTypeId: number): boolean {
  * @param teacherTypeId - The teacher type ID
  * @returns Array of field names that should be shown
  */
-export function getFieldsForTeacherType(teacherTypeId: number): string[] {
+export function getFieldsForTeacherType(teacherTypeId: number): AttReportField[] {
   if (!isValidTeacherType(teacherTypeId)) {
     return UNIVERSAL_FIELDS;
   }
 
   const teacherFields = TEACHER_TYPE_FIELDS[teacherTypeId] || [];
-  const sharedFields = Object.entries(SHARED_FIELDS)
-    .filter(([_, types]) => types.includes(teacherTypeId))
-    .map(([fieldName, _]) => fieldName);
-
-  return [...UNIVERSAL_FIELDS, ...teacherFields, ...sharedFields];
+  return [...UNIVERSAL_FIELDS, ...teacherFields];
 }
 
 /**
@@ -150,8 +142,8 @@ export function getFieldsForTeacherType(teacherTypeId: number): string[] {
  * @param fieldName - The field name to check
  * @returns Array of teacher type IDs that use this field
  */
-export function getTeacherTypesForField(fieldName: string): number[] {
-  if (UNIVERSAL_FIELDS.includes(fieldName)) {
+export function getTeacherTypesForField(fieldName: AttReportField | string): number[] {
+  if (UNIVERSAL_FIELDS.includes(fieldName as AttReportField)) {
     return Object.values(TeacherTypeId).filter((id) => typeof id === 'number') as number[];
   }
 
@@ -159,16 +151,10 @@ export function getTeacherTypesForField(fieldName: string): number[] {
 
   // Check in teacher-specific fields
   Object.entries(TEACHER_TYPE_FIELDS).forEach(([typeId, fields]) => {
-    if (fields.includes(fieldName)) {
+    if (fields.includes(fieldName as AttReportField)) {
       teacherTypes.push(Number(typeId));
     }
   });
-
-  // Check in shared fields
-  const sharedFieldTypes = SHARED_FIELDS[fieldName];
-  if (sharedFieldTypes) {
-    teacherTypes.push(...sharedFieldTypes);
-  }
 
   return [...new Set(teacherTypes)]; // Remove duplicates
 }

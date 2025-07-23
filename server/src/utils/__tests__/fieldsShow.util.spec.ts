@@ -4,12 +4,13 @@ import {
   getFieldsForTeacherType,
   getTeacherTypesForField,
   TeacherTypeId,
+  AttReportField,
 } from '../fieldsShow.util';
 
 describe('fieldsShow.util', () => {
   describe('shouldShowField', () => {
     describe('Universal fields', () => {
-      const universalFields = [
+      const universalFields: AttReportField[] = [
         'id',
         'userId',
         'teacherId',
@@ -38,7 +39,7 @@ describe('fieldsShow.util', () => {
     describe('Seminar Kita Teachers (Type 1)', () => {
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
-      const expectedFields = [
+      const expectedFields: AttReportField[] = [
         'howManyStudents',
         'howManyLessons',
         'howManyWatchOrIndividual',
@@ -54,7 +55,7 @@ describe('fieldsShow.util', () => {
         });
       });
 
-      const unexpectedFields = [
+      const unexpectedFields: AttReportField[] = [
         'howManyMethodic',
         'fourLastDigitsOfTeacherPhone',
         'isTaarifHulia',
@@ -72,7 +73,7 @@ describe('fieldsShow.util', () => {
     describe('Manha Teachers (Type 3)', () => {
       const teacherTypeId = TeacherTypeId.MANHA;
 
-      const expectedFields = [
+      const expectedFields: AttReportField[] = [
         'howManyMethodic',
         'fourLastDigitsOfTeacherPhone',
         'isTaarifHulia',
@@ -92,7 +93,7 @@ describe('fieldsShow.util', () => {
         });
       });
 
-      const unexpectedFields = [
+      const unexpectedFields: AttReportField[] = [
         'howManyLessons',
         'wasKamal',
         'wasCollectiveWatch',
@@ -110,7 +111,11 @@ describe('fieldsShow.util', () => {
     describe('PDS Teachers (Type 5)', () => {
       const teacherTypeId = TeacherTypeId.PDS;
 
-      const expectedFields = ['howManyWatchOrIndividual', 'howManyTeachedOrInterfering', 'howManyDiscussingLessons'];
+      const expectedFields: AttReportField[] = [
+        'howManyWatchOrIndividual',
+        'howManyTeachedOrInterfering',
+        'howManyDiscussingLessons',
+      ];
 
       expectedFields.forEach((field) => {
         it(`should show field "${field}" for PDS teachers`, () => {
@@ -118,7 +123,7 @@ describe('fieldsShow.util', () => {
         });
       });
 
-      const unexpectedFields = [
+      const unexpectedFields: AttReportField[] = [
         'howManyMethodic',
         'wasKamal',
         'howManyLessonsAbsence',
@@ -136,7 +141,7 @@ describe('fieldsShow.util', () => {
     describe('Kindergarten Teachers (Type 6)', () => {
       const teacherTypeId = TeacherTypeId.KINDERGARTEN;
 
-      const expectedFields = ['wasCollectiveWatch', 'howManyStudents', 'wasStudentsGood'];
+      const expectedFields: AttReportField[] = ['wasCollectiveWatch', 'howManyStudents', 'wasStudentsGood'];
 
       expectedFields.forEach((field) => {
         it(`should show field "${field}" for Kindergarten teachers`, () => {
@@ -144,7 +149,7 @@ describe('fieldsShow.util', () => {
         });
       });
 
-      const unexpectedFields = [
+      const unexpectedFields: AttReportField[] = [
         'howManyMethodic',
         'wasKamal',
         'howManyLessonsAbsence',
@@ -162,12 +167,11 @@ describe('fieldsShow.util', () => {
     describe('Special Education Teachers (Type 7)', () => {
       const teacherTypeId = TeacherTypeId.SPECIAL_EDUCATION;
 
-      const expectedFields = [
+      const expectedFields: AttReportField[] = [
         'howManyLessons',
         'howManyStudentsWatched',
         'howManyStudentsTeached',
         'wasPhoneDiscussing',
-        'whoIsYourTrainingTeacher',
         'whatIsYourSpeciality',
       ];
 
@@ -177,7 +181,7 @@ describe('fieldsShow.util', () => {
         });
       });
 
-      const unexpectedFields = [
+      const unexpectedFields: AttReportField[] = [
         'howManyMethodic',
         'wasKamal',
         'howManyLessonsAbsence',
