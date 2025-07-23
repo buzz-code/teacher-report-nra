@@ -98,9 +98,9 @@ const UNIVERSAL_FIELDS: AttReportField[] = [
  * @param teacherTypeId - The teacher type ID to check against
  * @returns true if the field should be shown, false otherwise
  */
-export function shouldShowField(fieldName: AttReportField | string, teacherTypeId: number): boolean {
+export function shouldShowField(fieldName: AttReportField, teacherTypeId: number): boolean {
   // Check if it's a universal field (always shown)
-  if (UNIVERSAL_FIELDS.includes(fieldName as AttReportField)) {
+  if (UNIVERSAL_FIELDS.includes(fieldName)) {
     return true;
   }
 
@@ -111,7 +111,7 @@ export function shouldShowField(fieldName: AttReportField | string, teacherTypeI
 
   // Check if the field is explicitly defined for this teacher type
   const teacherFields = TEACHER_TYPE_FIELDS[teacherTypeId] || [];
-  return teacherFields.includes(fieldName as AttReportField);
+  return teacherFields.includes(fieldName);
 }
 
 /**
@@ -142,8 +142,8 @@ export function getFieldsForTeacherType(teacherTypeId: number): AttReportField[]
  * @param fieldName - The field name to check
  * @returns Array of teacher type IDs that use this field
  */
-export function getTeacherTypesForField(fieldName: AttReportField | string): number[] {
-  if (UNIVERSAL_FIELDS.includes(fieldName as AttReportField)) {
+export function getTeacherTypesForField(fieldName: AttReportField): number[] {
+  if (UNIVERSAL_FIELDS.includes(fieldName)) {
     return Object.values(TeacherTypeId).filter((id) => typeof id === 'number') as number[];
   }
 
@@ -151,7 +151,7 @@ export function getTeacherTypesForField(fieldName: AttReportField | string): num
 
   // Check in teacher-specific fields
   Object.entries(TEACHER_TYPE_FIELDS).forEach(([typeId, fields]) => {
-    if (fields.includes(fieldName as AttReportField)) {
+    if (fields.includes(fieldName)) {
       teacherTypes.push(Number(typeId));
     }
   });

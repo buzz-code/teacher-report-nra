@@ -342,8 +342,8 @@ describe('fieldsShow.util', () => {
       expect(types).toHaveLength(3);
     });
 
-    it('should return empty array for non-existent fields', () => {
-      const types = getTeacherTypesForField('nonExistentField');
+    it('should return empty array for fields not used by any teacher type', () => {
+      const types = getTeacherTypesForField('teachedStudentTz');
       expect(types).toEqual([]);
     });
 
