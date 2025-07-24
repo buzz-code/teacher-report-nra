@@ -62,6 +62,9 @@ import yemotCall from '@shared/components/common-entities/yemot-call';
 
 import Settings from 'src/settings/Settings';
 
+// Import pivot components
+import AttReportWithPricing from 'src/pivots/AttReportWithPricing';
+
 import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
 import YemotSimulator from "@shared/components/views/YemotSimulator";
 import { RegisterPage } from '@shared/components/layout/RegisterPage';
@@ -166,6 +169,7 @@ const App = () => (
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/pages-view" element={<PageList />} />
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
+              <Route path="/att-report-pricing" element={<AttReportWithPricing />} />
             </CustomRoutes>
 
             <CustomRoutes noLayout>
