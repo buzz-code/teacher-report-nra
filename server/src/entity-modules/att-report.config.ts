@@ -6,7 +6,6 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
-import { TeacherTypeId } from '../utils/fieldsShow.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -14,16 +13,12 @@ function getConfig(): BaseEntityModuleOptions {
     query: {
       join: {
         teacher: { eager: true },
-        attType: {},
-        user: {},
       },
     },
     exporter: {
       processReqForExport(req: CrudRequest, innerFunc) {
         req.options.query.join = {
           teacher: { eager: true },
-          attType: { eager: true },
-          user: { eager: true },
         };
         return innerFunc(req);
       },
@@ -59,8 +54,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
 
         // Calculate pricing for each report and update in place
         data.forEach((report: AttReportWithPricing) => {
-          const teacher = report.teacher;
-          const teacherTypeId = teacher?.teacherTypeId || TeacherTypeId.SEMINAR_KITA;
+          const teacherTypeId = report.teacher?.teacherTypeId;
 
           try {
             // Calculate price using the pricing utility

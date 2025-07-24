@@ -53,7 +53,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                 }}
             />
             <TextField source="comment" />
-            <ShowMatchingAttReportsButton />
         </CommonDatagrid>
     );
 }
