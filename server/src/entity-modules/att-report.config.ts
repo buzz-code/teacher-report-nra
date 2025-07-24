@@ -5,18 +5,15 @@ import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
-import { TeacherType } from '../db/entities/TeacherType.entity';
-import { Teacher } from '../db/entities/Teacher.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
 import { TeacherTypeId } from '../utils/fieldsShow.util';
-import { In } from 'typeorm';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
     entity: AttReport,
     query: {
       join: {
-        teacher: {},
+        teacher: { eager: true },
         attType: {},
         user: {},
       },
@@ -60,34 +57,18 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
           where: { userId: getUserIdFromUser(auth) },
         });
 
-        // Convert price data to the format expected by pricing utility
-        const priceMap = priceData.map((price) => ({
-          key: price.id,
-          price: price.price,
-        }));
-
-        // Get teacher types for each unique teacher ID
-        const teacherIds = [...new Set(data.map((report) => report.teacherId))];
-        const teachers = await this.dataSource.getRepository(Teacher).find({
-          where: { id: In(teacherIds) },
-        });
-        const teacherMap = teachers.reduce((acc, teacher) => {
-          acc[teacher.id] = teacher;
-          return acc;
-        }, {});
-
         // Calculate pricing for each report and update in place
         data.forEach((report: AttReportWithPricing) => {
-          const teacher = teacherMap[report.teacherId];
-          const teacherTypeId = teacher?.teacherTypeId || TeacherTypeId.SEMINAR_KITA; // Default fallback
+          const teacher = report.teacher;
+          const teacherTypeId = teacher?.teacherTypeId || TeacherTypeId.SEMINAR_KITA;
 
           try {
             // Calculate price using the pricing utility
-            const price = calculateAttendanceReportPrice(report, teacherTypeId, priceMap);
+            const price = calculateAttendanceReportPrice(report, teacherTypeId, priceData);
             report.price = price;
           } catch (error) {
             console.warn(`Failed to calculate price for report ${report.id}:`, error.message);
-            report.price = 0; // Fallback price
+            report.price = 0;
           }
         });
         break;

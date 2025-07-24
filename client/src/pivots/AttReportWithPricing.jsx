@@ -3,9 +3,7 @@ import {
     NumberField, 
     TextField, 
     ReferenceField, 
-    useRecordContext, 
     SelectField, 
-    useListFilterContext, 
     TextInput, 
     BooleanInput,
     DateField
@@ -15,7 +13,6 @@ import { MultiReferenceField } from '@shared/components/fields/CommonReferenceFi
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } from '@shared/components/fields/CommonReferenceInputFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import { ShowMatchingRecordsButton } from '@shared/components/fields/ShowMatchingRecordsButton';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 
 const filters = [
@@ -58,21 +55,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="comment" />
             <ShowMatchingAttReportsButton />
         </CommonDatagrid>
-    );
-}
-
-const ShowMatchingAttReportsButton = ({ ...props }) => {
-    const { filterValues } = useListFilterContext();
-    const { id, teacherId } = useRecordContext();
-    const filter = {
-        id,
-        teacherId,
-        'reportDate:$gte': filterValues['reportDate:$gte'],
-        'reportDate:$lte': filterValues['reportDate:$lte'],
-    };
-
-    return (
-        <ShowMatchingRecordsButton filter={filter} resource="att_report" />
     );
 }
 
