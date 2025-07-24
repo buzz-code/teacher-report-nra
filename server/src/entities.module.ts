@@ -24,7 +24,7 @@ import studentByYearConfig from './entity-modules/student-by-year.config';
 
 // Teacher Report System entities
 import { TeacherType } from './db/entities/TeacherType.entity';
-import { AttReport } from './db/entities/AttReport.entity';
+import attReportConfig from './entity-modules/att-report.config';
 import { AttType } from './db/entities/AttType.entity';
 import { Price } from './db/entities/Price.entity';
 import { Question } from './db/entities/Question.entity';
@@ -58,7 +58,7 @@ import { Image } from '@shared/entities/Image.entity';
 
     // Teacher Report System entities
     BaseEntityModule.register({ entity: TeacherType }),
-    BaseEntityModule.register({ entity: AttReport }),
+    BaseEntityModule.register(attReportConfig),
     BaseEntityModule.register({ entity: AttType }),
     BaseEntityModule.register({ entity: Price }),
     BaseEntityModule.register({ entity: Question }),

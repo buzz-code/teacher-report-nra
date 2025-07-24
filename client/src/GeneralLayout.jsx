@@ -9,6 +9,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MapIcon from '@mui/icons-material/Map';
 import PercentIcon from '@mui/icons-material/Percent';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 import BaseLayout from "@shared/components/layout/Layout";
 import BaseDashboard from '@shared/components/views/Dashboard';
@@ -28,7 +29,13 @@ const customMenuItems = [
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
     { name: 'events', icon: <AnalyticsIcon /> },
-    { name: 'reports', icon: <SummarizeIcon /> },
+    { 
+        name: 'reports', 
+        icon: <SummarizeIcon />, 
+        routes: [
+            <MenuItemLink key="att-report-pricing" to="/att-report-pricing" primaryText="דוח נוכחות עם תמחור" leftIcon={<MonetizationOnIcon />} />,
+        ]
+    },
     { name: 'settings', icon: <SettingsIcon /> },
     { name: 'admin', icon: <AdminPanelSettingsIcon /> },
 ];

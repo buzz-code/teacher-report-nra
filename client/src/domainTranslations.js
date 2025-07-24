@@ -187,6 +187,7 @@ export default {
                 isTaarifHulia: 'תעריף חוליה',
                 isTaarifHulia2: 'תעריף חוליה 2',
                 isTaarifHulia3: 'תעריף חוליה 3',
+                price: 'מחיר',
             }
         },
         att_type: {
