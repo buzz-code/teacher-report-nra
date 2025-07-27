@@ -6,6 +6,7 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
+import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -22,7 +23,9 @@ function getConfig(): BaseEntityModuleOptions {
         };
         return innerFunc(req);
       },
-      getExportHeaders(): IHeader[] {
+      getExportHeaders(entityColumns: string[]): IHeader[] {
+        // For dynamic teacher type exports, we would need the request context
+        // but it's not available in this signature. Fall back to default headers
         return [
           { value: 'teacher.name', label: 'שם המורה' },
           { value: 'reportDate', label: 'תאריך דיווח' },
@@ -41,32 +44,53 @@ interface AttReportWithPricing extends AttReport {
   price?: number;
 }
 
+interface AttReportWithHeaders extends AttReport {
+  headers?: ITableHeader[];
+}
+
 class AttReportPricingService<T extends Entity | AttReport> extends BaseEntityService<T> {
-  protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any, auth: any): Promise<void> {
+  protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any[], auth: any): Promise<void> {
     const data = list as AttReport[];
 
     switch (pivotName) {
       case 'AttReportWithPricing': {
-        // Get pricing data from Price entity
-        const priceData = await this.dataSource.getRepository(Price).find({
-          where: { userId: getUserIdFromUser(auth) },
-        });
-
-        // Calculate pricing for each report and update in place
-        data.forEach((report: AttReportWithPricing) => {
-          const teacherTypeId = report.teacher?.teacherTypeId;
-
-          try {
-            // Calculate price using the pricing utility
-            const price = calculateAttendanceReportPrice(report, teacherTypeId, priceData);
-            report.price = price;
-          } catch (error) {
-            console.warn(`Failed to calculate price for report ${report.id}:`, error.message);
-            report.price = 0;
-          }
-        });
+        await this.handlePricingPivot(data, auth);
         break;
       }
+
+      case 'AttReportByTeacherType': {
+        await this.handleTeacherTypePivot(data, extra, filter, auth);
+        break;
+      }
+    }
+  }
+
+  private async handlePricingPivot(data: AttReport[], auth: any): Promise<void> {
+    // Get pricing data from Price entity
+    const priceData = await this.dataSource.getRepository(Price).find({
+      where: { userId: getUserIdFromUser(auth) },
+    });
+
+    // Calculate pricing for each report and update in place
+    data.forEach((report: AttReportWithPricing) => {
+      const teacherTypeId = report.teacher?.teacherTypeId;
+
+      try {
+        // Calculate price using the pricing utility
+        const price = calculateAttendanceReportPrice(report, teacherTypeId, priceData);
+        report.price = price;
+      } catch (error) {
+        console.warn(`Failed to calculate price for report ${report.id}:`, error.message);
+        report.price = 0;
+      }
+    });
+  }
+
+  private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any[], auth: any): Promise<void> {
+    const teacherTypeId = filter?.find(f => f.field === 'teacher.teacherTypeId')?.value || null;
+    const headers = buildHeadersForTeacherType(teacherTypeId);
+    if (data.length > 0) {
+      (data[0] as any).headers = headers;
     }
   }
 }

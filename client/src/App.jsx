@@ -64,6 +64,7 @@ import Settings from 'src/settings/Settings';
 
 // Import pivot components
 import AttReportWithPricing from 'src/pivots/AttReportWithPricing';
+import AttReportByTeacherType from 'src/pivots/AttReportByTeacherType';
 
 import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
 import YemotSimulator from "@shared/components/views/YemotSimulator";
@@ -101,6 +102,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -170,6 +172,7 @@ const App = () => (
               <Route path="/pages-view" element={<PageList />} />
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
               <Route path="/att-report-pricing" element={<AttReportWithPricing />} />
+              <Route path="/att-report-by-teacher-type" element={<AttReportByTeacherType />} />
             </CustomRoutes>
 
             <CustomRoutes noLayout>

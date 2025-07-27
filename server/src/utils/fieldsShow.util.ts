@@ -6,6 +6,13 @@
 import { AttReport } from '../db/entities/AttReport.entity';
 
 /**
+ * Interface for table headers - more specific than the shared IHeader
+ */
+export interface ITableHeader {
+  value: string;
+}
+
+/**
  * Teacher type constants based on the YEMOT flow documentation
  */
 export enum TeacherTypeId {
@@ -157,4 +164,15 @@ export function getTeacherTypesForField(fieldName: AttReportField): number[] {
   });
 
   return [...new Set(teacherTypes)]; // Remove duplicates
+}
+
+/**
+ * Build headers for dynamic table rendering based on teacher type
+ */
+export function buildHeadersForTeacherType(teacherTypeId: number | null): ITableHeader[] {
+  const fields = teacherTypeId ? getFieldsForTeacherType(teacherTypeId) : UNIVERSAL_FIELDS;
+
+  return fields.map((field) => ({
+    value: field,
+  }));
 }

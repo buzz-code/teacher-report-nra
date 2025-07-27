@@ -3,8 +3,10 @@ import {
   isValidTeacherType,
   getFieldsForTeacherType,
   getTeacherTypesForField,
+  buildHeadersForTeacherType,
   TeacherTypeId,
   AttReportField,
+  ITableHeader,
 } from '../fieldsShow.util';
 
 describe('fieldsShow.util', () => {
@@ -356,6 +358,71 @@ describe('fieldsShow.util', () => {
       // Check that each type appears only once
       const uniqueTypes = [...new Set(types)];
       expect(types.length).toBe(uniqueTypes.length);
+    });
+  });
+
+  describe('buildHeadersForTeacherType', () => {
+    it('should build headers for SEMINAR_KITA teacher type', () => {
+      const headers = buildHeadersForTeacherType(TeacherTypeId.SEMINAR_KITA);
+
+      // Should include universal fields
+      expect(headers.find((h) => h.value === 'id')).toEqual({
+        value: 'id',
+      });
+
+      // Should include teacher-specific fields
+      expect(headers.find((h) => h.value === 'howManyStudents')).toEqual({
+        value: 'howManyStudents',
+      });
+
+      expect(headers.find((h) => h.value === 'wasKamal')).toEqual({
+        value: 'wasKamal',
+      });
+
+      // Should not include fields for other teacher types
+      expect(headers.find((h) => h.value === 'howManyMethodic')).toBeUndefined();
+      expect(headers.find((h) => h.value === 'wasCollectiveWatch')).toBeUndefined();
+    });
+
+    it('should build headers for MANHA teacher type', () => {
+      const headers = buildHeadersForTeacherType(TeacherTypeId.MANHA);
+
+      // Should include MANHA-specific fields
+      expect(headers.find((h) => h.value === 'howManyMethodic')).toEqual({
+        value: 'howManyMethodic',
+      });
+
+      expect(headers.find((h) => h.value === 'isTaarifHulia')).toEqual({
+        value: 'isTaarifHulia',
+      });
+
+      // Should not include SEMINAR_KITA-specific fields
+      expect(headers.find((h) => h.value === 'wasKamal')).toBeUndefined();
+    });
+
+    it('should build headers for null teacher type (universal fields only)', () => {
+      const headers = buildHeadersForTeacherType(null);
+
+      // Should only include universal fields
+      expect(headers.find((h) => h.value === 'id')).toBeDefined();
+      expect(headers.find((h) => h.value === 'teacherId')).toBeDefined();
+      expect(headers.find((h) => h.value === 'comment')).toBeDefined();
+
+      // Should not include any teacher-specific fields
+      expect(headers.find((h) => h.value === 'howManyStudents')).toBeUndefined();
+      expect(headers.find((h) => h.value === 'howManyMethodic')).toBeUndefined();
+      expect(headers.find((h) => h.value === 'wasCollectiveWatch')).toBeUndefined();
+    });
+
+    it('should create simple headers with just value field', () => {
+      const headers = buildHeadersForTeacherType(TeacherTypeId.KINDERGARTEN);
+
+      headers.forEach((header) => {
+        expect(header).toHaveProperty('value');
+        expect(header).not.toHaveProperty('label');
+        expect(header).not.toHaveProperty('sortable');
+        expect(Object.keys(header)).toEqual(['value']);
+      });
     });
   });
 });
