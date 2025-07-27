@@ -49,7 +49,7 @@ interface AttReportWithHeaders extends AttReport {
 }
 
 class AttReportPricingService<T extends Entity | AttReport> extends BaseEntityService<T> {
-  protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any, auth: any): Promise<void> {
+  protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any[], auth: any): Promise<void> {
     const data = list as AttReport[];
 
     switch (pivotName) {
@@ -86,8 +86,8 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
     });
   }
 
-  private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any, auth: any): Promise<void> {
-    const teacherTypeId = filter?.['teacher.teacherTypeId'] || null;
+  private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any[], auth: any): Promise<void> {
+    const teacherTypeId = filter?.find(f => f.field === 'teacher.teacherTypeId')?.value || null;
     const headers = buildHeadersForTeacherType(teacherTypeId);
     if (data.length > 0) {
       (data[0] as any).headers = headers;
