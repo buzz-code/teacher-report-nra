@@ -1,11 +1,7 @@
 // Integration test for AttReportByTeacherType functionality
 // This tests the full flow from backend to frontend integration
 
-import {
-  getFieldsForTeacherType,
-  buildHeadersForTeacherType,
-  TeacherTypeId,
-} from '../fieldsShow.util';
+import { getFieldsForTeacherType, buildHeadersForTeacherType, TeacherTypeId } from '../fieldsShow.util';
 
 describe('AttReportByTeacherType Integration', () => {
   describe('Teacher Type Integration Scenarios', () => {
@@ -24,8 +20,6 @@ describe('AttReportByTeacherType Integration', () => {
       const studentHeader = headers.find((h) => h.value === 'howManyStudents');
       expect(studentHeader).toEqual({
         value: 'howManyStudents',
-        label: 'מספר תלמידים',
-        sortable: true,
       });
 
       // Verify no headers for other teacher types
@@ -54,11 +48,10 @@ describe('AttReportByTeacherType Integration', () => {
         // Headers should match fields
         expect(headers.length).toBe(fields.length);
 
-        // All headers should have Hebrew labels
+        // All headers should have value property only
         headers.forEach((header) => {
-          expect(header.label).toBeTruthy();
-          expect(typeof header.label).toBe('string');
-          expect(header.label).not.toBe(header.value); // Should be translated
+          expect(header.value).toBeTruthy();
+          expect(typeof header.value).toBe('string');
         });
       });
     });
@@ -107,8 +100,8 @@ describe('AttReportByTeacherType Integration', () => {
     });
   });
 
-  describe('Hebrew Translation Integration', () => {
-    it('should provide Hebrew labels for all field types', () => {
+  describe('Header Structure Integration', () => {
+    it('should provide simple headers with just value field for all teacher types', () => {
       const seminarHeaders = buildHeadersForTeacherType(TeacherTypeId.SEMINAR_KITA);
       const manhaHeaders = buildHeadersForTeacherType(TeacherTypeId.MANHA);
       const pdsHeaders = buildHeadersForTeacherType(TeacherTypeId.PDS);
@@ -123,9 +116,12 @@ describe('AttReportByTeacherType Integration', () => {
         ...specialEdHeaders,
       ];
 
-      // Check that all headers have Hebrew labels (contain Hebrew characters)
+      // Check that all headers have only value property
       allHeaders.forEach((header) => {
-        expect(header.label).toMatch(/[\u0590-\u05FF]/); // Hebrew Unicode range
+        expect(header).toHaveProperty('value');
+        expect(header).not.toHaveProperty('label');
+        expect(header).not.toHaveProperty('sortable');
+        expect(Object.keys(header)).toEqual(['value']);
       });
     });
   });

@@ -10,8 +10,6 @@ import { AttReport } from '../db/entities/AttReport.entity';
  */
 export interface ITableHeader {
   value: string;
-  label: string;
-  sortable?: boolean;
 }
 
 /**
@@ -169,60 +167,12 @@ export function getTeacherTypesForField(fieldName: AttReportField): number[] {
 }
 
 /**
- * Get field labels in Hebrew for UI display
- */
-export function getFieldLabels(): Record<AttReportField, string> {
-  return {
-    // Universal fields
-    id: 'מזהה',
-    userId: 'מזהה משתמש',
-    teacherId: 'מזהה מורה',
-    reportDate: 'תאריך דיווח',
-    updateDate: 'תאריך עדכון',
-    year: 'שנה',
-    isConfirmed: 'מאושר',
-    salaryReport: 'דוח משכורת',
-    salaryMonth: 'חודש משכורת',
-    comment: 'הערות',
-    createdAt: 'נוצר ב',
-    updatedAt: 'עודכן ב',
-
-    // Teacher-specific fields
-    howManyStudents: 'מספר תלמידים',
-    howManyLessons: 'מספר שיעורים',
-    howManyWatchOrIndividual: 'מספר צפיות או אישיות',
-    howManyTeachedOrInterfering: 'מספר הוראות או התערבויות',
-    wasKamal: 'האם היה כמל',
-    howManyDiscussingLessons: 'מספר שיעורי דיון',
-    howManyLessonsAbsence: 'מספר שיעורי היעדרות',
-    howManyMethodic: 'מספר מתודיקות',
-    fourLastDigitsOfTeacherPhone: '4 ספרות אחרונות טלפון מורה',
-    isTaarifHulia: 'תעריף חוליה',
-    isTaarifHulia2: 'תעריף חוליה 2',
-    isTaarifHulia3: 'תעריף חוליה 3',
-    howManyWatchedLessons: 'מספר שיעורים שנצפו',
-    howManyStudentsTeached: 'מספר תלמידים שהורו',
-    howManyYalkutLessons: 'מספר שיעורי ילקוט',
-    howManyStudentsHelpTeached: 'מספר תלמידים עזרו בהוראה',
-    teacherToReportFor: 'מורה לדווח עבור',
-    wasCollectiveWatch: 'האם היה צפייה קבוצתית',
-    wasStudentsGood: 'האם התלמידים היו טובים',
-    howManyStudentsWatched: 'מספר תלמידים שנצפו',
-    wasPhoneDiscussing: 'האם היה דיון טלפוני',
-    whatIsYourSpeciality: 'מה ההתמחות שלך',
-  } as Record<AttReportField, string>;
-}
-
-/**
  * Build headers for dynamic table rendering based on teacher type
  */
 export function buildHeadersForTeacherType(teacherTypeId: number | null): ITableHeader[] {
   const fields = teacherTypeId ? getFieldsForTeacherType(teacherTypeId) : UNIVERSAL_FIELDS;
-  const labels = getFieldLabels();
 
   return fields.map((field) => ({
     value: field,
-    label: labels[field] || field,
-    sortable: true,
   }));
 }

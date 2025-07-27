@@ -6,10 +6,7 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
-import {
-  buildHeadersForTeacherType,
-  ITableHeader,
-} from '../utils/fieldsShow.util';
+import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -90,7 +87,8 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
   }
 
   private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any, auth: any): Promise<void> {
-    const headers = buildHeadersForTeacherType(null);
+    const teacherTypeId = filter?.['teacher.teacherTypeId'] || null;
+    const headers = buildHeadersForTeacherType(teacherTypeId);
     if (data.length > 0) {
       (data[0] as any).headers = headers;
     }
