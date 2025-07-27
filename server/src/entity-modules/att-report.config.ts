@@ -7,10 +7,7 @@ import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
 import {
-  getFieldsForTeacherType,
   buildHeadersForTeacherType,
-  getTeacherTypeChoices,
-  AttReportField,
   ITableHeader,
 } from '../utils/fieldsShow.util';
 
@@ -93,45 +90,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
   }
 
   private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any, auth: any): Promise<void> {
-    const teacherTypeId = extra?.teacherTypeId;
-
-    if (!teacherTypeId) {
-      // No teacher type selected - show basic fields only
-      const headers = buildHeadersForTeacherType(null);
-      if (data.length > 0) {
-        (data[0] as any).headers = headers;
-      }
-      return;
-    }
-
-    // Get relevant fields for the selected teacher type
-    const relevantFields = getFieldsForTeacherType(teacherTypeId);
-
-    // Build headers dynamically
-    const headers = buildHeadersForTeacherType(teacherTypeId);
-
-    // Filter data to only include relevant fields for this teacher type
-    data.forEach((report: AttReportWithHeaders) => {
-      // Create new object with only relevant fields
-      const filteredReport: Partial<AttReport> = {};
-
-      relevantFields.forEach((field) => {
-        if (report[field] !== undefined) {
-          (filteredReport as any)[field] = report[field];
-        }
-      });
-
-      // Update the report object with filtered data
-      Object.keys(report).forEach((key) => {
-        if (!relevantFields.includes(key as AttReportField) && key !== 'teacher') {
-          delete (report as any)[key];
-        }
-      });
-
-      Object.assign(report, filteredReport);
-    });
-
-    // Add headers to first item for dynamic rendering
+    const headers = buildHeadersForTeacherType(null);
     if (data.length > 0) {
       (data[0] as any).headers = headers;
     }

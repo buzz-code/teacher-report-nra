@@ -16,27 +16,18 @@ import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/f
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 
-// Teacher type choices for the filter
-const teacherTypeChoices = [
-  { id: 1, name: 'סמינר כיתה' },
-  { id: 3, name: 'מנהה' },
-  { id: 5, name: 'פדס' },
-  { id: 6, name: 'גן' },
-  { id: 7, name: 'חינוך מיוחד' },
-];
-
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
-    <CommonAutocompleteInput 
-        source="extra.teacherTypeId" 
-        choices={teacherTypeChoices} 
+    <CommonReferenceInputFilter 
+        source="teacher.teacherTypeId" 
+        reference="teacher_type" 
         label="סוג מורה"
         alwaysOn 
+        dynamicFilter={filterByUserId} 
     />,
     <DateInput source="reportDate:$gte" label="תאריך דיווח אחרי" alwaysOn />,
     <DateInput source="reportDate:$lte" label="תאריך דיווח לפני" alwaysOn />,
     <CommonReferenceInputFilter source="teacherId" reference="teacher" dynamicFilter={filterByUserId} />,
-    <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
     <BooleanInput source="isConfirmed" label="מאושר" />,
 ];
@@ -47,7 +38,7 @@ const filterDefaultValues = {
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     const { data, filterValues } = useListContext();
-    const selectedTeacherType = filterValues?.['extra.teacherTypeId'];
+    const selectedTeacherType = filterValues?.['teacher.teacherTypeId'];
 
     return (
         <CommonDatagrid {...props}>

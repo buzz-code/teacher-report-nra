@@ -4,7 +4,6 @@
 import {
   getFieldsForTeacherType,
   buildHeadersForTeacherType,
-  getTeacherTypeChoices,
   TeacherTypeId,
 } from '../fieldsShow.util';
 
@@ -34,15 +33,18 @@ describe('AttReportByTeacherType Integration', () => {
     });
 
     it('should handle dynamic teacher type selection', () => {
-      const choices = getTeacherTypeChoices();
+      // Test specific teacher types have proper fields
+      const testTypes = [
+        TeacherTypeId.SEMINAR_KITA,
+        TeacherTypeId.MANHA,
+        TeacherTypeId.PDS,
+        TeacherTypeId.KINDERGARTEN,
+        TeacherTypeId.SPECIAL_EDUCATION,
+      ];
 
-      // Test that we have all expected teacher types
-      expect(choices).toHaveLength(5);
-
-      // Test each teacher type has proper fields
-      choices.forEach((choice) => {
-        const fields = getFieldsForTeacherType(choice.id);
-        const headers = buildHeadersForTeacherType(choice.id);
+      testTypes.forEach((teacherTypeId) => {
+        const fields = getFieldsForTeacherType(teacherTypeId);
+        const headers = buildHeadersForTeacherType(teacherTypeId);
 
         // Every teacher type should have universal fields
         expect(fields).toContain('id');
@@ -125,20 +127,6 @@ describe('AttReportByTeacherType Integration', () => {
       allHeaders.forEach((header) => {
         expect(header.label).toMatch(/[\u0590-\u05FF]/); // Hebrew Unicode range
       });
-    });
-
-    it('should have teacher type choices in Hebrew', () => {
-      const choices = getTeacherTypeChoices();
-
-      choices.forEach((choice) => {
-        expect(choice.name).toMatch(/[\u0590-\u05FF]/); // Hebrew Unicode range
-        expect(choice.name).toBeTruthy();
-      });
-
-      // Verify specific names
-      expect(choices.find((c) => c.id === TeacherTypeId.SEMINAR_KITA)?.name).toBe('סמינר כיתה');
-      expect(choices.find((c) => c.id === TeacherTypeId.MANHA)?.name).toBe('מנהה');
-      expect(choices.find((c) => c.id === TeacherTypeId.KINDERGARTEN)?.name).toBe('גן');
     });
   });
 });

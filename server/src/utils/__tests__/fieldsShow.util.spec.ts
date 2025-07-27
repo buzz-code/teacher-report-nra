@@ -4,7 +4,6 @@ import {
   getFieldsForTeacherType,
   getTeacherTypesForField,
   getFieldLabels,
-  getTeacherTypeChoices,
   buildHeadersForTeacherType,
   TeacherTypeId,
   AttReportField,
@@ -382,28 +381,6 @@ describe('fieldsShow.util', () => {
       Object.keys(labels).forEach((field) => {
         expect(labels[field as AttReportField]).toBeTruthy();
         expect(typeof labels[field as AttReportField]).toBe('string');
-      });
-    });
-  });
-
-  describe('getTeacherTypeChoices', () => {
-    it('should return teacher type choices with Hebrew names', () => {
-      const choices = getTeacherTypeChoices();
-
-      expect(choices).toEqual([
-        { id: TeacherTypeId.SEMINAR_KITA, name: 'סמינר כיתה' },
-        { id: TeacherTypeId.MANHA, name: 'מנהה' },
-        { id: TeacherTypeId.PDS, name: 'פדס' },
-        { id: TeacherTypeId.KINDERGARTEN, name: 'גן' },
-        { id: TeacherTypeId.SPECIAL_EDUCATION, name: 'חינוך מיוחד' },
-      ]);
-
-      expect(choices).toHaveLength(5);
-      choices.forEach((choice) => {
-        expect(choice).toHaveProperty('id');
-        expect(choice).toHaveProperty('name');
-        expect(typeof choice.id).toBe('number');
-        expect(typeof choice.name).toBe('string');
       });
     });
   });

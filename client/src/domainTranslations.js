@@ -8,16 +8,6 @@ export default {
         settings: 'הגדרות',
         admin: 'ניהול',
     },
-    teacherTypeChoices: {
-        1: 'סמינר כיתה',
-        3: 'מנהה',
-        5: 'פדס',
-        6: 'גן',
-        7: 'חינוך מיוחד',
-    },
-    pivotReports: {
-        attReportByTeacherType: 'דוחות נוכחות לפי סוג מורה',
-    },
     resources: {
         // Event Management System Entities
         event: {

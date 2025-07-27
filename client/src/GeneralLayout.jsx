@@ -34,6 +34,7 @@ const menuGroups = [
         icon: <SummarizeIcon />, 
         routes: [
             <MenuItemLink key="att-report-pricing" to="/att-report-pricing" primaryText="דוח נוכחות עם תמחור" leftIcon={<MonetizationOnIcon />} />,
+            <MenuItemLink key="att-report-by-teacher-type" to="/att-report-by-teacher-type" primaryText="דוחות לפי סוג מורה" leftIcon={<PercentIcon />} />,
         ]
     },
     { name: 'settings', icon: <SettingsIcon /> },

@@ -39,7 +39,6 @@ import teacher from "src/entities/teacher";
 // Teacher Report System Entities
 import teacherType from "src/entities/teacher-type";
 import attReport from "src/entities/att-report";
-import attReportByTeacherType from "src/entities/att-report-by-teacher-type";
 import attType from "src/entities/att-type";
 import price from "src/entities/price";
 import question from "src/entities/question";
@@ -134,12 +133,6 @@ const App = () => (
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
             <Resource name="att_report" {...attReport} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
-            <Resource 
-              name="att_report_by_teacher_type" 
-              {...attReportByTeacherType} 
-              options={{ menuGroup: 'reports', label: 'דוחות לפי סוג מורה' }} 
-              icon={FilterListIcon} 
-            />
             <Resource name="att_type" {...attType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
             <Resource name="price" {...price} options={{ menuGroup: 'reports' }} icon={PaymentIcon} />
             <Resource name="question" {...question} options={{ menuGroup: 'reports' }} icon={QuestionAnswerIcon} />

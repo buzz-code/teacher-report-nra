@@ -214,19 +214,6 @@ export function getFieldLabels(): Record<AttReportField, string> {
 }
 
 /**
- * Get teacher type choices for UI selection
- */
-export function getTeacherTypeChoices(): { id: number; name: string }[] {
-  return [
-    { id: TeacherTypeId.SEMINAR_KITA, name: 'סמינר כיתה' },
-    { id: TeacherTypeId.MANHA, name: 'מנהה' },
-    { id: TeacherTypeId.PDS, name: 'פדס' },
-    { id: TeacherTypeId.KINDERGARTEN, name: 'גן' },
-    { id: TeacherTypeId.SPECIAL_EDUCATION, name: 'חינוך מיוחד' },
-  ];
-}
-
-/**
  * Build headers for dynamic table rendering based on teacher type
  */
 export function buildHeadersForTeacherType(teacherTypeId: number | null): ITableHeader[] {
