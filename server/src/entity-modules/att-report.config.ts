@@ -87,7 +87,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
   }
 
   private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any[], auth: any): Promise<void> {
-    const teacherTypeId = filter?.find(f => f.field === 'teacher.teacherTypeId')?.value || null;
+    const teacherTypeId = filter?.find((f) => f.field === 'teacher.teacherTypeId')?.value || null;
     const headers = buildHeadersForTeacherType(teacherTypeId);
     if (data.length > 0) {
       (data[0] as any).headers = headers;
