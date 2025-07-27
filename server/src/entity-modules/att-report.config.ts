@@ -73,7 +73,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
 
     // Calculate pricing for each report and update in place
     data.forEach((report: AttReportWithPricing) => {
-      const teacherTypeId = report.teacher?.teacherTypeId;
+      const teacherTypeId = report.teacher?.teacherTypeKey;
 
       try {
         // Calculate price using the pricing utility

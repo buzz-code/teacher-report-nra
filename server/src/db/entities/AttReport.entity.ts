@@ -7,33 +7,76 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
+  BeforeInsert,
+  BeforeUpdate,
+  DataSource,
 } from 'typeorm';
 import { User } from './User.entity';
 import { Teacher } from './Teacher.entity';
 import { AttType } from './AttType.entity';
-import { IsOptional } from 'class-validator';
+import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType, BooleanType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
+import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 
 @Entity('att_reports')
 @Index('att_reports_user_id_idx', ['userId'], {})
-@Index('att_reports_teacher_id_idx', ['teacherId'], {})
+@Index('att_reports_teacher_id_idx', ['teacherReferenceId'], {})
 @Index('att_reports_report_date_idx', ['reportDate'], {})
 @Index('att_reports_year_idx', ['year'], {})
+@Index('att_reports_activity_type_idx', ['activityTypeReferenceId'], {})
 export class AttReport implements IHasUserId {
+  @BeforeInsert()
+  @BeforeUpdate()
+  async fillFields() {
+    let dataSource: DataSource;
+    try {
+      dataSource = await getDataSource([Teacher, AttType]);
+
+      this.teacherReferenceId = await findOneAndAssignReferenceId(
+        dataSource,
+        Teacher,
+        { tz: this.teacherTz },
+        this.userId,
+        this.teacherReferenceId,
+        this.teacherTz,
+      );
+
+      this.activityTypeReferenceId = await findOneAndAssignReferenceId(
+        dataSource,
+        AttType,
+        { key: this.activityTypeKey },
+        this.userId,
+        this.activityTypeReferenceId,
+        this.activityTypeKey,
+      );
+    } finally {
+      dataSource?.destroy();
+    }
+  }
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column('int', { name: 'user_id' })
   userId: number;
 
+  @ValidateIf((attReport: AttReport) => !Boolean(attReport.teacherReferenceId), {
+    always: true,
+  })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
-  @Column('int', { name: 'teacher_id' })
-  teacherId: number;
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  teacherTz: string;
+
+  @ValidateIf((attReport: AttReport) => !Boolean(attReport.teacherTz) && Boolean(attReport.teacherReferenceId), {
+    always: true,
+  })
+  @Column({ nullable: true })
+  teacherReferenceId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
@@ -141,10 +184,21 @@ export class AttReport implements IHasUserId {
   @Column('boolean', { name: 'was_students_exit_on_time', default: false })
   wasStudentsExitOnTime: boolean;
 
+  @ValidateIf((attReport: AttReport) => !Boolean(attReport.activityTypeReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
-  @Column('int', { name: 'activity_type', nullable: true })
-  activityType: number;
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  activityTypeKey: number;
+
+  @ValidateIf(
+    (attReport: AttReport) => !Boolean(attReport.activityTypeKey) && Boolean(attReport.activityTypeReferenceId),
+    { always: true },
+  )
+  @Column({ nullable: true })
+  activityTypeReferenceId: number;
 
   @IsOptional({ always: true })
   @NumberType
@@ -217,10 +271,10 @@ export class AttReport implements IHasUserId {
   user: User;
 
   @ManyToOne(() => Teacher, { nullable: true })
-  @JoinColumn({ name: 'teacher_id' })
+  @JoinColumn({ name: 'teacherReferenceId' })
   teacher: Teacher;
 
   @ManyToOne(() => AttType, { nullable: true })
-  @JoinColumn({ name: 'activity_type' })
+  @JoinColumn({ name: 'activityTypeReferenceId' })
   attType: AttType;
 }
