@@ -73,7 +73,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
 
     // Calculate pricing for each report and update in place
     data.forEach((report: AttReportWithPricing) => {
-      const teacherTypeId = report.teacher?.teacherTypeId;
+      const teacherTypeId = report.teacher?.teacherTypeKey;
 
       try {
         // Calculate price using the pricing utility
@@ -87,7 +87,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
   }
 
   private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any[], auth: any): Promise<void> {
-    const teacherTypeId = filter?.find(f => f.field === 'teacher.teacherTypeId')?.value || null;
+    const teacherTypeId = filter?.find((f) => f.field === 'teacher.teacherTypeId')?.value || null;
     const headers = buildHeadersForTeacherType(teacherTypeId);
     if (data.length > 0) {
       (data[0] as any).headers = headers;

@@ -7,7 +7,7 @@ describe('pricing.util', () => {
     const mockAttReport: Partial<AttReport> = {
       id: 1,
       userId: 1,
-      teacherId: 1,
+      teacherTz: '123456789',
       reportDate: new Date('2023-01-01'),
       year: 2023,
       isConfirmed: false,
@@ -105,7 +105,7 @@ describe('pricing.util', () => {
       const reportWithNulls: Partial<AttReport> = {
         id: 1,
         userId: 1,
-        teacherId: 1,
+        teacherTz: '123456789',
         reportDate: new Date('2023-01-01'),
         year: 2023,
         howManyStudents: null,
@@ -183,7 +183,7 @@ describe('pricing.util', () => {
       const watchOnlyReport: Partial<AttReport> = {
         id: 1,
         userId: 1,
-        teacherId: 1,
+        teacherTz: '123456789',
         reportDate: new Date('2023-01-01'),
         year: 2023,
         howManyStudentsWatched: 10,

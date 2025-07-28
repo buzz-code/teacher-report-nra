@@ -7,35 +7,88 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
+  BeforeInsert,
+  BeforeUpdate,
+  DataSource,
 } from 'typeorm';
 import { User } from './User.entity';
 import { QuestionType } from './QuestionType.entity';
-import { IsOptional } from 'class-validator';
+import { TeacherType } from './TeacherType.entity';
+import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType, BooleanType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
+import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 
 @Entity('questions')
 @Index('questions_user_id_idx', ['userId'], {})
-@Index('questions_teacher_type_id_idx', ['teacherTypeId'], {})
-@Index('questions_question_type_id_idx', ['questionTypeId'], {})
+@Index('questions_teacher_type_id_idx', ['teacherTypeReferenceId'], {})
+@Index('questions_question_type_id_idx', ['questionTypeReferenceId'], {})
 export class Question implements IHasUserId {
+  @BeforeInsert()
+  @BeforeUpdate()
+  async fillFields() {
+    let dataSource: DataSource;
+    try {
+      dataSource = await getDataSource([TeacherType, QuestionType]);
+
+      this.teacherTypeReferenceId = await findOneAndAssignReferenceId(
+        dataSource,
+        TeacherType,
+        { key: this.teacherTypeKey },
+        this.userId,
+        this.teacherTypeReferenceId,
+        this.teacherTypeKey,
+      );
+
+      this.questionTypeReferenceId = await findOneAndAssignReferenceId(
+        dataSource,
+        QuestionType,
+        { key: this.questionTypeKey },
+        this.userId,
+        this.questionTypeReferenceId,
+        this.questionTypeKey,
+      );
+    } finally {
+      dataSource?.destroy();
+    }
+  }
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column('int', { name: 'user_id' })
   userId: number;
 
+  @ValidateIf((question: Question) => !Boolean(question.teacherTypeReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
-  @Column('int', { name: 'teacher_type_id', nullable: true })
-  teacherTypeId: number;
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  teacherTypeKey: number;
 
+  @ValidateIf((question: Question) => !Boolean(question.teacherTypeKey) && Boolean(question.teacherTypeReferenceId), {
+    always: true,
+  })
+  @Column({ nullable: true })
+  teacherTypeReferenceId: number;
+
+  @ValidateIf((question: Question) => !Boolean(question.questionTypeReferenceId), {
+    always: true,
+  })
   @IsOptional({ always: true })
   @NumberType
-  @Column('int', { name: 'question_type_id', nullable: true })
-  questionTypeId: number;
+  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
+  @Column({ nullable: true })
+  questionTypeKey: number;
+
+  @ValidateIf((question: Question) => !Boolean(question.questionTypeKey) && Boolean(question.questionTypeReferenceId), {
+    always: true,
+  })
+  @Column({ nullable: true })
+  questionTypeReferenceId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
@@ -72,7 +125,11 @@ export class Question implements IHasUserId {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @ManyToOne(() => TeacherType, { nullable: true })
+  @JoinColumn({ name: 'teacherTypeReferenceId' })
+  teacherType: TeacherType;
+
   @ManyToOne(() => QuestionType, { nullable: true })
-  @JoinColumn({ name: 'question_type_id' })
+  @JoinColumn({ name: 'questionTypeReferenceId' })
   questionType: QuestionType;
 }

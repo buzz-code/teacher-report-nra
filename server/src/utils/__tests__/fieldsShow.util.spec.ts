@@ -15,7 +15,8 @@ describe('fieldsShow.util', () => {
       const universalFields: AttReportField[] = [
         'id',
         'userId',
-        'teacherId',
+        'teacherTz',
+        'teacherReferenceId',
         'reportDate',
         'updateDate',
         'year',
@@ -405,7 +406,7 @@ describe('fieldsShow.util', () => {
 
       // Should only include universal fields
       expect(headers.find((h) => h.value === 'id')).toBeDefined();
-      expect(headers.find((h) => h.value === 'teacherId')).toBeDefined();
+      expect(headers.find((h) => h.value === 'teacherTz')).toBeDefined();
       expect(headers.find((h) => h.value === 'comment')).toBeDefined();
 
       // Should not include any teacher-specific fields

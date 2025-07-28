@@ -87,7 +87,8 @@ const TEACHER_TYPE_FIELDS: Record<TeacherTypeId, AttReportField[]> = {
 const UNIVERSAL_FIELDS: AttReportField[] = [
   'id',
   'userId',
-  'teacherId',
+  'teacherTz',
+  'teacherReferenceId',
   'reportDate',
   'updateDate',
   'year',
