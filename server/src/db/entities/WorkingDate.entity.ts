@@ -59,7 +59,10 @@ export class WorkingDate implements IHasUserId {
   @Column({ nullable: true })
   teacherTypeKey: number;
 
-  @ValidateIf((workingDate: WorkingDate) => !Boolean(workingDate.teacherTypeKey) && Boolean(workingDate.teacherTypeReferenceId), { always: true })
+  @ValidateIf(
+    (workingDate: WorkingDate) => !Boolean(workingDate.teacherTypeKey) && Boolean(workingDate.teacherTypeReferenceId),
+    { always: true },
+  )
   @Column({ nullable: true })
   teacherTypeReferenceId: number;
 

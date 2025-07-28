@@ -42,7 +42,8 @@ describe('AttReportByTeacherType Integration', () => {
 
         // Every teacher type should have universal fields
         expect(fields).toContain('id');
-        expect(fields).toContain('teacherId');
+        expect(fields).toContain('teacherTz');
+        expect(fields).toContain('teacherReferenceId');
         expect(fields).toContain('reportDate');
 
         // Headers should match fields
@@ -61,7 +62,8 @@ describe('AttReportByTeacherType Integration', () => {
 
       // Should only have universal fields
       expect(headers.find((h) => h.value === 'id')).toBeDefined();
-      expect(headers.find((h) => h.value === 'teacherId')).toBeDefined();
+      expect(headers.find((h) => h.value === 'teacherTz')).toBeDefined();
+      expect(headers.find((h) => h.value === 'teacherReferenceId')).toBeDefined();
       expect(headers.find((h) => h.value === 'comment')).toBeDefined();
 
       // Should not have any teacher-specific fields

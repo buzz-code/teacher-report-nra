@@ -11,17 +11,17 @@ describe('Reference Field Normalization Unit Tests', () => {
     describe('Teacher Entity', () => {
       it('should have dual fields for teacherType reference', () => {
         const teacher = new Teacher();
-        
+
         // Test that properties can be set (property exists)
         teacher.teacherTypeKey = 5;
         teacher.teacherTypeReferenceId = 10;
-        
+
         expect(teacher.teacherTypeKey).toBe(5);
         expect(teacher.teacherTypeReferenceId).toBe(10);
-        
+
         // Should have fillFields method
         expect(typeof teacher.fillFields).toBe('function');
-        
+
         // Should have tz field for being referenced by others
         teacher.tz = '123456789';
         expect(teacher.tz).toBe('123456789');
@@ -31,18 +31,18 @@ describe('Reference Field Normalization Unit Tests', () => {
     describe('Question Entity', () => {
       it('should have dual fields for teacherType and questionType references', () => {
         const question = new Question();
-        
+
         // Test that properties can be set (property exists)
         question.teacherTypeKey = 5;
         question.teacherTypeReferenceId = 10;
         question.questionTypeKey = 15;
         question.questionTypeReferenceId = 20;
-        
+
         expect(question.teacherTypeKey).toBe(5);
         expect(question.teacherTypeReferenceId).toBe(10);
         expect(question.questionTypeKey).toBe(15);
         expect(question.questionTypeReferenceId).toBe(20);
-        
+
         // Should have fillFields method
         expect(typeof question.fillFields).toBe('function');
       });
@@ -51,18 +51,18 @@ describe('Reference Field Normalization Unit Tests', () => {
     describe('Answer Entity', () => {
       it('should have dual fields for teacher and question references', () => {
         const answer = new Answer();
-        
+
         // Test that properties can be set (property exists)
         answer.teacherTz = '123456789';
         answer.teacherReferenceId = 10;
         answer.questionId = 15;
         answer.questionReferenceId = 20;
-        
+
         expect(answer.teacherTz).toBe('123456789');
         expect(answer.teacherReferenceId).toBe(10);
         expect(answer.questionId).toBe(15);
         expect(answer.questionReferenceId).toBe(20);
-        
+
         // Should have fillFields method
         expect(typeof answer.fillFields).toBe('function');
       });
@@ -71,18 +71,18 @@ describe('Reference Field Normalization Unit Tests', () => {
     describe('AttReport Entity', () => {
       it('should have dual fields for teacher and activityType references', () => {
         const attReport = new AttReport();
-        
+
         // Test that properties can be set (property exists)
         attReport.teacherTz = '123456789';
         attReport.teacherReferenceId = 10;
         attReport.activityTypeKey = 15;
         attReport.activityTypeReferenceId = 20;
-        
+
         expect(attReport.teacherTz).toBe('123456789');
         expect(attReport.teacherReferenceId).toBe(10);
         expect(attReport.activityTypeKey).toBe(15);
         expect(attReport.activityTypeReferenceId).toBe(20);
-        
+
         // Should have fillFields method
         expect(typeof attReport.fillFields).toBe('function');
       });
@@ -91,14 +91,14 @@ describe('Reference Field Normalization Unit Tests', () => {
     describe('WorkingDate Entity', () => {
       it('should have dual fields for teacherType reference', () => {
         const workingDate = new WorkingDate();
-        
+
         // Test that properties can be set (property exists)
         workingDate.teacherTypeKey = 5;
         workingDate.teacherTypeReferenceId = 10;
-        
+
         expect(workingDate.teacherTypeKey).toBe(5);
         expect(workingDate.teacherTypeReferenceId).toBe(10);
-        
+
         // Should have fillFields method
         expect(typeof workingDate.fillFields).toBe('function');
       });
@@ -107,11 +107,11 @@ describe('Reference Field Normalization Unit Tests', () => {
     describe('AttType Entity', () => {
       it('should have key field for reference lookup', () => {
         const attType = new AttType();
-        
+
         // Test that properties can be set (property exists)
         attType.key = 5;
         attType.name = 'Test Activity Type';
-        
+
         expect(attType.key).toBe(5);
         expect(attType.name).toBe('Test Activity Type');
       });
@@ -160,7 +160,7 @@ describe('Reference Field Normalization Unit Tests', () => {
       const question = new Question();
       question.teacherTypeKey = 1;
       question.questionTypeKey = 2;
-      
+
       const attReport = new AttReport();
       attReport.teacherTz = '123456789';
       attReport.activityTypeKey = 3;
@@ -191,17 +191,17 @@ describe('Reference Field Normalization Unit Tests', () => {
   describe('Referenced Entity Key Fields', () => {
     it('should verify all referenced entities have proper key fields', () => {
       // Entities that are referenced should have key or tz fields
-      
+
       // TeacherType should have key
       const teacherType = new TeacherType();
       teacherType.key = 1;
       expect(teacherType.key).toBe(1);
-      
+
       // AttType should have key
       const attType = new AttType();
       attType.key = 2;
       expect(attType.key).toBe(2);
-      
+
       // Teacher should have tz
       const teacher = new Teacher();
       teacher.tz = '123456789';
@@ -212,12 +212,12 @@ describe('Reference Field Normalization Unit Tests', () => {
   describe('Functional Tests', () => {
     it('should properly validate dual field constraints', () => {
       const answer = new Answer();
-      
+
       // Should be able to set either teacherTz or teacherReferenceId
       answer.teacherTz = '123456789';
       expect(answer.teacherTz).toBe('123456789');
       expect(answer.teacherReferenceId).toBeUndefined();
-      
+
       // Clear and set the other field
       answer.teacherTz = undefined;
       answer.teacherReferenceId = 123;
