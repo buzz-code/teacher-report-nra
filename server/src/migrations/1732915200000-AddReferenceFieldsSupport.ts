@@ -13,9 +13,19 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     await queryRunner.query(`ALTER TABLE \`answers\` ADD \`teacherReferenceId\` int NULL`);
     await queryRunner.query(`ALTER TABLE \`answers\` ADD \`questionReferenceId\` int NULL`);
 
+    // Migrate existing data from old columns to new columns
+    await queryRunner.query(
+      `UPDATE \`answers\` SET \`teacherReferenceId\` = \`teacher_id\` WHERE \`teacher_id\` IS NOT NULL`,
+    );
+    await queryRunner.query(
+      `UPDATE \`answers\` SET \`questionReferenceId\` = \`question_id\` WHERE \`question_id\` IS NOT NULL`,
+    );
+
     // Drop old columns and create new indexes
     await queryRunner.query(`DROP INDEX \`answers_teacher_id_idx\` ON \`answers\``);
     await queryRunner.query(`DROP INDEX \`answers_question_id_idx\` ON \`answers\``);
+    await queryRunner.query(`ALTER TABLE \`answers\` DROP COLUMN \`teacher_id\``);
+    await queryRunner.query(`ALTER TABLE \`answers\` DROP COLUMN \`question_id\``);
     await queryRunner.query(`CREATE INDEX \`answers_teacher_id_idx\` ON \`answers\` (\`teacherReferenceId\`)`);
     await queryRunner.query(`CREATE INDEX \`answers_question_id_idx\` ON \`answers\` (\`questionReferenceId\`)`);
 
@@ -25,9 +35,19 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     await queryRunner.query(`ALTER TABLE \`questions\` ADD \`questionTypeKey\` int NULL`);
     await queryRunner.query(`ALTER TABLE \`questions\` ADD \`questionTypeReferenceId\` int NULL`);
 
+    // Migrate existing data from old columns to new columns
+    await queryRunner.query(
+      `UPDATE \`questions\` SET \`teacherTypeReferenceId\` = \`teacher_type_id\` WHERE \`teacher_type_id\` IS NOT NULL`,
+    );
+    await queryRunner.query(
+      `UPDATE \`questions\` SET \`questionTypeReferenceId\` = \`question_type_id\` WHERE \`question_type_id\` IS NOT NULL`,
+    );
+
     // Drop old columns and create new indexes
     await queryRunner.query(`DROP INDEX \`questions_teacher_type_id_idx\` ON \`questions\``);
     await queryRunner.query(`DROP INDEX \`questions_question_type_id_idx\` ON \`questions\``);
+    await queryRunner.query(`ALTER TABLE \`questions\` DROP COLUMN \`teacher_type_id\``);
+    await queryRunner.query(`ALTER TABLE \`questions\` DROP COLUMN \`question_type_id\``);
     await queryRunner.query(
       `CREATE INDEX \`questions_teacher_type_id_idx\` ON \`questions\` (\`teacherTypeReferenceId\`)`,
     );
@@ -38,6 +58,14 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     // Add dual fields to teachers table
     await queryRunner.query(`ALTER TABLE \`teachers\` ADD \`teacherTypeKey\` int NULL`);
     await queryRunner.query(`ALTER TABLE \`teachers\` ADD \`teacherTypeReferenceId\` int NULL`);
+
+    // Migrate existing data from old column to new column
+    await queryRunner.query(
+      `UPDATE \`teachers\` SET \`teacherTypeReferenceId\` = \`teacher_type_id\` WHERE \`teacher_type_id\` IS NOT NULL`,
+    );
+
+    // Drop old column and create new index
+    await queryRunner.query(`ALTER TABLE \`teachers\` DROP COLUMN \`teacher_type_id\``);
     await queryRunner.query(
       `CREATE INDEX \`teachers_teacher_type_id_idx\` ON \`teachers\` (\`teacherTypeReferenceId\`)`,
     );
@@ -48,8 +76,18 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     await queryRunner.query(`ALTER TABLE \`att_reports\` ADD \`activityTypeKey\` int NULL`);
     await queryRunner.query(`ALTER TABLE \`att_reports\` ADD \`activityTypeReferenceId\` int NULL`);
 
-    // Drop old indexes and create new ones
+    // Migrate existing data from old columns to new columns
+    await queryRunner.query(
+      `UPDATE \`att_reports\` SET \`teacherReferenceId\` = \`teacher_id\` WHERE \`teacher_id\` IS NOT NULL`,
+    );
+    await queryRunner.query(
+      `UPDATE \`att_reports\` SET \`activityTypeReferenceId\` = \`activity_type\` WHERE \`activity_type\` IS NOT NULL`,
+    );
+
+    // Drop old indexes and columns, create new ones
     await queryRunner.query(`DROP INDEX \`att_reports_teacher_id_idx\` ON \`att_reports\``);
+    await queryRunner.query(`ALTER TABLE \`att_reports\` DROP COLUMN \`teacher_id\``);
+    await queryRunner.query(`ALTER TABLE \`att_reports\` DROP COLUMN \`activity_type\``);
     await queryRunner.query(`CREATE INDEX \`att_reports_teacher_id_idx\` ON \`att_reports\` (\`teacherReferenceId\`)`);
     await queryRunner.query(
       `CREATE INDEX \`att_reports_activity_type_idx\` ON \`att_reports\` (\`activityTypeReferenceId\`)`,
@@ -59,8 +97,14 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     await queryRunner.query(`ALTER TABLE \`working_dates\` ADD \`teacherTypeKey\` int NULL`);
     await queryRunner.query(`ALTER TABLE \`working_dates\` ADD \`teacherTypeReferenceId\` int NULL`);
 
-    // Drop old index and create new one
+    // Migrate existing data from old column to new column
+    await queryRunner.query(
+      `UPDATE \`working_dates\` SET \`teacherTypeReferenceId\` = \`teacher_type_id\` WHERE \`teacher_type_id\` IS NOT NULL`,
+    );
+
+    // Drop old index and column, create new one
     await queryRunner.query(`DROP INDEX \`working_dates_teacher_type_id_idx\` ON \`working_dates\``);
+    await queryRunner.query(`ALTER TABLE \`working_dates\` DROP COLUMN \`teacher_type_id\``);
     await queryRunner.query(
       `CREATE INDEX \`working_dates_teacher_type_id_idx\` ON \`working_dates\` (\`teacherTypeReferenceId\`)`,
     );
@@ -71,6 +115,10 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
 
     // Revert working_dates
     await queryRunner.query(`DROP INDEX \`working_dates_teacher_type_id_idx\` ON \`working_dates\``);
+    await queryRunner.query(`ALTER TABLE \`working_dates\` ADD \`teacher_type_id\` int NULL`);
+    await queryRunner.query(
+      `UPDATE \`working_dates\` SET \`teacher_type_id\` = \`teacherTypeReferenceId\` WHERE \`teacherTypeReferenceId\` IS NOT NULL`,
+    );
     await queryRunner.query(
       `CREATE INDEX \`working_dates_teacher_type_id_idx\` ON \`working_dates\` (\`teacher_type_id\`)`,
     );
@@ -80,6 +128,14 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     // Revert att_reports
     await queryRunner.query(`DROP INDEX \`att_reports_activity_type_idx\` ON \`att_reports\``);
     await queryRunner.query(`DROP INDEX \`att_reports_teacher_id_idx\` ON \`att_reports\``);
+    await queryRunner.query(`ALTER TABLE \`att_reports\` ADD \`teacher_id\` int NULL`);
+    await queryRunner.query(`ALTER TABLE \`att_reports\` ADD \`activity_type\` int NULL`);
+    await queryRunner.query(
+      `UPDATE \`att_reports\` SET \`teacher_id\` = \`teacherReferenceId\` WHERE \`teacherReferenceId\` IS NOT NULL`,
+    );
+    await queryRunner.query(
+      `UPDATE \`att_reports\` SET \`activity_type\` = \`activityTypeReferenceId\` WHERE \`activityTypeReferenceId\` IS NOT NULL`,
+    );
     await queryRunner.query(`CREATE INDEX \`att_reports_teacher_id_idx\` ON \`att_reports\` (\`teacher_id\`)`);
     await queryRunner.query(`ALTER TABLE \`att_reports\` DROP COLUMN \`activityTypeReferenceId\``);
     await queryRunner.query(`ALTER TABLE \`att_reports\` DROP COLUMN \`activityTypeKey\``);
@@ -88,12 +144,24 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
 
     // Revert teachers
     await queryRunner.query(`DROP INDEX \`teachers_teacher_type_id_idx\` ON \`teachers\``);
+    await queryRunner.query(`ALTER TABLE \`teachers\` ADD \`teacher_type_id\` int NULL`);
+    await queryRunner.query(
+      `UPDATE \`teachers\` SET \`teacher_type_id\` = \`teacherTypeReferenceId\` WHERE \`teacherTypeReferenceId\` IS NOT NULL`,
+    );
     await queryRunner.query(`ALTER TABLE \`teachers\` DROP COLUMN \`teacherTypeReferenceId\``);
     await queryRunner.query(`ALTER TABLE \`teachers\` DROP COLUMN \`teacherTypeKey\``);
 
     // Revert questions
     await queryRunner.query(`DROP INDEX \`questions_question_type_id_idx\` ON \`questions\``);
     await queryRunner.query(`DROP INDEX \`questions_teacher_type_id_idx\` ON \`questions\``);
+    await queryRunner.query(`ALTER TABLE \`questions\` ADD \`teacher_type_id\` int NULL`);
+    await queryRunner.query(`ALTER TABLE \`questions\` ADD \`question_type_id\` int NULL`);
+    await queryRunner.query(
+      `UPDATE \`questions\` SET \`teacher_type_id\` = \`teacherTypeReferenceId\` WHERE \`teacherTypeReferenceId\` IS NOT NULL`,
+    );
+    await queryRunner.query(
+      `UPDATE \`questions\` SET \`question_type_id\` = \`questionTypeReferenceId\` WHERE \`questionTypeReferenceId\` IS NOT NULL`,
+    );
     await queryRunner.query(`CREATE INDEX \`questions_question_type_id_idx\` ON \`questions\` (\`question_type_id\`)`);
     await queryRunner.query(`CREATE INDEX \`questions_teacher_type_id_idx\` ON \`questions\` (\`teacher_type_id\`)`);
     await queryRunner.query(`ALTER TABLE \`questions\` DROP COLUMN \`questionTypeReferenceId\``);
@@ -104,6 +172,14 @@ export class AddReferenceFieldsSupport1732915200000 implements MigrationInterfac
     // Revert answers
     await queryRunner.query(`DROP INDEX \`answers_question_id_idx\` ON \`answers\``);
     await queryRunner.query(`DROP INDEX \`answers_teacher_id_idx\` ON \`answers\``);
+    await queryRunner.query(`ALTER TABLE \`answers\` ADD \`teacher_id\` int NULL`);
+    await queryRunner.query(`ALTER TABLE \`answers\` ADD \`question_id\` int NULL`);
+    await queryRunner.query(
+      `UPDATE \`answers\` SET \`teacher_id\` = \`teacherReferenceId\` WHERE \`teacherReferenceId\` IS NOT NULL`,
+    );
+    await queryRunner.query(
+      `UPDATE \`answers\` SET \`question_id\` = \`questionReferenceId\` WHERE \`questionReferenceId\` IS NOT NULL`,
+    );
     await queryRunner.query(`CREATE INDEX \`answers_question_id_idx\` ON \`answers\` (\`question_id\`)`);
     await queryRunner.query(`CREATE INDEX \`answers_teacher_id_idx\` ON \`answers\` (\`teacher_id\`)`);
     await queryRunner.query(`ALTER TABLE \`answers\` DROP COLUMN \`questionReferenceId\``);

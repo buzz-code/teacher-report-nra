@@ -37,9 +37,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Get teacher type name
     let teacherTypeName = 'מורה';
-    if (this.teacher.teacherTypeKey) {
+    if (this.teacher.teacherTypeReferenceId) {
       const teacherType = await this.dataSource.getRepository(TeacherType).findOne({
-        where: { userId: this.user.id, key: this.teacher.teacherTypeKey },
+        where: { userId: this.user.id, id: this.teacher.teacherTypeReferenceId },
       });
       if (teacherType) {
         teacherTypeName = teacherType.name;
@@ -62,6 +62,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         userId: this.user.id,
         phone: this.call.ApiPhone,
       },
+      relations: ['teacherType'],
     });
 
     if (!teacher) {
@@ -84,7 +85,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     // TODO: Implement question handling - get questions based on teacher type
-    this.logger.log(`Asking questions for teacher type: ${this.teacher.teacherTypeKey}`);
+    this.logger.log(`Asking questions for teacher type: ${this.teacher.teacherTypeReferenceId}`);
 
     const questions = await this.getQuestionsForTeacher();
     for (const question of questions) {
@@ -183,7 +184,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Check for unconfirmed previous reports (not for "מורה מנחה" and not for previous month)
     const reportDateIsPrevMonth = reportDate < new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    if (this.teacher.teacherTypeKey !== 3 && !reportDateIsPrevMonth) {
+    if (this.teacher.teacherType?.key !== 3 && !reportDateIsPrevMonth) {
       const startReportsDate = new Date('1970-01-01');
       const endReportsDate = new Date(new Date().getFullYear(), new Date().getMonth(), 0, 23, 59, 59); // Last day of previous month
       const unconfirmedPreviousReports = await this.getUnconfirmedReportsByDateRange(startReportsDate, endReportsDate);
@@ -204,7 +205,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     // Check for existing reports
-    if (this.teacher.teacherTypeKey !== 3) {
+    if (this.teacher.teacherType?.key !== 3) {
       // Not for "מורה מנחה"
       const existingReports = await this.getReportsByTeacherIdAndDate(dateStr);
 
@@ -259,14 +260,14 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return await this.dataSource.getRepository(AttReport).find({
       where: {
         userId: this.user.id,
-        teacherTz: this.teacher.tz,
+        teacherReferenceId: this.teacher.id,
         reportDate: new Date(date),
       },
     });
   }
 
   private async getReportAndSave(): Promise<void> {
-    switch (this.teacher.teacherTypeKey) {
+    switch (this.teacher.teacherType?.key) {
       case 1:
         // מורה של סמינר כיתה
         await this.getSeminarKitaReport();
@@ -696,8 +697,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async finishSavingReport(): Promise<void> {
-    const isManhaAndOnOthers = this.teacher.teacherTypeKey === 3 && this.callParams.manhaReportType === '2';
-    const isSeminarKita = this.teacher.teacherTypeKey === 1;
+    const isManhaAndOnOthers = this.teacher.teacherType?.key === 3 && this.callParams.manhaReportType === '2';
+    const isSeminarKita = this.teacher.teacherType?.key === 1;
 
     if (isManhaAndOnOthers) {
       // בסיום האם תרצי לדווח על מורה נוספת
@@ -787,7 +788,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async updateReportIdForAnswers(reportId: number): Promise<void> {
     await this.dataSource
       .getRepository(Answer)
-      .update({ userId: this.user.id, teacherTz: this.teacher.tz, reportId: null }, { reportId: reportId });
+      .update({ userId: this.user.id, teacherReferenceId: this.teacher.id, reportId: null }, { reportId: reportId });
   }
 
   private async updateReportIdForExistingReportAnswers(oldReportId: number, newReportId: number): Promise<void> {
@@ -798,7 +799,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return await this.dataSource.getRepository(AttReport).find({
       where: {
         userId: this.user.id,
-        teacherTz: this.teacher.tz,
+        teacherReferenceId: this.teacher.id,
         reportDate: {
           $gte: startDate,
           $lte: endDate,
@@ -825,7 +826,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       7: 'REPORT.SPECIAL_EDUCATION_PREVIOUS',
     };
 
-    const messageKey = reportMessages[this.teacher.teacherTypeKey];
+    const messageKey = reportMessages[this.teacher.teacherType?.key];
     if (!messageKey) {
       return `דיווח מתאריך ${reportDate} - לחץ 9 לאישור או מספר אחר לעריכה`;
     }
@@ -930,7 +931,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const reports = await this.dataSource.getRepository(AttReport).find({
       where: {
         userId: this.user.id,
-        teacherTz: this.teacher.tz,
+        teacherReferenceId: this.teacher.id,
       },
       select: ['howManyLessonsAbsence'],
     });
