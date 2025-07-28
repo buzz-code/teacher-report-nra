@@ -5,7 +5,6 @@ import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import CallIcon from '@mui/icons-material/Call';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DatasetIcon from '@mui/icons-material/Dataset';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MapIcon from '@mui/icons-material/Map';
 import PercentIcon from '@mui/icons-material/Percent';
@@ -14,8 +13,8 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import BaseLayout from "@shared/components/layout/Layout";
 import BaseDashboard from '@shared/components/views/Dashboard';
 import { useDashboardItems } from './settings/settingsUtil';
-import { UpcomingEvents } from './dashboard/UpcomingEvents';
-import { EventStatsContainer } from './dashboard/EventStatsContainer';
+import { TeacherReportStats } from './dashboard/TeacherReportStats';
+import { RecentTeacherReports } from './dashboard/RecentTeacherReports';
 
 const customMenuItems = [
     <MenuItemLink key="tutorial" to="/tutorial" primaryText="מדריך למשתמש" leftIcon={<HelpIcon />} />,
@@ -28,7 +27,6 @@ const customMenuItems = [
 
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
-    { name: 'events', icon: <AnalyticsIcon /> },
     { 
         name: 'reports', 
         icon: <SummarizeIcon />, 
@@ -51,8 +49,8 @@ export const Dashboard = () => {
     const dashboardItems = useDashboardItems();
     return (
         <BaseDashboard dashboardItems={dashboardItems} >
-            <UpcomingEvents />
-            <EventStatsContainer />
+            <TeacherReportStats />
+            <RecentTeacherReports />
         </BaseDashboard>
     );
 }
