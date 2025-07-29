@@ -13,7 +13,6 @@ import {
   DataSource,
 } from 'typeorm';
 import { User } from './User.entity';
-import { Event } from './Event.entity';
 import { TeacherType } from './TeacherType.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';

@@ -21,17 +21,6 @@ import { Dashboard, Layout } from 'src/GeneralLayout';
 
 import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
 
-// Event Management System Entities
-import event from "src/entities/event";
-import eventType from "src/entities/event-type";
-import eventNote from "src/entities/event-note";
-import gift from "src/entities/gift";
-import eventGift from "src/entities/event-gift";
-import classEntity from "src/entities/class";
-import levelType from "src/entities/level-type";
-import studentClass from './entities/student-class';
-import studentByYear from './entities/student-by-year'; // Added import
-
 // Keep required shared entities
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
@@ -77,13 +66,6 @@ import Roadmap from '@shared/components/views/Roadmap';
 // Icons
 import BadgeIcon from '@mui/icons-material/Badge';
 import PortraitIcon from '@mui/icons-material/Portrait';
-import CategoryIcon from '@mui/icons-material/Category';
-import EventIcon from '@mui/icons-material/Event';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import ClassIcon from '@mui/icons-material/Class';
-import CommentIcon from '@mui/icons-material/Comment';
-import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import ImageIcon from '@mui/icons-material/Image';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -93,8 +75,6 @@ import LogoDevIcon from '@mui/icons-material/LogoDev';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import RouteIcon from '@mui/icons-material/Route';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import WorkIcon from '@mui/icons-material/Work';
@@ -102,7 +82,8 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import RateReviewIcon from '@mui/icons-material/RateReview';
+import CategoryIcon from '@mui/icons-material/Category';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -115,19 +96,8 @@ const App = () => (
         requireAuth>
         {permissions => (
           <>
-            {/* Event Management System Resources */}
-            <Resource name="event" {...event} options={{ menuGroup: 'events' }} icon={EventIcon} />
-            <Resource name="event_type" {...eventType} options={{ menuGroup: 'events' }} icon={CategoryIcon} />
-            <Resource name="event_note" {...eventNote} options={{ menuGroup: 'events' }} icon={CommentIcon} />
-            <Resource name="gift" {...gift} options={{ menuGroup: 'events' }} icon={CardGiftcardIcon} />
-            <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
-            <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
-            <Resource name="level_type" {...levelType} options={{ menuGroup: 'data' }} icon={RouteIcon} />
-            
-            {/* Keep Student and Teacher from original system */}
+            {/* Core Teacher Report Data */}
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-            <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-            <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             
             {/* Teacher Report System Resources */}
