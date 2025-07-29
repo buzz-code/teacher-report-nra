@@ -8,13 +8,7 @@ import { Price } from '../db/entities/Price.entity';
 import { WorkingDate } from '../db/entities/WorkingDate.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
 import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
-import {
-  validateAbsencesPerMonth,
-  validateWorkingDay,
-  validateReportModification,
-  validateNotFutureDate,
-  validateSeminarKitaLessonCount,
-} from '../utils/validation.util';
+import { validateAbsencesPerMonth, validateWorkingDay, validateReportModification } from '../utils/validation.util';
 import { BadRequestException } from '@nestjs/common';
 import { DeepPartial } from 'typeorm';
 
@@ -81,8 +75,16 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
   }
 
   async updateOne(req: any, dto: DeepPartial<T>): Promise<T> {
-    // Basic validation - detailed validation happens in validateAttReport
-    await this.validateAttReport(dto as AttReport, req.user);
+    // TODO: Move to class-validator when business logic validation support improves
+    // Check if report can be modified (involves checking related entities)
+    const attReport = dto as AttReport;
+    const modificationError = validateReportModification(attReport);
+    if (modificationError) {
+      throw new BadRequestException(modificationError);
+    }
+
+    // Basic business validation - other validations handled by class-validator decorators
+    await this.validateAttReport(attReport, req.user);
     return super.updateOne(req, dto);
   }
 
@@ -90,28 +92,21 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
     const errors: string[] = [];
     const userId = getUserIdFromUser(user);
 
-    // Validate future date
-    const futureDateError = validateNotFutureDate(attReport.reportDate);
-    if (futureDateError) {
-      errors.push(futureDateError);
-    }
+    // NOTE: Date validation and Seminar Kita lesson count validation are now handled by class-validator decorators
+    // in AttReport.entity.ts. The remaining validations require database access or complex business logic.
 
-    // Validate absences per month
+    // TODO: Move to class-validator when async validation support improves
+    // Validate absences per month (requires database queries)
     const absencesError = await validateAbsencesPerMonth(attReport, this.dataSource.getRepository(AttReport), userId);
     if (absencesError) {
       errors.push(absencesError);
     }
 
-    // Validate working day
+    // TODO: Move to class-validator when async validation support improves
+    // Validate working day (requires database queries)
     const workingDayError = await validateWorkingDay(attReport, this.dataSource.getRepository(WorkingDate), userId);
     if (workingDayError) {
       errors.push(workingDayError);
-    }
-
-    // Validate Seminar Kita lesson count
-    const lessonCountError = validateSeminarKitaLessonCount(attReport);
-    if (lessonCountError) {
-      errors.push(lessonCountError);
     }
 
     if (errors.length > 0) {

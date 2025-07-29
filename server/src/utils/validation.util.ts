@@ -3,6 +3,9 @@ import { Repository } from 'typeorm';
 
 /**
  * Business validation rules for attendance reports
+ *
+ * NOTE: Simple validations have been moved to class-validator decorators in AttReport.entity.ts
+ * The validations below require database access or complex business logic that cannot be handled by class-validator
  */
 
 /**
@@ -11,6 +14,9 @@ import { Repository } from 'typeorm';
  * @param attReportRepository - Repository for querying existing reports
  * @param userId - Current user ID
  * @returns Promise<string | null> - Error message if validation fails, null if valid
+ *
+ * TODO: This validation requires database queries to check existing reports
+ * and cannot be implemented using class-validator decorators
  */
 export async function validateAbsencesPerMonth(
   attReport: AttReport,
@@ -58,6 +64,9 @@ export async function validateAbsencesPerMonth(
  * @param workingDateRepository - Repository for querying working dates
  * @param userId - Current user ID
  * @returns Promise<string | null> - Error message if validation fails, null if valid
+ *
+ * TODO: This validation requires database queries to check working dates
+ * and cannot be implemented using class-validator decorators
  */
 export async function validateWorkingDay(
   attReport: AttReport,
@@ -91,6 +100,9 @@ export async function validateWorkingDay(
  * Validates that a report cannot be modified if it's already confirmed or linked to salary report
  * @param attReport - The attendance report being validated
  * @returns string | null - Error message if validation fails, null if valid
+ *
+ * TODO: This validation involves business logic checking related entities
+ * and cannot be fully implemented using class-validator decorators
  */
 export function validateReportModification(attReport: AttReport): string | null {
   if (attReport.isConfirmed) {
@@ -99,61 +111,6 @@ export function validateReportModification(attReport: AttReport): string | null 
 
   if (attReport.salaryReport) {
     return 'לא ניתן לעדכן דוח הקשור לדוח שכר. יש להסיר את הקישור תחילה.';
-  }
-
-  return null;
-}
-
-/**
- * Validates that future dates cannot be reported
- * @param reportDate - The report date being validated
- * @returns string | null - Error message if validation fails, null if valid
- */
-export function validateNotFutureDate(reportDate: Date): string | null {
-  const today = new Date();
-  today.setHours(23, 59, 59, 999); // End of today
-
-  if (new Date(reportDate) > today) {
-    return 'לא ניתן לדווח על תאריכים עתידיים.';
-  }
-
-  return null;
-}
-
-/**
- * Validates that Seminar Kita lesson count matches reported activities
- * @param attReport - The attendance report being validated
- * @returns string | null - Error message if validation fails, null if valid
- */
-export function validateSeminarKitaLessonCount(attReport: AttReport): string | null {
-  const {
-    howManyLessons,
-    howManyWatchOrIndividual,
-    howManyTeachedOrInterfering,
-    wasKamal,
-    howManyDiscussingLessons,
-    howManyLessonsAbsence,
-    teacher,
-  } = attReport;
-
-  // Only validate for Seminar Kita teachers (type 1)
-  if (teacher?.teacherType?.key !== 1) {
-    return null;
-  }
-
-  if (!howManyLessons) {
-    return null; // Cannot validate without total lesson count
-  }
-
-  const reportedActivities =
-    (howManyWatchOrIndividual || 0) +
-    (howManyTeachedOrInterfering || 0) +
-    (wasKamal ? 1 : 0) +
-    (howManyDiscussingLessons || 0) +
-    (howManyLessonsAbsence || 0);
-
-  if (howManyLessons !== reportedActivities) {
-    return `סה"כ השיעורים המדווחים (${reportedActivities}) אינו תואם למספר השיעורים שהוקש (${howManyLessons}). יש לבדוק את הנתונים.`;
   }
 
   return null;

@@ -16,7 +16,13 @@ import { Teacher } from './Teacher.entity';
 import { AttType } from './AttType.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import {
+  IsNotEmpty,
+  MaxLength,
+  IsNumber,
+  IsNotFutureDate,
+  ValidateSeminarKitaLessonCount,
+} from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType, BooleanType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
@@ -80,6 +86,7 @@ export class AttReport implements IHasUserId {
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
+  @IsNotFutureDate({ always: true })
   @Column('date', { name: 'report_date' })
   reportDate: Date;
 
@@ -227,6 +234,7 @@ export class AttReport implements IHasUserId {
 
   @IsOptional({ always: true })
   @NumberType
+  @ValidateSeminarKitaLessonCount({ always: true })
   @Column('int', { name: 'how_many_lessons', nullable: true })
   howManyLessons: number;
 
