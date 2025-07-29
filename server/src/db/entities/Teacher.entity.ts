@@ -32,7 +32,7 @@ export class Teacher implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([TeacherType]);
+      dataSource = await getDataSource([TeacherType, User]);
 
       this.teacherTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
