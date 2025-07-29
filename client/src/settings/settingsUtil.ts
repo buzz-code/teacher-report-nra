@@ -12,30 +12,30 @@ export function getDashboardItems(identity) {
 export function getDefaultDashboardItems() {
   return [
       {
-          resource: 'event',
-          icon: 'List',
-          title: 'אירועים מתוכננים',
+          resource: 'att_report',
+          icon: 'Assignment',
+          title: 'דוחות נוכחות',
           yearFilterType: 'year',
-          filter: { 'eventDate:$gte': new Date().toISOString().split('T')[0] }
+          filter: {}
       },
       {
-          resource: 'student_by_year',
+          resource: 'teacher',
           icon: 'Person',
-          title: 'משתתפים',
+          title: 'מורים',
+          yearFilterType: 'none',
+          filter: {}
+      },
+      {
+          resource: 'salary_report',
+          icon: 'Receipt',
+          title: 'דוחות שכר',
           yearFilterType: 'year',
           filter: {}
       },
       {
-          resource: 'event_gift',
-          icon: 'List',
-          title: 'מתנות באירועים',
-          yearFilterType: 'year',
-          filter: {}
-      },
-      {
-          resource: 'event_note',
-          icon: 'List',
-          title: 'הערות לאירועים',
+          resource: 'working_date',
+          icon: 'CalendarToday',
+          title: 'תאריכי עבודה',
           yearFilterType: 'year',
           filter: {}
       }
