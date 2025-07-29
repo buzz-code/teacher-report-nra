@@ -6,7 +6,7 @@ export class InitialSchema1752699094170 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const typeormMetadataExists = await queryRunner.hasTable('typeorm_metadata');
     if (!typeormMetadataExists) {
-        await queryRunner.query(`
+      await queryRunner.query(`
             CREATE TABLE \`typeorm_metadata\` (\`type\` varchar(255) NOT NULL,\`database\` varchar(255) DEFAULT NULL,\`schema\` varchar(255) DEFAULT NULL,\`table\` varchar(255) DEFAULT NULL,\`name\` varchar(255) DEFAULT NULL,\`value\` text) ENGINE=InnoDB
         `);
     }
