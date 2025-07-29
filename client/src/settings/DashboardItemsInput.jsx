@@ -26,14 +26,18 @@ export function DashboardItemsInput() {
             <CommonEntityNameInput
               source="resource"
               allowedEntities={[
-                'event',
-                'event_type',
-                'event_note',
-                'gift',
-                'event_gift',
-                'class',
-                'student',
+                'att_report',
                 'teacher',
+                'teacher_type',
+                'att_type',
+                'salary_report',
+                'working_date',
+                'price',
+                'question',
+                'answer',
+                'student',
+                'student_class',
+                'student_by_year',
               ]}
               helperText="בחר את מקור הנתונים שברצונך להציג"
               fullWidth

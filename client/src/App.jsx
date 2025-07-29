@@ -1,6 +1,6 @@
 import { Admin, Resource, CustomRoutes } from 'react-admin';
 import { BrowserRouter, Route } from 'react-router-dom';
-import { teal, orange } from '@mui/material/colors';
+import { teal, orange, blue, green } from '@mui/material/colors';
 
 import domainTranslations from 'src/domainTranslations';
 import dataProvider from "@shared/providers/dataProvider";
@@ -12,8 +12,8 @@ import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import roadmapFeatures from 'src/roadmapFeatures';
 
 const appTheme = createTheme({
-  primary: teal[700],
-  secondary: orange[600],
+  primary: blue[700],    // Educational, professional blue
+  secondary: green[600], // Supporting green instead of orange
   isRtl: true
 });
 
@@ -21,20 +21,11 @@ import { Dashboard, Layout } from 'src/GeneralLayout';
 
 import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
 
-// Event Management System Entities
-import event from "src/entities/event";
-import eventType from "src/entities/event-type";
-import eventNote from "src/entities/event-note";
-import gift from "src/entities/gift";
-import eventGift from "src/entities/event-gift";
-import classEntity from "src/entities/class";
-import levelType from "src/entities/level-type";
-import studentClass from './entities/student-class';
-import studentByYear from './entities/student-by-year'; // Added import
-
-// Keep required shared entities
+// Shared entities (used by teacher reporting system)
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
+import studentClass from './entities/student-class';
+import studentByYear from './entities/student-by-year';
 
 // Teacher Report System Entities
 import teacherType from "src/entities/teacher-type";
@@ -115,16 +106,7 @@ const App = () => (
         requireAuth>
         {permissions => (
           <>
-            {/* Event Management System Resources */}
-            <Resource name="event" {...event} options={{ menuGroup: 'events' }} icon={EventIcon} />
-            <Resource name="event_type" {...eventType} options={{ menuGroup: 'events' }} icon={CategoryIcon} />
-            <Resource name="event_note" {...eventNote} options={{ menuGroup: 'events' }} icon={CommentIcon} />
-            <Resource name="gift" {...gift} options={{ menuGroup: 'events' }} icon={CardGiftcardIcon} />
-            <Resource name="event_gift" {...eventGift} options={{ menuGroup: 'events' }} icon={EventNoteIcon} />
-            <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
-            <Resource name="level_type" {...levelType} options={{ menuGroup: 'data' }} icon={RouteIcon} />
-            
-            {/* Keep Student and Teacher from original system */}
+            {/* Shared entities (used by teacher reporting) */}
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />

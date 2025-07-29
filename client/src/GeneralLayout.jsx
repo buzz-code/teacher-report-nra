@@ -14,8 +14,6 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import BaseLayout from "@shared/components/layout/Layout";
 import BaseDashboard from '@shared/components/views/Dashboard';
 import { useDashboardItems } from './settings/settingsUtil';
-import { UpcomingEvents } from './dashboard/UpcomingEvents';
-import { EventStatsContainer } from './dashboard/EventStatsContainer';
 
 const customMenuItems = [
     <MenuItemLink key="tutorial" to="/tutorial" primaryText="מדריך למשתמש" leftIcon={<HelpIcon />} />,
@@ -28,7 +26,6 @@ const customMenuItems = [
 
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
-    { name: 'events', icon: <AnalyticsIcon /> },
     { 
         name: 'reports', 
         icon: <SummarizeIcon />, 
@@ -50,9 +47,6 @@ export const Layout = ({ children }) => (
 export const Dashboard = () => {
     const dashboardItems = useDashboardItems();
     return (
-        <BaseDashboard dashboardItems={dashboardItems} >
-            <UpcomingEvents />
-            <EventStatsContainer />
-        </BaseDashboard>
+        <BaseDashboard dashboardItems={dashboardItems} />
     );
 }

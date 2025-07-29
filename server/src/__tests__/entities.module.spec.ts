@@ -37,15 +37,9 @@ import pageConfig from '../entity-modules/page.config';
 import paymentTrackConfig from '../entity-modules/payment-track.config';
 import textConfig from '../entity-modules/text.config';
 import mailAddressConfig from '@shared/utils/mail/mail-address.config';
-import eventConfig from '../entity-modules/event.config';
-import eventTypeConfig from '../entity-modules/event-type.config';
-import eventNoteConfig from '../entity-modules/event-note.config';
-import giftConfig from '../entity-modules/gift.config';
-import eventGiftConfig from '../entity-modules/event-gift.config';
-import classConfig from '../entity-modules/class.config';
+// Shared entities used by teacher report system
 import studentConfig from '../entity-modules/student.config';
 import teacherConfig from '../entity-modules/teacher.config';
-import levelTypeConfig from '../entity-modules/level-type.config';
 import studentClassConfig from '../entity-modules/student-class.config';
 import studentByYearConfig from '../entity-modules/student-by-year.config';
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -90,15 +84,8 @@ describe('EntitiesModule', () => {
                 pageConfig.entity,
                 paymentTrackConfig.entity,
                 textConfig.entity,
-                eventConfig.entity,
-                eventTypeConfig.entity,
-                eventNoteConfig.entity,
-                giftConfig.entity,
-                eventGiftConfig.entity,
-                classConfig.entity,
                 studentConfig.entity,
                 teacherConfig.entity,
-                levelTypeConfig.entity,
                 studentClassConfig.entity,
                 studentByYearConfig.entity,
                 YemotCall,
@@ -140,15 +127,8 @@ describe('EntitiesModule', () => {
       { name: 'paymentTrackConfig', config: paymentTrackConfig },
       { name: 'textConfig', config: textConfig },
       { name: 'mailAddressConfig', config: mailAddressConfig },
-      { name: 'eventConfig', config: eventConfig },
-      { name: 'eventTypeConfig', config: eventTypeConfig },
-      { name: 'eventNoteConfig', config: eventNoteConfig },
-      { name: 'giftConfig', config: giftConfig },
-      { name: 'eventGiftConfig', config: eventGiftConfig },
-      { name: 'classConfig', config: classConfig },
       { name: 'studentConfig', config: studentConfig },
       { name: 'teacherConfig', config: teacherConfig },
-      { name: 'levelTypeConfig', config: levelTypeConfig },
       { name: 'studentClassConfig', config: studentClassConfig },
       { name: 'studentByYearConfig', config: studentByYearConfig },
     ];
