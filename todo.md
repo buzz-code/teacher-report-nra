@@ -144,16 +144,13 @@
 
 ### 🚨 Critical Missing API Endpoints
 
-#### 16. Specialized Report Endpoints (Backend)
-According to SYSTEM_REQUIREMENTS.md, the following specialized report endpoints should exist but are currently missing:
-- [ ] `GET /api/att-reports/getSeminarKitaReport` - Seminar Kita teacher reports with student count calculations
-- [ ] `GET /api/att-reports/getTrainingReport` - Training teacher reports (marked as not in use but should exist)
-- [ ] `GET /api/att-reports/getManhaReport` - Manha teacher reports with complex validation
-- [ ] `GET /api/att-reports/getResponsibleReport` - Responsible reports (marked as not in use but should exist)
-- [ ] `GET /api/att-reports/getPdsReport` - PDS teacher reports
-- [ ] `GET /api/att-reports/getSpecialEducationReport` - Special education reports
-- [ ] `GET /api/att-reports/getKindergartenReport` - Kindergarten reports
-- [ ] `GET /api/att-reports/getTotalPayMonthlyReport` - Monthly salary summary reports
+#### 16. Specialized Report Endpoints (Backend) - ✅ PARTIALLY IMPLEMENTED
+The system has existing pivot functionality that provides teacher-type-specific views:
+- [x] **AttReportByTeacherType pivot** - Dynamic field display based on teacher type filter
+- [x] **AttReportWithPricing pivot** - Reports with salary calculations
+- [x] **Backend pivot logic** - `AttReportPricingService.populatePivotData()` handles both scenarios
+
+**Note**: The specialized endpoints like `getSeminarKitaReport`, `getManhaReport`, etc. may not be needed as separate endpoints since the pivot functionality already provides teacher-type-specific views through filtering.
 
 #### 17. Report Management Endpoints (Backend)
 - [ ] `POST /api/att-reports/updateSalaryMonth` - Update salary month for multiple reports
@@ -192,14 +189,15 @@ Current implementation has many TODO comments and missing functionality:
 
 ### 🎯 Frontend Missing Specialized Views
 
-#### 21. Dedicated Report Views by Teacher Type
-According to SYSTEM_REQUIREMENTS.md, these specialized frontend routes should exist:
-- [ ] `/seminar-kita-reports` - Dedicated view for Seminar Kita teacher reports
-- [ ] `/manha-reports` - Dedicated view for Manha teacher reports  
-- [ ] `/pds-reports` - Dedicated view for PDS teacher reports
-- [ ] `/special-education-reports` - Dedicated view for Special Education reports
-- [ ] `/kindergarten-reports` - Dedicated view for Kindergarten reports
-- [ ] `/total-monthly-reports` - Monthly salary summary reports view
+#### 21. Dedicated Report Views by Teacher Type - ✅ PARTIALLY IMPLEMENTED
+The system has existing pivot-based report views:
+- [x] `/att-report-by-teacher-type` - Dynamic view with teacher type filtering and dynamic columns
+- [x] `/att-report-pricing` - Reports with pricing calculations
+- [x] **Dynamic field visibility** - Based on teacher type selection through `fieldsShow.util.ts`
+
+**Additional specialized routes that could enhance UX**:
+- [ ] Direct navigation shortcuts for each teacher type (optional enhancement)
+- [ ] Pre-filtered views for common teacher type combinations
 
 #### 22. Enhanced Navigation Structure
 - [ ] Update main navigation to include "Reports" dropdown menu with specialized report views
@@ -275,10 +273,15 @@ While basic pricing utilities exist, the complex salary calculation from SYSTEM_
 ## Implementation Priority
 
 ### High Priority (Core Functionality)
-1. Specialized report API endpoints (#16)
-2. Complete YemotHandlerService implementation (#19)
-3. Text/message system for phone integration (#20)
-4. Basic specialized frontend views (#21)
+1. Complete YemotHandlerService implementation (#19)
+2. Text/message system for phone integration (#20)
+3. Report management endpoints (#17)
+
+### Medium Priority (Enhanced Features)  
+1. Complete salary calculation system (#24)
+2. Enhanced validation rules (#25)
+3. Question system enhancement (#27)
+4. Excel import/export functionality (#23)
 
 ### Medium Priority (Enhanced Features)  
 1. Complete salary calculation system (#24)
