@@ -38,6 +38,7 @@ export function DashboardItemsInput() {
                 'student',
                 'student_class',
                 'student_by_year',
+                'class',
               ]}
               helperText="בחר את מקור הנתונים שברצונך להציג"
               fullWidth

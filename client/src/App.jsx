@@ -1,6 +1,6 @@
 import { Admin, Resource, CustomRoutes } from 'react-admin';
 import { BrowserRouter, Route } from 'react-router-dom';
-import { teal, orange, blue, green } from '@mui/material/colors';
+import { blue, green } from '@mui/material/colors';
 
 import domainTranslations from 'src/domainTranslations';
 import dataProvider from "@shared/providers/dataProvider";
@@ -24,6 +24,7 @@ import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityG
 // Shared entities (used by teacher reporting system)
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
+import classEntity from "src/entities/class";
 import studentClass from './entities/student-class';
 import studentByYear from './entities/student-by-year';
 
@@ -69,11 +70,7 @@ import Roadmap from '@shared/components/views/Roadmap';
 import BadgeIcon from '@mui/icons-material/Badge';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import CategoryIcon from '@mui/icons-material/Category';
-import EventIcon from '@mui/icons-material/Event';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import ClassIcon from '@mui/icons-material/Class';
-import CommentIcon from '@mui/icons-material/Comment';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import ImageIcon from '@mui/icons-material/Image';
@@ -85,15 +82,12 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import RouteIcon from '@mui/icons-material/Route';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import WorkIcon from '@mui/icons-material/Work';
 import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import FilterListIcon from '@mui/icons-material/FilterList';
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -111,6 +105,7 @@ const App = () => (
             <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+            <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
             
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
