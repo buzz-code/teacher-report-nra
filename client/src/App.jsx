@@ -1,6 +1,6 @@
 import { Admin, Resource, CustomRoutes } from 'react-admin';
 import { BrowserRouter, Route } from 'react-router-dom';
-import { teal, orange } from '@mui/material/colors';
+import { blue, green } from '@mui/material/colors';
 
 import domainTranslations from 'src/domainTranslations';
 import dataProvider from "@shared/providers/dataProvider";
@@ -12,8 +12,8 @@ import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import roadmapFeatures from 'src/roadmapFeatures';
 
 const appTheme = createTheme({
-  primary: teal[700],
-  secondary: orange[600],
+  primary: blue[700],    // Educational, professional blue
+  secondary: green[600], // Supporting green instead of orange
   isRtl: true
 });
 
@@ -21,9 +21,12 @@ import { Dashboard, Layout } from 'src/GeneralLayout';
 
 import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
 
-// Keep required shared entities
+// Shared entities (used by teacher reporting system)
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
+import classEntity from "src/entities/class";
+import studentClass from './entities/student-class';
+import studentByYear from './entities/student-by-year';
 
 // Teacher Report System Entities
 import teacherType from "src/entities/teacher-type";
@@ -66,6 +69,9 @@ import Roadmap from '@shared/components/views/Roadmap';
 // Icons
 import BadgeIcon from '@mui/icons-material/Badge';
 import PortraitIcon from '@mui/icons-material/Portrait';
+import CategoryIcon from '@mui/icons-material/Category';
+import ClassIcon from '@mui/icons-material/Class';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import ImageIcon from '@mui/icons-material/Image';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -75,15 +81,18 @@ import LogoDevIcon from '@mui/icons-material/LogoDev';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import WorkIcon from '@mui/icons-material/Work';
 import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+<<<<<<< HEAD
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import CategoryIcon from '@mui/icons-material/Category';
+=======
+>>>>>>> origin/main
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -96,9 +105,14 @@ const App = () => (
         requireAuth>
         {permissions => (
           <>
+<<<<<<< HEAD
             {/* Core Teacher Report Data */}
+=======
+            {/* Shared entities (used by teacher reporting) */}
+>>>>>>> origin/main
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+            <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
             
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />

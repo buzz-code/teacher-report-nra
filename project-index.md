@@ -1,8 +1,8 @@
-# Event Management NRA Project Index
+# Teacher Report Management NRA Project Index
 
 ## Executive Summary
 
-The Event Management NRA system is a comprehensive platform designed to track and manage events, participants, gifts, and event-related activities. Built with a React Admin frontend and NestJS backend, the system enables organizations to create and organize events, manage attendee registration, track gift distribution, and generate reports. The application features robust entity relationships centered around events, with support for RTL Hebrew text, customizable settings, and integration with the Yemot telephony system. This dockerized application uses MySQL for data persistence and follows a modular architecture with shared components for extensibility and code reuse.
+The Teacher Report Management NRA system is a comprehensive platform designed to track and manage teacher attendance reports, payroll, and educational activities. Built with a React Admin frontend and NestJS backend, the system enables educational organizations to record teacher attendance, calculate salaries, manage working dates, and generate detailed reports. The application features robust teacher-centered entity relationships, with support for RTL Hebrew text, customizable settings, and integration with the Yemot telephony system. This dockerized application uses MySQL for data persistence and follows a modular architecture with shared components for extensibility and code reuse.
 
 ## Table of Contents
 - [1. Project Overview](#1-project-overview)
@@ -15,7 +15,7 @@ The Event Management NRA system is a comprehensive platform designed to track an
 
 ## Key Concepts
 
-1. **Event-Centered Data Model** - Events are the primary entity around which the entire system revolves. All other entities (participants, gifts, notes) connect to events either directly or indirectly.
+1. **Teacher-Centered Data Model** - Teachers and attendance reports are the primary entities around which the entire system revolves. All other entities (students, classes, salary reports) connect to teachers either directly or indirectly.
 
 2. **Modular Architecture** - Both frontend and backend use a modular approach with shared components/modules stored in separate Git submodule repositories, enabling code reuse across multiple projects.
 
@@ -32,19 +32,21 @@ The Event Management NRA system is a comprehensive platform designed to track an
 ## 1. Project Overview
 
 ### Project Purpose
-This is an event management system designed to track and manage events, participants, gifts, and event-related activities. The system focuses on creating and organizing events, managing attendees, and tracking gift distribution.
+This is a teacher report management system designed to track and manage teacher attendance, payroll calculations, working dates, and educational activities. The system focuses on recording teacher activities, calculating salaries based on attendance, and generating comprehensive reports for educational institutions.
 
 ### Entity Relationships
 The system is built around these core relationships:
-- **Events** are the central entity that everything connects to
-- **Event Types** categorize different kinds of events
-- **Event Notes** provide additional information for specific events
-- **Gifts** can be attached to events through the **Event Gift** junction entity
-- **Students** are the participants who attend events
-- **Teachers** organize and manage events
-- **Classes** represent physical locations or venues where events take place
+- **Teachers** are the central entity that everything connects to
+- **Teacher Types** categorize different kinds of teaching roles
+- **Attendance Reports** track teacher presence and activities
+- **Activity Types** define different kinds of teaching activities
+- **Salary Reports** calculate compensation based on attendance
+- **Working Dates** define valid working periods
+- **Students** are participants in the educational process
+- **Classes** represent physical locations or groups where teaching occurs
+- **Questions and Answers** support evaluation and feedback systems
 
-These relationships allow for tracking of which participants attended which events, what gifts were distributed, and collecting notes and feedback about events.
+These relationships allow for tracking of teacher attendance, calculating appropriate compensation, and generating reports for administrative purposes.
 
 ### Language Support
 The application fully supports Right-to-Left (RTL) Hebrew text. UI labels and messages are defined in the domainTranslations.js file and managed through the i18nProvider.
@@ -105,10 +107,11 @@ The client side uses React Admin as the foundation for the administrative interf
 - `/client/src/domainTranslations.js` - Domain-specific translation strings
 
 ### Essential Entity Definitions
-- `/client/src/entities/event.jsx` - Core entity for event management
-- `/client/src/entities/event-gift.jsx` - Connects events with gifts
-- `/client/src/entities/student.jsx` - Event participants
-- `/client/src/entities/teacher.jsx` - Event organizers
+- `/client/src/entities/att-report.jsx` - Core entity for attendance tracking
+- `/client/src/entities/teacher.jsx` - Teacher management
+- `/client/src/entities/salary-report.jsx` - Salary calculations
+- `/client/src/entities/student.jsx` - Student information
+- `/client/src/entities/working-date.jsx` - Working date management
 
 ### Critical Providers
 - `/client/shared/providers/dataProvider.js` - API communication
@@ -117,8 +120,8 @@ The client side uses React Admin as the foundation for the administrative interf
 
 ### Key Components
 - `/client/shared/components/layout/` - Layout components with RTL support
-- `/client/src/dashboard/UpcomingEvents.jsx` - Main dashboard component 
 - `/client/src/settings/Settings.jsx` - System configuration
+- `/client/src/pivots/` - Report pivot components for data analysis
 
 ## 4. Server Side (NestJS Backend)
 
@@ -135,16 +138,16 @@ The server side is built with NestJS, providing a modular and scalable backend a
 - `/server/src/entities.module.ts` - Entity registration
 
 ### Primary Entity Modules
-- `/server/src/entity-modules/event.config.ts` - Primary event entity
-- `/server/src/entity-modules/student.config.ts` - Participant management
-- `/server/src/entity-modules/teacher.config.ts` - Organizer management
-- `/server/src/entity-modules/gift.config.ts` - Gift tracking
+- `/server/src/entity-modules/att-report.config.ts` - Primary attendance tracking entity
+- `/server/src/entity-modules/teacher.config.ts` - Teacher management
+- `/server/src/entity-modules/student.config.ts` - Student information
+- `/server/src/entity-modules/salary-report.config.ts` - Salary calculations
 - `/server/src/entity-modules/user.config.ts` - User authentication
 
 ### Critical Infrastructure
 - `/server/shared/auth/auth.module.ts` - Authentication system
 - `/server/shared/utils/mail/mail-send.module.ts` - Email notifications
-- `/server/src/yemot-handler.ts` - Telephony integration
+- `/server/src/yemot-handler.service.ts` - Telephony integration
 
 ## 5. Database
 - `/db/data.sql` - Initial database data
