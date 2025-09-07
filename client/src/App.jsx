@@ -88,11 +88,6 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-<<<<<<< HEAD
-import RateReviewIcon from '@mui/icons-material/RateReview';
-import CategoryIcon from '@mui/icons-material/Category';
-=======
->>>>>>> origin/main
 
 const i18nProvider = getI18nProvider(domainTranslations);
 
@@ -105,11 +100,7 @@ const App = () => (
         requireAuth>
         {permissions => (
           <>
-<<<<<<< HEAD
-            {/* Core Teacher Report Data */}
-=======
             {/* Shared entities (used by teacher reporting) */}
->>>>>>> origin/main
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
