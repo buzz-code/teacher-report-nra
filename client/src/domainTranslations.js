@@ -2,128 +2,17 @@ import { generalResourceFieldsTranslation } from "@shared/providers/i18nProvider
 
 export default {
     menu_groups: {
-        events: 'אירועים',
         data: 'נתונים',
         reports: 'דוחות מורים',
         settings: 'הגדרות',
         admin: 'ניהול',
     },
     resources: {
-        // Event Management System Entities
-        event: {
-            name: 'אירוע |||| אירועים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'תלמידה',
-                studentReferenceId: 'תלמידה',
-                teacherTz: 'מורה אחראית',
-                teacherReferenceId: 'מורה אחראית',
-                eventTypeReferenceId: 'סוג האירוע',
-                eventTypeId: 'סוג האירוע',
-                levelTypeReferenceId: 'סוג רמה',
-                levelTypeId: 'סוג רמה',
-                studentClassReferenceId: 'כיתה',
-                description: 'תיאור',
-                eventDate: 'תאריך האירוע',
-                'eventDate:$gte': 'תאריך האירוע מ-',
-                'eventDate:$lte': 'תאריך האירוע עד-',
-                eventHebrewDate: 'תאריך עברי',
-                eventHebrewMonth: 'חודש עברי',
-                'eventHebrewMonth:$cont': 'חודש עברי',
-                completed: 'הושלם?',
-                grade: 'ציון',
-                newNote: 'הערה חדשה',
-            }
-        },
-        event_type: {
-            name: 'סוג אירוע |||| סוגי אירועים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                description: 'תיאור',
-            }
-        },
-        level_type: {
-            name: 'סוג רמה |||| סוגי רמה',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                description: 'תיאור',
-                'description:$cont': 'חיפוש בתיאור',
-            }
-        },
-        event_note: {
-            name: 'הערה לאירוע |||| הערות לאירועים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                eventReferenceId: 'אירוע',
-                noteText: 'הערה',
-                'noteText:$cont': 'חיפוש בהערה',
-            }
-        },
-        gift: {
-            name: 'מתנה |||| מתנות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                description: 'תיאור',
-            }
-        },
-        event_gift: {
-            name: 'מתנה לאירוע |||| מתנות לאירועים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                eventReferenceId: 'אירוע',
-                giftReferenceId: 'מתנה',
-                giftKey: 'מפתח מתנה',
-            }
-        },
-        class: {
-            name: 'כיתה |||| כיתות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                gradeLevel: 'שכבה',
-                'gradeLevel:$cont': 'חיפוש בשכבה',
-            }
-        },
-        student_class: {
-            name: 'שיוך תלמיד לכיתה |||| שיוכי תלמידים לכיתות',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentReferenceId: 'תלמיד',
-                studentTz: 'תלמיד',
-                classReferenceId: 'כיתה',
-                classKey: 'כיתה',
-            }
-        },
-        student_by_year: {
-            name: 'תלמידה לפי שנה |||| תלמידות לפי שנים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                studentTz: 'ת.ז. תלמיד',
-                studentName: 'שם תלמיד',
-                'studentName:$cont': 'שם תלמיד',
-                year: 'שנה',
-                classNames: 'שמות כיתות',
-                classReferenceIds: 'מזהי כיתות',
-            }
-        },
         student: {
             name: 'תלמידה |||| תלמידות',
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
-                phone: 'טלפון',
-                email: 'דואל',
-                address: 'כתובת',
-                'address:$cont': 'חיפוש בכתובת',
-                motherName: 'שם האם',
-                'motherName:$cont': 'חיפוש בשם האם',
-                motherContact: 'יצירת קשר עם האם',
-                'motherContact:$cont': 'חיפוש ביצירת קשר עם האם',
-                fatherName: 'שם האב',
-                'fatherName:$cont': 'חיפוש בשם האב',
-                fatherContact: 'יצירת קשר עם האב',
-                'fatherContact:$cont': 'חיפוש ביצירת קשר עם האב',
-                motherPreviousName: 'שם משפחה קודם של האם',
-                'motherPreviousName:$cont': 'חיפוש בשם משפחה קודם של האם',
             }
         },
         teacher: {

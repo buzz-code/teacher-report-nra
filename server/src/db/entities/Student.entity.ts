@@ -47,54 +47,6 @@ export class Student implements IHasUserId {
   @Column({ length: 510 })
   name: string;
 
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(1000, { always: true })
-  @Column({ type: 'text', nullable: true })
-  address: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  motherName: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  motherContact: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  fatherName: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  fatherContact: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  motherPreviousName: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(50, { always: true })
-  @Column({ length: 50, nullable: true })
-  phone: string;
-
-  @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, nullable: true })
-  email: string;
-
   @CreateDateColumn()
   createdAt: Date;
 

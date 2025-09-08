@@ -12,9 +12,6 @@ import textConfig from './entity-modules/text.config';
 // Shared entities used by teacher report system
 import studentConfig from './entity-modules/student.config';
 import teacherConfig from './entity-modules/teacher.config';
-import classConfig from './entity-modules/class.config';
-import studentClassConfig from './entity-modules/student-class.config';
-import studentByYearConfig from './entity-modules/student-by-year.config';
 
 // Teacher Report System entities
 import { TeacherType } from './db/entities/TeacherType.entity';
@@ -40,9 +37,6 @@ import { Image } from '@shared/entities/Image.entity';
     // Shared entities used by teacher report system
     BaseEntityModule.register(studentConfig),
     BaseEntityModule.register(teacherConfig),
-    BaseEntityModule.register(classConfig),
-    BaseEntityModule.register(studentClassConfig),
-    BaseEntityModule.register(studentByYearConfig),
 
     // Teacher Report System entities
     BaseEntityModule.register({ entity: TeacherType }),

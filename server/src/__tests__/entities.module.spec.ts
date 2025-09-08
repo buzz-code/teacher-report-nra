@@ -40,9 +40,6 @@ import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 // Shared entities used by teacher report system
 import studentConfig from '../entity-modules/student.config';
 import teacherConfig from '../entity-modules/teacher.config';
-import classConfig from '../entity-modules/class.config';
-import studentClassConfig from '../entity-modules/student-class.config';
-import studentByYearConfig from '../entity-modules/student-by-year.config';
 import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 import { RecievedMail } from '@shared/entities/RecievedMail.entity';
@@ -87,9 +84,6 @@ describe('EntitiesModule', () => {
                 textConfig.entity,
                 studentConfig.entity,
                 teacherConfig.entity,
-                classConfig.entity,
-                studentClassConfig.entity,
-                studentByYearConfig.entity,
                 YemotCall,
                 TextByUser,
                 RecievedMail,
@@ -131,9 +125,6 @@ describe('EntitiesModule', () => {
       { name: 'mailAddressConfig', config: mailAddressConfig },
       { name: 'studentConfig', config: studentConfig },
       { name: 'teacherConfig', config: teacherConfig },
-      { name: 'classConfig', config: classConfig },
-      { name: 'studentClassConfig', config: studentClassConfig },
-      { name: 'studentByYearConfig', config: studentByYearConfig },
     ];
 
     configsToTest.forEach(({ name, config }) => {

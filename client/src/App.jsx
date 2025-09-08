@@ -24,9 +24,6 @@ import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityG
 // Shared entities (used by teacher reporting system)
 import student from "src/entities/student";
 import teacher from "src/entities/teacher";
-import classEntity from "src/entities/class";
-import studentClass from './entities/student-class';
-import studentByYear from './entities/student-by-year';
 
 // Teacher Report System Entities
 import teacherType from "src/entities/teacher-type";
@@ -102,10 +99,7 @@ const App = () => (
           <>
             {/* Shared entities (used by teacher reporting) */}
             <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-            <Resource name="student_class" {...studentClass} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-            <Resource name="student_by_year" {...studentByYear} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-            <Resource name="class" {...classEntity} options={{ menuGroup: 'data' }} icon={ClassIcon} />
             
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />

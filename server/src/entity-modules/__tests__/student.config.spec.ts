@@ -11,12 +11,6 @@ describe('StudentConfig', () => {
     expect(headers).toEqual([
       { value: 'tz', label: 'ת.ז.' },
       { value: 'name', label: 'שם מלא' },
-      { value: 'address', label: 'כתובת' },
-      { value: 'motherName', label: 'שם האם' },
-      { value: 'motherContact', label: 'טלפון האם' },
-      { value: 'fatherName', label: 'שם האב' },
-      { value: 'fatherContact', label: 'טלפון האב' },
-      { value: 'motherPreviousName', label: 'שם משפחה קודם של האם' },
     ]);
   });
 
