@@ -31,7 +31,7 @@ export class Question implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([TeacherType, QuestionType]);
+      dataSource = await getDataSource([TeacherType, QuestionType, User]);
 
       this.teacherTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,

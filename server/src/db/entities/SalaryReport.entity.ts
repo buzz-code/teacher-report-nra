@@ -4,11 +4,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
 } from 'typeorm';
 import { User } from './User.entity';
+import { AttReport } from './AttReport.entity';
+import { Answer } from './Answer.entity';
 import { IsOptional } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';
@@ -24,11 +27,6 @@ export class SalaryReport implements IHasUserId {
 
   @Column('int', { name: 'user_id' })
   userId: number;
-
-  @IsOptional({ always: true })
-  @StringType
-  @Column({ type: 'text', nullable: true })
-  ids: string;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
@@ -50,4 +48,10 @@ export class SalaryReport implements IHasUserId {
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => AttReport, attReport => attReport.salaryReport)
+  attReports: AttReport[];
+
+  @OneToMany(() => Answer, answer => answer.salaryReport)
+  answers: Answer[];
 }

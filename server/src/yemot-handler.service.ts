@@ -104,7 +104,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       await this.saveAnswerForQuestion(question.id, answer);
 
       if (question.isStandalone) {
-        await this.createEmptyReportForAnswers();
         return this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
       }
     }
@@ -127,7 +126,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       teacherTz: this.teacher.tz,
       questionReferenceId: questionReferenceId,
       answer: parseInt(answer),
-      answerDate: new Date(),
+      reportDate: new Date(),
     });
     await answerRepo.save(answerEntity);
   }
@@ -360,10 +359,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       if (this.existingReport) {
         await attReportRepo.remove(this.existingReport);
-        await this.updateReportIdForExistingReportAnswers(this.existingReport.id, savedReport.id);
       }
-
-      await this.updateReportIdForAnswers(savedReport.id);
 
       await this.finishSavingReport();
     } catch (error) {
@@ -771,30 +767,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
-  }
-
-  private async createEmptyReportForAnswers(): Promise<void> {
-    const emptyReport = {
-      userId: this.user.id,
-      teacherTz: this.teacher.tz,
-      reportDate: new Date(),
-      updateDate: new Date(),
-      year: getCurrentHebrewYear(),
-      isConfirmed: true,
-    };
-    const attReportRepo = this.dataSource.getRepository(AttReport);
-    const savedReport = await attReportRepo.save(emptyReport);
-    await this.updateReportIdForAnswers(savedReport.id);
-  }
-
-  private async updateReportIdForAnswers(reportId: number): Promise<void> {
-    await this.dataSource
-      .getRepository(Answer)
-      .update({ userId: this.user.id, teacherReferenceId: this.teacher.id, reportId: null }, { reportId: reportId });
-  }
-
-  private async updateReportIdForExistingReportAnswers(oldReportId: number, newReportId: number): Promise<void> {
-    await this.dataSource.getRepository(Answer).update({ reportId: oldReportId }, { reportId: newReportId });
   }
 
   private async getUnconfirmedReportsByDateRange(startDate: Date, endDate: Date): Promise<AttReport[]> {

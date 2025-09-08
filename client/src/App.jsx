@@ -35,6 +35,7 @@ import questionType from "src/entities/question-type";
 import answer from "src/entities/answer";
 import workingDate from "src/entities/working-date";
 import salaryReport from "src/entities/salary-report";
+import reportableItem from "src/entities/reportable-item";
 
 // Common entities and utilities
 import text from "@shared/components/common-entities/text";
@@ -80,6 +81,7 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
@@ -111,6 +113,7 @@ const App = () => (
             <Resource name="answer" {...answer} options={{ menuGroup: 'reports' }} icon={RateReviewIcon} />
             <Resource name="working_date" {...workingDate} options={{ menuGroup: 'reports' }} icon={CalendarTodayIcon} />
             <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+            <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={AssignmentTurnedInIcon} />
 
             {/* Common settings and utilities */}
             <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />

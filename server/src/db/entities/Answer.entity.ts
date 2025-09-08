@@ -14,7 +14,9 @@ import {
 import { User } from './User.entity';
 import { Teacher } from './Teacher.entity';
 import { Question } from './Question.entity';
-import { AttReport } from './AttReport.entity';
+import { TeacherType } from './TeacherType.entity';
+import { QuestionType } from './QuestionType.entity';
+import { SalaryReport } from './SalaryReport.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, IsNumber } from '@shared/utils/validation/class-validator-he';
@@ -26,15 +28,14 @@ import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity
 @Index('answers_user_id_idx', ['userId'], {})
 @Index('answers_teacher_id_idx', ['teacherReferenceId'], {})
 @Index('answers_question_id_idx', ['questionReferenceId'], {})
-@Index('answers_report_id_idx', ['reportId'], {})
-@Index('answers_answer_date_idx', ['answerDate'], {})
+@Index('answers_report_date_idx', ['reportDate'], {})
 export class Answer implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([Teacher, Question]);
+      dataSource = await getDataSource([Teacher, Question, User, TeacherType, QuestionType]);
 
       this.teacherReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -93,8 +94,8 @@ export class Answer implements IHasUserId {
 
   @IsOptional({ always: true })
   @NumberType
-  @Column('int', { name: 'report_id', nullable: true })
-  reportId: number;
+  @Column('int', { name: 'salary_report_id', nullable: true })
+  salaryReportId: number;
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
@@ -103,8 +104,8 @@ export class Answer implements IHasUserId {
   answer: number;
 
   @IsOptional({ always: true })
-  @Column('date', { name: 'answer_date', nullable: true })
-  answerDate: Date;
+  @Column('date', { name: 'report_date', nullable: true })
+  reportDate: Date;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -124,7 +125,7 @@ export class Answer implements IHasUserId {
   @JoinColumn({ name: 'questionReferenceId' })
   question: Question;
 
-  @ManyToOne(() => AttReport, { nullable: true })
-  @JoinColumn({ name: 'report_id' })
-  report: AttReport;
+  @ManyToOne(() => SalaryReport, { nullable: true })
+  @JoinColumn({ name: 'salary_report_id' })
+  salaryReport: SalaryReport;
 }

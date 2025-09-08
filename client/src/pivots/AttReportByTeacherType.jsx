@@ -27,7 +27,7 @@ const filters = [
     />,
     <DateInput source="reportDate:$gte" label="תאריך דיווח אחרי" alwaysOn />,
     <DateInput source="reportDate:$lte" label="תאריך דיווח לפני" alwaysOn />,
-    <CommonReferenceInputFilter source="teacherId" reference="teacher" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
     <BooleanInput source="isConfirmed" label="מאושר" />,
 ];
@@ -47,7 +47,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {/* Universal fields - always shown */}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <MultiReferenceField source="teacherId" sortBy="teacher.name" reference="teacher" />
+            <MultiReferenceField source="teacherReferenceId" sortBy="teacher.name" reference="teacher" />
             <DateField source="reportDate" />
             <SelectField source="year" choices={yearChoices} />
             <BooleanField source="isConfirmed" />

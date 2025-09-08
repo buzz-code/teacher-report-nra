@@ -23,12 +23,12 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 
 const filters = [
     ...commonAdminFilters,
-    <CommonReferenceInputFilter source="teacherId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn />,
+    <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn />,
     <DateInput source="reportDate:$gte" />,
     <DateInput source="reportDate:$lte" />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
     <BooleanInput source="isConfirmed" />,
-    <CommonReferenceInputFilter source="salaryReport" reference="salary_report" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
 ];
 
@@ -42,12 +42,12 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <ReferenceField source="teacherId" reference="teacher" />
+            <ReferenceField source="teacherReferenceId" reference="teacher" />
             <DateField source="reportDate" />
             <DateField showDate showTime source="updateDate" />
             <NumberField source="year" />
             <BooleanField source="isConfirmed" />
-            <ReferenceField source="salaryReport" reference="salary_report" />
+            <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="salaryMonth" />
             <TextField source="comment" />
             <NumberField source="howManyStudents" />
@@ -70,14 +70,14 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <CommonReferenceInput source="teacherId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="teacherReferenceId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
         <DateInput source="reportDate" validate={[required()]} />
         <DateTimeInput source="updateDate" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         <BooleanInput source="isConfirmed" />
         
         {/* Salary fields */}
-        <CommonReferenceInput source="salaryReport" reference="salary_report" dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />
         <NumberInput source="salaryMonth" />
         <TextInput source="comment" multiline />
         
@@ -122,8 +122,8 @@ const Representation = CommonRepresentation;
 
 const importer = {
     fields: [
-        'teacherId', 'reportDate', 'updateDate', 'year', 'isConfirmed',
-        'salaryReport', 'salaryMonth', 'comment',
+        'teacherTz', 'reportDate', 'updateDate', 'year', 'isConfirmed',
+        'salaryReportId', 'salaryMonth', 'comment',
         'howManyStudents', 'howManyMethodic', 'fourLastDigitsOfTeacherPhone',
         'teachedStudentTz', 'howManyYalkutLessons', 'howManyDiscussingLessons',
         'howManyStudentsHelpTeached', 'howManyLessonsAbsence', 'howManyWatchedLessons',

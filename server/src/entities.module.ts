@@ -23,6 +23,7 @@ import { QuestionType } from './db/entities/QuestionType.entity';
 import { Answer } from './db/entities/Answer.entity';
 import { WorkingDate } from './db/entities/WorkingDate.entity';
 import { SalaryReport } from './db/entities/SalaryReport.entity';
+import reportableItemConfig from './entity-modules/reportable-item.config';
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -48,6 +49,7 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register({ entity: Answer }),
     BaseEntityModule.register({ entity: WorkingDate }),
     BaseEntityModule.register({ entity: SalaryReport }),
+    BaseEntityModule.register(reportableItemConfig),
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),

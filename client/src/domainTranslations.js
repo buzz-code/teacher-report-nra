@@ -46,14 +46,14 @@ export default {
             name: 'דוח נוכחות |||| דוחות נוכחות',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
+                teacherReferenceId: 'מורה',
                 reportDate: 'תאריך דוח',
                 'reportDate:$gte': 'תאריך דוח מ-',
                 'reportDate:$lte': 'תאריך דוח עד-',
                 updateDate: 'תאריך עדכון',
                 year: 'שנה',
                 isConfirmed: 'מאושר',
-                salaryReport: 'דוח שכר',
+                salaryReportId: 'דוח שכר',
                 salaryMonth: 'חודש שכר',
                 comment: 'הערה',
                 howManyStudents: 'כמה תלמידות',
@@ -131,13 +131,13 @@ export default {
             name: 'תשובה |||| תשובות',
             fields: {
                 ...generalResourceFieldsTranslation,
-                teacherId: 'מורה',
+                teacherReferenceId: 'מורה',
                 questionId: 'שאלה',
-                reportId: 'דוח',
+                salaryReportId: 'דוח שכר',
                 answer: 'תשובה',
-                answerDate: 'תאריך תשובה',
-                'answerDate:$gte': 'תאריך תשובה מ-',
-                'answerDate:$lte': 'תאריך תשובה עד-',
+                reportDate: 'תאריך דיווח',
+                'reportDate:$gte': 'תאריך דיווח מ-',
+                'reportDate:$lte': 'תאריך דיווח עד-',
             }
         },
         working_date: {
@@ -302,6 +302,40 @@ export default {
                 isOpen: 'פעיל?',
                 apiCallId: 'מזהה שיחה (ימות)',
             },
+        },
+        salary_report: {
+            name: 'דוח שכר |||| דוחות שכר',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם הדוח',
+                'name:$cont': 'חיפוש בשם',
+                date: 'תאריך',
+                'date:$gte': 'תאריך מ-',
+                'date:$lte': 'תאריך עד-',
+            }
+        },
+        reportable_item: {
+            name: 'פריט להקצאה |||| פריטים להקצאה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                reportDate: 'תאריך דיווח',
+                'reportDate:$gte': 'תאריך דיווח מ-',
+                'reportDate:$lte': 'תאריך דיווח עד-',
+                salaryReportId: 'דוח שכר',
+                'salaryReportId:$isnull': 'סטטוס הקצאה',
+                type: 'סוג',
+                isAssigned: 'מוקצה',
+                existingSalaryReportId: 'דוח שכר קיים',
+                salaryReportName: 'שם דוח שכר',
+                salaryReportDate: 'תאריך דוח שכר',
+            },
+            values: {
+                type: {
+                    answer: 'תשובה',
+                    attendance_report: 'דיווח נוכחות'
+                }
+            }
         }
     }
 };

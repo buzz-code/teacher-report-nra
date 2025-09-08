@@ -64,7 +64,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     </>
 }
 
-const Representation = CommonRepresentation;
+const Representation = 'content';
 
 const importer = {
     fields: ['teacherTypeId', 'questionTypeId', 'content', 'allowedDigits', 'isStandalone', 'startDate', 'endDate'],

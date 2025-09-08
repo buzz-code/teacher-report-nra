@@ -14,6 +14,7 @@ import {
 import { User } from './User.entity';
 import { Teacher } from './Teacher.entity';
 import { AttType } from './AttType.entity';
+import { SalaryReport } from './SalaryReport.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
@@ -99,8 +100,8 @@ export class AttReport implements IHasUserId {
 
   @IsOptional({ always: true })
   @NumberType
-  @Column('int', { name: 'salary_report', nullable: true })
-  salaryReport: number;
+  @Column('int', { name: 'salary_report_id', nullable: true })
+  salaryReportId: number;
 
   @IsOptional({ always: true })
   @NumberType
@@ -277,4 +278,8 @@ export class AttReport implements IHasUserId {
   @ManyToOne(() => AttType, { nullable: true })
   @JoinColumn({ name: 'activityTypeReferenceId' })
   attType: AttType;
+
+  @ManyToOne(() => SalaryReport, { nullable: true })
+  @JoinColumn({ name: 'salary_report_id' })
+  salaryReport: SalaryReport;
 }
