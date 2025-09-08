@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Teacher } from 'src/db/entities/Teacher.entity';
+import { Student } from 'src/db/entities/Student.entity';
 import { TeacherType } from 'src/db/entities/TeacherType.entity';
 import { AttReport } from 'src/db/entities/AttReport.entity';
 import { Question } from 'src/db/entities/Question.entity';
@@ -375,8 +376,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     // TODO: Implement seminar kita report logic
     this.logger.log('Getting seminar kita report');
 
-    // Use teacher's student count if available, otherwise ask
-    this.callParams.howManyStudents = this.teacher.studentCount?.toString();
+    // Use teacher's current student count if available, otherwise ask
+    const currentStudentCount = await this.getCurrentStudentCount();
+    this.callParams.howManyStudents = currentStudentCount?.toString();
     if (!this.callParams.howManyStudents) {
       // כמה תלמידות היו אצלך היום
       this.callParams.howManyStudents = await this.askForInput(
@@ -937,6 +939,25 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     });
 
     return reports.reduce((total, report) => total + (report.howManyLessonsAbsence || 0), 0);
+  }
+
+  private async getCurrentStudentCount(): Promise<number> {
+    if (!this.teacher) {
+      return 0;
+    }
+
+    const today = new Date();
+    const studentRepository = this.dataSource.getRepository(Student);
+    
+    const count = await studentRepository
+      .createQueryBuilder('student')
+      .where('student.userId = :userId', { userId: this.user.id })
+      .andWhere('student.teacherReferenceId = :teacherId', { teacherId: this.teacher.id })
+      .andWhere('(student.startDate IS NULL OR student.startDate <= :today)', { today })
+      .andWhere('(student.endDate IS NULL OR student.endDate >= :today)', { today })
+      .getCount();
+
+    return count;
   }
 
   private teacherToReportFor: Teacher;

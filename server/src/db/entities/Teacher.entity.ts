@@ -117,11 +117,6 @@ export class Teacher implements IHasUserId {
   @Column('int', { name: 'special_question', nullable: true })
   specialQuestion: number;
 
-  @IsOptional({ always: true })
-  @NumberType
-  @Column('int', { name: 'student_count', nullable: true })
-  studentCount: number;
-
   @CreateDateColumn()
   createdAt: Date;
 
