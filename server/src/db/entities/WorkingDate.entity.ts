@@ -19,15 +19,19 @@ import { IsNotEmpty, IsNumber } from '@shared/utils/validation/class-validator-h
 import { NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('working_dates')
 @Index('working_dates_user_id_idx', ['userId'], {})
 @Index('working_dates_teacher_type_id_idx', ['teacherTypeReferenceId'], {})
 @Index('working_dates_working_date_idx', ['workingDate'], {})
+@Index('working_dates_year_idx', ['year'], {})
 export class WorkingDate implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
+    fillDefaultYearValue(this);
+
     let dataSource: DataSource;
     try {
       dataSource = await getDataSource([TeacherType]);
@@ -70,6 +74,11 @@ export class WorkingDate implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @Column('date', { name: 'working_date' })
   workingDate: Date;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { nullable: true })
+  year: number;
 
   @CreateDateColumn()
   createdAt: Date;

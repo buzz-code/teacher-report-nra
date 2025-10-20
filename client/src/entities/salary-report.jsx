@@ -1,7 +1,9 @@
 import { 
     DateField, 
+    DateInput,
     DateTimeInput, 
     maxLength, 
+    NumberField,
     ReferenceField, 
     required, 
     TextField, 
@@ -12,13 +14,20 @@ import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
+import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
+import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 
 const filters = [
     ...commonAdminFilters,
     <TextInput source="name:$cont" alwaysOn />,
-    <DateTimeInput source="date:$gte" />,
-    <DateTimeInput source="date:$lte" />,
+    <DateInput source="date:$gte" />,
+    <DateInput source="date:$lte" />,
+    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
 ];
+
+const filterDefaultValues = {
+    ...defaultYearFilter,
+};
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
@@ -29,6 +38,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="ids" />
             <DateField showDate showTime source="date" />
             <TextField source="name" />
+            <NumberField source="year" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -40,8 +50,9 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <TextInput source="ids" multiline helperText="מזהי דוחות, מופרדים בפסיק" />
-        <DateTimeInput source="date" validate={[required()]} />
+        <DateInput source="date" validate={[required()]} />
         <TextInput source="name" validate={[maxLength(255)]} />
+        <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
@@ -50,7 +61,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['ids', 'date', 'name'],
+    fields: ['ids', 'date', 'name', 'year'],
 }
 
 const entity = {
@@ -58,6 +69,7 @@ const entity = {
     Inputs,
     Representation,
     filters,
+    filterDefaultValues,
     importer,
 };
 
