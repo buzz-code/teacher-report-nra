@@ -26,9 +26,7 @@ export default {
                 school: 'בית ספר',
                 teacherTypeKey: 'סוג מורה',
                 teacherTypeReferenceId: 'סוג מורה',
-                price: 'מחיר לשעה',
                 trainingTeacher: 'מורה מכשירה',
-                specialQuestion: 'שאלה מיוחדת',
                 studentCount: 'מספר תלמידות',
             }
         },

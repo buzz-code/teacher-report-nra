@@ -102,20 +102,10 @@ export class Teacher implements IHasUserId {
   teacherTypeReferenceId: number;
 
   @IsOptional({ always: true })
-  @NumberType
-  @Column('decimal', { precision: 8, scale: 2, nullable: true })
-  price: number;
-
-  @IsOptional({ always: true })
   @StringType
   @MaxLength(255, { always: true })
   @Column({ length: 255, nullable: true, name: 'training_teacher' })
   trainingTeacher: string;
-
-  @IsOptional({ always: true })
-  @NumberType
-  @Column('int', { name: 'special_question', nullable: true })
-  specialQuestion: number;
 
   @CreateDateColumn()
   createdAt: Date;
