@@ -6,6 +6,8 @@ import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput
 import { useUnique } from '@shared/utils/useUnique';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
+import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const filters = [
     ...commonAdminFilters,
@@ -17,9 +19,24 @@ const filters = [
     <CommonReferenceInputFilter source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />,
 ];
 
+const additionalBulkButtons = [
+  <BulkActionButton
+    name="bulkAssignQuestion"
+    label="שיוך שאלה"
+    icon={<AssignmentIcon />}
+  >
+    <CommonReferenceInput
+      source="questionId"
+      reference="question"
+      dynamicFilter={filterByUserId}
+      validate={required()}
+    />
+  </BulkActionButton>
+];
+
 const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
-        <CommonDatagrid {...props}>
+        <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}

@@ -22,7 +22,6 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 const filters = [
     ...commonAdminFilters,
     <TextInput source="content:$cont" alwaysOn />,
-    <CommonReferenceInputFilter source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="questionTypeReferenceId" reference="question_type" dynamicFilter={filterByUserId} />,
     <BooleanInput source="isMandatory" />,
     <DateInput source="startDate:$gte" />,
@@ -35,7 +34,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
             <ReferenceField source="questionTypeReferenceId" reference="question_type" />
             <TextField source="content" />
             <NumberField source="upperLimit" />
@@ -55,7 +53,6 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <CommonReferenceInput source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />
         <CommonReferenceInput source="questionTypeReferenceId" reference="question_type" dynamicFilter={filterByUserId} />
         <TextInput source="content" validate={[required()]} multiline />
         <NumberInput source="upperLimit" />
@@ -73,7 +70,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = 'content';
 
 const importer = {
-    fields: ['teacherTypeKey', 'questionTypeKey', 'content', 'upperLimit', 'lowerLimit', 'tariff', 'isMandatory', 'startDate', 'endDate', 'effectiveDate'],
+    fields: ['questionTypeKey', 'content', 'upperLimit', 'lowerLimit', 'tariff', 'isMandatory', 'startDate', 'endDate', 'effectiveDate'],
 }
 
 const entity = {

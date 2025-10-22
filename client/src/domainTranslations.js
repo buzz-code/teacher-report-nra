@@ -41,6 +41,15 @@ export default {
                 'name:$cont': 'חיפוש בשם',
             }
         },
+        teacher_question: {
+            name: 'שיוך שאלה למורה |||| שיוכי שאלות למורים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                questionReferenceId: 'שאלה',
+                answerReferenceId: 'תשובה',
+            }
+        },
         att_report: {
             name: 'דוח נוכחות |||| דוחות נוכחות',
             fields: {

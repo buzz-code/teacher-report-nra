@@ -13,7 +13,6 @@ import {
 } from 'typeorm';
 import { User } from './User.entity';
 import { QuestionType } from './QuestionType.entity';
-import { TeacherType } from './TeacherType.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength, IsNumber, IsInt } from '@shared/utils/validation/class-validator-he';
@@ -23,7 +22,6 @@ import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity
 
 @Entity('questions')
 @Index('questions_user_id_idx', ['userId'], {})
-@Index('questions_teacher_type_id_idx', ['teacherTypeReferenceId'], {})
 @Index('questions_question_type_id_idx', ['questionTypeReferenceId'], {})
 export class Question implements IHasUserId {
   @BeforeInsert()
@@ -31,16 +29,7 @@ export class Question implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([TeacherType, QuestionType, User]);
-
-      this.teacherTypeReferenceId = await findOneAndAssignReferenceId(
-        dataSource,
-        TeacherType,
-        { key: this.teacherTypeKey },
-        this.userId,
-        this.teacherTypeReferenceId,
-        this.teacherTypeKey,
-      );
+      dataSource = await getDataSource([QuestionType, User]);
 
       this.questionTypeReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -59,21 +48,6 @@ export class Question implements IHasUserId {
 
   @Column('int', { name: 'user_id' })
   userId: number;
-
-  @ValidateIf((question: Question) => !Boolean(question.teacherTypeReferenceId), {
-    always: true,
-  })
-  @IsOptional({ always: true })
-  @NumberType
-  @IsNumber({ maxDecimalPlaces: 0 }, { always: true })
-  @Column({ nullable: true })
-  teacherTypeKey: number;
-
-  @ValidateIf((question: Question) => !Boolean(question.teacherTypeKey) && Boolean(question.teacherTypeReferenceId), {
-    always: true,
-  })
-  @Column({ nullable: true })
-  teacherTypeReferenceId: number;
 
   @ValidateIf((question: Question) => !Boolean(question.questionTypeReferenceId), {
     always: true,
@@ -140,10 +114,6 @@ export class Question implements IHasUserId {
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @ManyToOne(() => TeacherType, { nullable: true })
-  @JoinColumn({ name: 'teacherTypeReferenceId' })
-  teacherType: TeacherType;
 
   @ManyToOne(() => QuestionType, { nullable: true })
   @JoinColumn({ name: 'questionTypeReferenceId' })

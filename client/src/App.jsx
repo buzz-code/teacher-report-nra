@@ -27,6 +27,7 @@ import teacher from "src/entities/teacher";
 
 // Teacher Report System Entities
 import teacherType from "src/entities/teacher-type";
+import teacherQuestion from "src/entities/teacher-question";
 import attReport from "src/entities/att-report";
 import attType from "src/entities/att-type";
 import price from "src/entities/price";
@@ -105,6 +106,7 @@ const App = () => (
             
             {/* Teacher Report System Resources */}
             <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
+            <Resource name="teacher_question" {...teacherQuestion} options={{ menuGroup: 'reports' }} icon={AssignmentTurnedInIcon} />
             <Resource name="att_report" {...attReport} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
             <Resource name="att_type" {...attType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
             <Resource name="price" {...price} options={{ menuGroup: 'reports' }} icon={PaymentIcon} />
@@ -113,7 +115,7 @@ const App = () => (
             <Resource name="answer" {...answer} options={{ menuGroup: 'reports' }} icon={RateReviewIcon} />
             <Resource name="working_date" {...workingDate} options={{ menuGroup: 'reports' }} icon={CalendarTodayIcon} />
             <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-            <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={AssignmentTurnedInIcon} />
+            <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
 
             {/* Common settings and utilities */}
             <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />

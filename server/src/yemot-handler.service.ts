@@ -7,8 +7,9 @@ import { AttReport } from 'src/db/entities/AttReport.entity';
 import { Question } from 'src/db/entities/Question.entity';
 import { Answer } from 'src/db/entities/Answer.entity';
 import { WorkingDate } from 'src/db/entities/WorkingDate.entity';
+import { TeacherQuestion } from 'src/db/entities/TeacherQuestion.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-import { Like } from 'typeorm';
+import { Like, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import {
   formatHebrewDateForIVR,
   gematriyaLetters,
@@ -119,13 +120,23 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async getQuestionsForTeacher(): Promise<Question[]> {
-    // TODO: Implement proper question filtering based on teacher type and special question
-    return await this.dataSource.getRepository(Question).find({
+    const today = new Date();
+
+    // Get individual assignments (unanswered only)
+    const individualAssignments = await this.dataSource.getRepository(TeacherQuestion).find({
       where: {
         userId: this.user.id,
-        teacherTypeReferenceId: this.teacher.teacherTypeReferenceId,
+        teacherReferenceId: this.teacher.id,
+        answerReferenceId: IsNull(), // Only unanswered
+        question: {
+          startDate: LessThanOrEqual(today),
+          endDate: MoreThanOrEqual(today),
+        },
       },
+      relations: ['question'],
     });
+
+    return individualAssignments.map((assignment) => assignment.question).filter(Boolean);
   }
 
   private async saveAnswerForQuestion(question: Question, answer: string): Promise<void> {
@@ -137,7 +148,20 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       answer: parseInt(answer),
       reportDate: question.effectiveDate || new Date(),
     });
-    await answerRepo.save(answerEntity);
+    const savedAnswer = await answerRepo.save(answerEntity);
+
+    // Link answer to teacher_question assignment if exists
+    await this.dataSource.getRepository(TeacherQuestion).update(
+      {
+        userId: this.user.id,
+        teacherReferenceId: this.teacher.id,
+        questionReferenceId: question.id,
+        answerReferenceId: IsNull(), // Only update unanswered assignments
+      },
+      {
+        answerReferenceId: savedAnswer.id,
+      },
+    );
   }
 
   private async getReportDate(): Promise<void> {
