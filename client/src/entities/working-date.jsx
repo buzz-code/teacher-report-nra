@@ -19,7 +19,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 
 const filters = [
     ...commonAdminFilters,
-    <CommonReferenceInputFilter source="teacherTypeId" reference="teacher_type" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />,
     <DateInput source="workingDate:$gte" />,
     <DateInput source="workingDate:$lte" />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
@@ -35,7 +35,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <ReferenceField source="teacherTypeId" reference="teacher_type" />
+            <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
             <DateField source="workingDate" />
             <NumberField source="year" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
@@ -48,7 +48,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <CommonReferenceInput source="teacherTypeId" reference="teacher_type" dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />
         <DateInput source="workingDate" validate={[required()]} />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
@@ -59,7 +59,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['teacherTypeId', 'workingDate', 'year'],
+    fields: ['teacherTypeKey', 'workingDate', 'year'],
 }
 
 const entity = {

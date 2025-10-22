@@ -14,7 +14,7 @@ const filters = [
     <TextInput source="phone" />,
     <TextInput source="email" />,
     <TextInput source="school:$cont" />,
-    <CommonReferenceInputFilter source="teacherTypeId" reference="teacher_type" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />,
 ];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
@@ -29,7 +29,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="phone" />
             <TextField source="email" />
             <TextField source="school" />
-            <ReferenceField source="teacherTypeId" reference="teacher_type" />
+            <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
             <NumberField source="price" />
             <TextField source="trainingTeacher" />
             <NumberField source="specialQuestion" />
@@ -50,7 +50,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <TextInput source="phone" validate={[maxLength(50)]} />
         <TextInput source="email" validate={[maxLength(255)]} />
         <TextInput source="school" validate={[maxLength(255)]} />
-        <CommonReferenceInput source="teacherTypeId" reference="teacher_type" dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />
         <NumberInput source="price" step={0.01} />
         <TextInput source="trainingTeacher" validate={[maxLength(255)]} />
         <NumberInput source="specialQuestion" />
@@ -62,7 +62,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = CommonRepresentation;
 
 const importer = {
-    fields: ['tz', 'name', 'phone', 'email', 'school', 'teacherTypeId', 'price', 'trainingTeacher', 'specialQuestion'],
+    fields: ['tz', 'name', 'phone', 'email', 'school', 'teacherTypeKey', 'price', 'trainingTeacher', 'specialQuestion'],
 }
 
 const entity = {

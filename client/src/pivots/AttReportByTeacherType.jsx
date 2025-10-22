@@ -19,7 +19,7 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
     <CommonReferenceInputFilter 
-        source="teacher.teacherTypeId" 
+        source="teacher.teacherTypeReferenceId" 
         reference="teacher_type" 
         label="סוג מורה"
         alwaysOn 
@@ -38,7 +38,7 @@ const filterDefaultValues = {
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     const { data, filterValues } = useListContext();
-    const selectedTeacherType = filterValues?.['teacher.teacherTypeId'];
+    const selectedTeacherType = filterValues?.['teacher.teacherTypeReferenceId'];
 
     return (
         <CommonDatagrid {...props}>
