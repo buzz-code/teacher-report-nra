@@ -93,29 +93,56 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       let isValidAnswer = false;
       let answer: string;
 
-      // Keep asking until we get a valid answer
+      // Keep asking until we get a valid answer or skip
       while (!isValidAnswer) {
-        const message = await this.getTextByUserId('QUESTION.CHOOSE_ANSWER');
-        answer = await this.askForInput(`${question.content},${message}`, {
+        // Build question message with skip instruction for optional questions
+        const messageParts = [question.content];
+        
+        if (!question.isMandatory) {
+          const skipInstruction = await this.getTextByUserId('QUESTION.SKIP_INSTRUCTION');
+          messageParts.push(skipInstruction);
+        }
+
+        const inputMessage = await this.getTextByUserId('QUESTION.CHOOSE_ANSWER');
+        messageParts.push(inputMessage);
+
+        answer = await this.askForInput(messageParts.join(', '), {
           max_digits: 2,
           min_digits: 1,
         });
 
-        // Validate answer is within range
-        const numericAnswer = parseInt(answer);
-        if (
-          question.upperLimit !== null &&
-          question.lowerLimit !== null &&
-          (numericAnswer < question.lowerLimit || numericAnswer > question.upperLimit)
-        ) {
-          await this.sendMessage(await this.getTextByUserId('VALIDATION.OUT_OF_RANGE'));
-          // Loop continues to re-ask
+        // Check if teacher pressed * to skip
+        if (answer === '*') {
+          if (question.isMandatory) {
+            // Cannot skip mandatory questions
+            await this.sendMessage(await this.getTextByUserId('QUESTION.CANNOT_SKIP_MANDATORY'));
+            // Loop continues to re-ask
+          } else {
+            // Skip optional question - don't save answer, move to next question
+            this.logger.log(`Teacher skipped optional question: ${question.id}`);
+            isValidAnswer = true; // Exit loop without saving
+            answer = null; // Mark as skipped
+          }
         } else {
-          isValidAnswer = true;
+          // Validate numeric answer is within range
+          const numericAnswer = parseInt(answer);
+          if (
+            question.upperLimit !== null &&
+            question.lowerLimit !== null &&
+            (numericAnswer < question.lowerLimit || numericAnswer > question.upperLimit)
+          ) {
+            await this.sendMessage(await this.getTextByUserId('VALIDATION.OUT_OF_RANGE'));
+            // Loop continues to re-ask
+          } else {
+            isValidAnswer = true;
+          }
         }
       }
 
-      await this.saveAnswerForQuestion(question, answer);
+      // Only save answer if not skipped
+      if (answer !== null) {
+        await this.saveAnswerForQuestion(question, answer);
+      }
     }
   }
 
