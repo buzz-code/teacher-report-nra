@@ -42,6 +42,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <BooleanField source="isStandalone" />
             <DateField source="startDate" />
             <DateField source="endDate" />
+            <DateField source="effectiveDate" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -59,6 +60,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <BooleanInput source="isStandalone" />
         <DateInput source="startDate" />
         <DateInput source="endDate" />
+        <DateInput source="effectiveDate" helperText="התאריך שיירשם בטבלת התשובות (לצורך דוח שכר)" />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
@@ -67,7 +69,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = 'content';
 
 const importer = {
-    fields: ['teacherTypeKey', 'questionTypeKey', 'content', 'allowedDigits', 'isStandalone', 'startDate', 'endDate'],
+    fields: ['teacherTypeKey', 'questionTypeKey', 'content', 'allowedDigits', 'isStandalone', 'startDate', 'endDate', 'effectiveDate'],
 }
 
 const entity = {

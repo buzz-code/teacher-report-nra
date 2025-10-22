@@ -101,7 +101,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         digits_allowed: question.allowedDigits?.split(',') || ['0', '1'],
       });
 
-      await this.saveAnswerForQuestion(question.id, answer);
+      await this.saveAnswerForQuestion(question, answer);
 
       if (question.isStandalone) {
         return this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
@@ -119,14 +119,14 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     });
   }
 
-  private async saveAnswerForQuestion(questionReferenceId: number, answer: string): Promise<void> {
+  private async saveAnswerForQuestion(question: Question, answer: string): Promise<void> {
     const answerRepo = this.dataSource.getRepository(Answer);
     const answerEntity = answerRepo.create({
       userId: this.user.id,
       teacherTz: this.teacher.tz,
-      questionReferenceId: questionReferenceId,
+      questionReferenceId: question.id,
       answer: parseInt(answer),
-      reportDate: new Date(),
+      reportDate: question.effectiveDate || new Date(),
     });
     await answerRepo.save(answerEntity);
   }

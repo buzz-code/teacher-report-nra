@@ -119,6 +119,7 @@ export default {
                 'startDate:$gte': 'תאריך התחלה מ-',
                 endDate: 'תאריך סיום',
                 'endDate:$lte': 'תאריך סיום עד-',
+                effectiveDate: 'תאריך אפקטיבי לדיווח',
             }
         },
         question_type: {

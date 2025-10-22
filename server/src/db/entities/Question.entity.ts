@@ -115,6 +115,10 @@ export class Question implements IHasUserId {
   @Column('date', { name: 'end_date', nullable: true })
   endDate: Date;
 
+  @IsOptional({ always: true })
+  @Column('date', { name: 'effective_date', nullable: true })
+  effectiveDate: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 
