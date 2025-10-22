@@ -148,6 +148,7 @@ export default {
                 questionId: 'שאלה',
                 salaryReportId: 'דוח שכר',
                 answer: 'תשובה',
+                calculatedPayment: 'תשלום מחושב',
                 reportDate: 'תאריך דיווח',
                 'reportDate:$gte': 'תאריך דיווח מ-',
                 'reportDate:$lte': 'תאריך דיווח עד-',

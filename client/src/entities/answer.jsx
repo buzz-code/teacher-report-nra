@@ -2,6 +2,7 @@ import {
     DateField,
     DateInput,
     DateTimeInput,
+    FunctionField,
     NumberInput,
     NumberField,
     ReferenceField,
@@ -38,6 +39,13 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="questionId" reference="question" />
             <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="answer" />
+            <FunctionField
+                label="resources.answer.fields.calculatedPayment"
+                render={record => {
+                    const payment = record.answer * (record.question?.tariff || 0);
+                    return payment ? `₪${payment.toFixed(2)}` : '-';
+                }}
+            />
             <DateField source="reportDate" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}

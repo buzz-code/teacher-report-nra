@@ -1,13 +1,14 @@
-import { 
-    DateField, 
+import {
+    DateField,
     DateInput,
-    DateTimeInput, 
-    maxLength, 
+    DateTimeInput,
+    maxLength,
     NumberField,
-    ReferenceField, 
-    required, 
-    TextField, 
-    TextInput 
+    ReferenceField,
+    required,
+    TextField,
+    TextInput,
+    useRecordContext
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
@@ -16,6 +17,19 @@ import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { ShowMatchingRecordsButton } from '@shared/components/fields/ShowMatchingRecordsButton';
+
+const ShowReportablesButton = ({ resource }) => {
+    const record = useRecordContext();
+    if (!record) return null;
+
+    return (
+        <ShowMatchingRecordsButton
+            resource={resource}
+            filter={{ salaryReportId: record.id }}
+        />
+    );
+};
 
 const filters = [
     ...commonAdminFilters,
@@ -41,6 +55,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <NumberField source="year" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
+            <ShowReportablesButton resource="att_report" />
+            <ShowReportablesButton resource="answer" />
         </CommonDatagrid>
     );
 }
