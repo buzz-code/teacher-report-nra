@@ -79,10 +79,9 @@ export class Student implements IHasUserId {
   @Column({ length: 9, nullable: true })
   teacherTz: string;
 
-  @ValidateIf(
-    (student: Student) => !Boolean(student.teacherTz) && Boolean(student.teacherReferenceId),
-    { always: true },
-  )
+  @ValidateIf((student: Student) => !Boolean(student.teacherTz) && Boolean(student.teacherReferenceId), {
+    always: true,
+  })
   @Column({ nullable: true })
   teacherReferenceId: number;
 

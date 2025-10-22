@@ -64,9 +64,9 @@ export class SalaryReport implements IHasUserId {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => AttReport, attReport => attReport.salaryReport)
+  @OneToMany(() => AttReport, (attReport) => attReport.salaryReport)
   attReports: AttReport[];
 
-  @OneToMany(() => Answer, answer => answer.salaryReport)
+  @OneToMany(() => Answer, (answer) => answer.salaryReport)
   answers: Answer[];
 }

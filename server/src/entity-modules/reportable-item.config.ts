@@ -22,15 +22,11 @@ class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntit
 
     switch (extra?.action) {
       case 'assignToSalaryReport': {
-        return this.assignItemsToSalaryReport(
-          userId,
-          extra.ids,
-          {
-            name: extra.salaryReportName,
-            date: extra.salaryReportDate ? new Date(extra.salaryReportDate) : undefined,
-            existingSalaryReportId: Number(extra.existingSalaryReportId)
-          }
-        );
+        return this.assignItemsToSalaryReport(userId, extra.ids, {
+          name: extra.salaryReportName,
+          date: extra.salaryReportDate ? new Date(extra.salaryReportDate) : undefined,
+          existingSalaryReportId: Number(extra.existingSalaryReportId),
+        });
       }
 
       default:
@@ -45,7 +41,7 @@ class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntit
       name?: string;
       date?: Date;
       existingSalaryReportId?: number;
-    }
+    },
   ): Promise<SalaryReport> {
     const dataSource = this.dataSource;
     const attReportRepo = dataSource.getRepository(AttReport);
@@ -57,30 +53,26 @@ class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntit
     // 1. Create new SalaryReport or use existing one
     if (salaryReportData.existingSalaryReportId && salaryReportData.existingSalaryReportId > 0) {
       salaryReport = await salaryReportRepo.findOneOrFail({
-        where: { id: salaryReportData.existingSalaryReportId, userId }
+        where: { id: salaryReportData.existingSalaryReportId, userId },
       });
     } else {
       salaryReport = await salaryReportRepo.save({
         name: salaryReportData.name,
         date: salaryReportData.date,
-        userId
+        userId,
       });
     }
 
     // 2. Parse and assign items
-    const reportIds = itemIds
-      .filter(id => id.startsWith('report_'))
-      .map(id => parseInt(id.replace('report_', '')));
+    const reportIds = itemIds.filter((id) => id.startsWith('report_')).map((id) => parseInt(id.replace('report_', '')));
 
-    const answerIds = itemIds
-      .filter(id => id.startsWith('answer_'))
-      .map(id => parseInt(id.replace('answer_', '')));
+    const answerIds = itemIds.filter((id) => id.startsWith('answer_')).map((id) => parseInt(id.replace('answer_', '')));
 
     // 3. Update AttReports
     if (reportIds.length > 0) {
       await attReportRepo.update(
         { id: In(reportIds), userId, salaryReportId: IsNull() },
-        { salaryReportId: salaryReport.id }
+        { salaryReportId: salaryReport.id },
       );
     }
 
@@ -88,7 +80,7 @@ class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntit
     if (answerIds.length > 0) {
       await answerRepo.update(
         { id: In(answerIds), userId, salaryReportId: IsNull() },
-        { salaryReportId: salaryReport.id }
+        { salaryReportId: salaryReport.id },
       );
     }
 

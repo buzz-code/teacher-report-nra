@@ -1,10 +1,4 @@
-import {
-  ViewEntity,
-  ViewColumn,
-  PrimaryColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { ViewEntity, ViewColumn, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { User } from '../entities/User.entity';
 import { Teacher } from '../entities/Teacher.entity';
@@ -33,7 +27,7 @@ import { SalaryReport } from '../entities/SalaryReport.entity';
       salary_report_id as salaryReportId,
       createdAt
     FROM answers
-  `
+  `,
 })
 export class ReportableItem implements IHasUserId {
   @ViewColumn()
