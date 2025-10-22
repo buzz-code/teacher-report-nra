@@ -85,27 +85,36 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return;
     }
 
-    // TODO: Implement question handling - get questions based on teacher type
     this.logger.log(`Asking questions for teacher type: ${this.teacher.teacherTypeReferenceId}`);
 
     const questions = await this.getQuestionsForTeacher();
     for (const question of questions) {
-      const messages = [question.content];
-      if (!question.allowedDigits) {
-        messages.push(await this.getTextByUserId('QUESTION.CHOOSE_ANSWER'));
-      }
+      let isValidAnswer = false;
+      let answer: string;
 
-      const answer = await this.askForInput(messages.join(','), {
-        max_digits: 1,
-        min_digits: 1,
-        digits_allowed: question.allowedDigits?.split(',') || ['0', '1'],
-      });
+      // Keep asking until we get a valid answer
+      while (!isValidAnswer) {
+        const message = await this.getTextByUserId('QUESTION.CHOOSE_ANSWER');
+        answer = await this.askForInput(`${question.content},${message}`, {
+          max_digits: 2,
+          min_digits: 1,
+        });
+
+        // Validate answer is within range
+        const numericAnswer = parseInt(answer);
+        if (
+          question.upperLimit !== null &&
+          question.lowerLimit !== null &&
+          (numericAnswer < question.lowerLimit || numericAnswer > question.upperLimit)
+        ) {
+          await this.sendMessage(await this.getTextByUserId('VALIDATION.OUT_OF_RANGE'));
+          // Loop continues to re-ask
+        } else {
+          isValidAnswer = true;
+        }
+      }
 
       await this.saveAnswerForQuestion(question, answer);
-
-      if (question.isStandalone) {
-        return this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
-      }
     }
   }
 
@@ -904,7 +913,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const today = new Date();
     const studentRepository = this.dataSource.getRepository(Student);
-    
+
     const count = await studentRepository
       .createQueryBuilder('student')
       .where('student.userId = :userId', { userId: this.user.id })

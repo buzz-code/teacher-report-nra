@@ -24,7 +24,7 @@ const filters = [
     <TextInput source="content:$cont" alwaysOn />,
     <CommonReferenceInputFilter source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="questionTypeReferenceId" reference="question_type" dynamicFilter={filterByUserId} />,
-    <BooleanInput source="isStandalone" />,
+    <BooleanInput source="isMandatory" />,
     <DateInput source="startDate:$gte" />,
     <DateInput source="endDate:$lte" />,
 ];
@@ -38,8 +38,10 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
             <ReferenceField source="questionTypeReferenceId" reference="question_type" />
             <TextField source="content" />
-            <TextField source="allowedDigits" />
-            <BooleanField source="isStandalone" />
+            <NumberField source="upperLimit" />
+            <NumberField source="lowerLimit" />
+            <NumberField source="tariff" />
+            <BooleanField source="isMandatory" />
             <DateField source="startDate" />
             <DateField source="endDate" />
             <DateField source="effectiveDate" />
@@ -56,8 +58,10 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <CommonReferenceInput source="teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} />
         <CommonReferenceInput source="questionTypeReferenceId" reference="question_type" dynamicFilter={filterByUserId} />
         <TextInput source="content" validate={[required()]} multiline />
-        <TextInput source="allowedDigits" validate={[maxLength(255)]} helperText="רשימת ספרות מותרות, מופרדות בפסיק" />
-        <BooleanInput source="isStandalone" />
+        <NumberInput source="upperLimit" />
+        <NumberInput source="lowerLimit" />
+        <NumberInput source="tariff" step={0.01} />
+        <BooleanInput source="isMandatory" defaultValue={false} />
         <DateInput source="startDate" />
         <DateInput source="endDate" />
         <DateInput source="effectiveDate" helperText="התאריך שיירשם בטבלת התשובות (לצורך דוח שכר)" />
@@ -69,7 +73,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
 const Representation = 'content';
 
 const importer = {
-    fields: ['teacherTypeKey', 'questionTypeKey', 'content', 'allowedDigits', 'isStandalone', 'startDate', 'endDate', 'effectiveDate'],
+    fields: ['teacherTypeKey', 'questionTypeKey', 'content', 'upperLimit', 'lowerLimit', 'tariff', 'isMandatory', 'startDate', 'endDate', 'effectiveDate'],
 }
 
 const entity = {

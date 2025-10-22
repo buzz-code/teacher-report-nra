@@ -16,7 +16,7 @@ import { QuestionType } from './QuestionType.entity';
 import { TeacherType } from './TeacherType.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
-import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-validator-he';
+import { IsNotEmpty, MaxLength, IsNumber, IsInt } from '@shared/utils/validation/class-validator-he';
 import { StringType, NumberType, BooleanType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
@@ -97,15 +97,27 @@ export class Question implements IHasUserId {
   content: string;
 
   @IsOptional({ always: true })
-  @StringType
-  @MaxLength(255, { always: true })
-  @Column({ length: 255, name: 'allowed_digits', nullable: true })
-  allowedDigits: string;
+  @NumberType
+  @IsInt({ always: true })
+  @Column('int', { name: 'upper_limit', nullable: true })
+  upperLimit: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsInt({ always: true })
+  @Column('int', { name: 'lower_limit', nullable: true })
+  lowerLimit: number;
+
+  @IsOptional({ always: true })
+  @NumberType
+  @IsNumber({ maxDecimalPlaces: 2 }, { always: true })
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  tariff: number;
 
   @IsOptional({ always: true })
   @BooleanType
-  @Column('boolean', { name: 'is_standalone', default: false })
-  isStandalone: boolean;
+  @Column('boolean', { name: 'is_mandatory', default: false })
+  isMandatory: boolean;
 
   @IsOptional({ always: true })
   @Column('date', { name: 'start_date', nullable: true })
