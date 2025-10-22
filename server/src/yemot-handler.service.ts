@@ -136,50 +136,34 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return;
     }
 
-    const reportDateType = await this.askForInput(await this.getTextByUserId('REPORT.CHOOSE_DATE_TYPE'), {
-      max_digits: 1,
-      min_digits: 1,
-      digits_allowed: ['1', '2', '3'],
-    });
-
-    if (reportDateType === '1') {
-      await this.getAndValidateReportDate(true);
-    } else if (reportDateType === '2') {
-      await this.getAndValidateReportDate(false);
-    } else if (reportDateType === '3') {
-      await this.showReports();
-    } else {
-      this.hangupWithMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
-    }
+    // Skip the "report for today" confirmation and go directly to date input
+    await this.getAndValidateReportDate();
   }
 
-  private async getAndValidateReportDate(isToday: boolean): Promise<void> {
+  private async getAndValidateReportDate(): Promise<void> {
     let reportDate: Date;
 
-    if (!isToday) {
-      const dateInput = await this.askForInput(await this.getTextByUserId('REPORT.CHOOSE_DATE'), {
-        max_digits: 8,
-        min_digits: 8,
-      });
-      // Parse DD/MM/YYYY format - convert to Date
-      const day = parseInt(dateInput.substr(0, 2));
-      const month = parseInt(dateInput.substr(2, 2)) - 1; // JS months are 0-based
-      const year = parseInt(dateInput.substr(4, 4));
-      reportDate = new Date(year, month, day);
-    } else {
-      reportDate = new Date();
-    }
+    // Always ask for date input instead of using today's date
+    const dateInput = await this.askForInput(await this.getTextByUserId('REPORT.CHOOSE_DATE'), {
+      max_digits: 8,
+      min_digits: 8,
+    });
+    // Parse DD/MM/YYYY format - convert to Date
+    const day = parseInt(dateInput.substr(0, 2));
+    const month = parseInt(dateInput.substr(2, 2)) - 1; // JS months are 0-based
+    const year = parseInt(dateInput.substr(4, 4));
+    reportDate = new Date(year, month, day);
 
     // Validate date
     if (isNaN(reportDate.getTime())) {
       this.sendMessage(await this.getTextByUserId('VALIDATION.INVALID_DATE'));
-      return this.getAndValidateReportDate(isToday);
+      return this.getAndValidateReportDate();
     }
 
     const reportDateIsFuture = reportDate > new Date();
     if (reportDateIsFuture) {
       this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_FUTURE'));
-      return this.getAndValidateReportDate(isToday);
+      return this.getAndValidateReportDate();
     }
 
     // Check for unconfirmed previous reports (not for "מורה מנחה" and not for previous month)
@@ -201,7 +185,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const isWorkingDay = await this.validateWorkingDateForTeacher(dateStr);
     if (!isWorkingDay) {
       this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_NON_WORKING_DAY'));
-      return this.getAndValidateReportDate(isToday);
+      return this.getAndValidateReportDate();
     }
 
     // Check for existing reports
@@ -224,11 +208,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       if (this.existingReport) {
         if (this.existingReport.salaryReport) {
           this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
-          return this.getAndValidateReportDate(isToday);
+          return this.getAndValidateReportDate();
         }
         if (this.existingReport.isConfirmed) {
           this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
-          return this.getAndValidateReportDate(isToday);
+          return this.getAndValidateReportDate();
         }
         this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
       }
@@ -239,7 +223,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const isConfirmed = await this.askConfirmation('REPORT.CONFIRM_DATE', { date: hebrewDate });
 
     if (!isConfirmed) {
-      return this.getAndValidateReportDate(isToday);
+      return this.getAndValidateReportDate();
     }
 
     this.reportDate = dateStr;
@@ -721,7 +705,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       if (anotherDateReport === '1') {
         this.reportDate = null; // Reset report date
-        return this.getAndValidateReportDate(false);
+        return this.getAndValidateReportDate();
       } else {
         this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
       }
