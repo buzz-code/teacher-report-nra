@@ -16,6 +16,7 @@ import {
   getGregorianDateFromHebrew,
   getHebrewMonthsList,
 } from '@shared/utils/formatting/hebrew.util';
+import { TeacherTypeId } from 'src/utils/fieldsShow.util';
 
 @Injectable()
 export class YemotHandlerService extends BaseYemotHandlerService {
@@ -246,7 +247,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Check for unconfirmed previous reports (not for "מורה מנחה" and not for previous month)
     const reportDateIsPrevMonth = reportDate < new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    if (this.teacher.teacherType?.key !== 3 && !reportDateIsPrevMonth) {
+    if (this.teacher.teacherType?.key !== TeacherTypeId.MANHA && !reportDateIsPrevMonth) {
       const startReportsDate = new Date('1970-01-01');
       const endReportsDate = new Date(new Date().getFullYear(), new Date().getMonth(), 0, 23, 59, 59); // Last day of previous month
       const unconfirmedPreviousReports = await this.getUnconfirmedReportsByDateRange(startReportsDate, endReportsDate);
@@ -267,7 +268,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     // Check for existing reports
-    if (this.teacher.teacherType?.key !== 3) {
+    if (this.teacher.teacherType?.key !== TeacherTypeId.MANHA) {
       // Not for "מורה מנחה"
       const existingReports = await this.getReportsByTeacherIdAndDate(dateStr);
 
@@ -330,31 +331,31 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
   private async getReportAndSave(): Promise<void> {
     switch (this.teacher.teacherType?.key) {
-      case 1:
+      case TeacherTypeId.SEMINAR_KITA:
         // מורה של סמינר כיתה
         await this.getSeminarKitaReport();
         break;
-      case 2:
+      case TeacherTypeId.TRAINING:
         // מורה מאמנת - לא בשימוש
         await this.getTrainingReport();
         break;
-      case 3:
+      case TeacherTypeId.MANHA:
         // מורה מנחה
         await this.getManhaReport();
         break;
-      case 4:
+      case TeacherTypeId.RESPONSIBLE:
         // אחראית בית ספר - לא בשימוש
         await this.getReponsibleReport();
         break;
-      case 5:
+      case TeacherTypeId.PDS:
         // מורת פידיאס
         await this.getPdsReport();
         break;
-      case 6:
+      case TeacherTypeId.KINDERGARTEN:
         // גננות
         await this.getKindergartenReport();
         break;
-      case 7:
+      case TeacherTypeId.SPECIAL_EDUCATION:
         // חינוך מיוחד
         await this.getSpecialEducationReport();
         break;
@@ -757,8 +758,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async finishSavingReport(): Promise<void> {
-    const isManhaAndOnOthers = this.teacher.teacherType?.key === 3 && this.callParams.manhaReportType === '2';
-    const isSeminarKita = this.teacher.teacherType?.key === 1;
+    const isManhaAndOnOthers =
+      this.teacher.teacherType?.key === TeacherTypeId.MANHA && this.callParams.manhaReportType === '2';
+    const isSeminarKita = this.teacher.teacherType?.key === TeacherTypeId.SEMINAR_KITA;
 
     if (isManhaAndOnOthers) {
       // בסיום האם תרצי לדווח על מורה נוספת
@@ -849,14 +851,14 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private getReportMessage(report: AttReport): string {
     const reportDate = formatHebrewDateForIVR(report.reportDate);
 
-    const reportMessages = {
-      1: 'REPORT.SEMINAR_KITA_PREVIOUS',
-      2: '',
-      3: 'REPORT.MANHA_PREVIOUS',
-      4: '',
-      5: 'REPORT.PDS_PREVIOUS',
-      6: 'REPORT.KINDERGARTEN_PREVIOUS',
-      7: 'REPORT.SPECIAL_EDUCATION_PREVIOUS',
+    const reportMessages: Record<TeacherTypeId, string> = {
+      [TeacherTypeId.SEMINAR_KITA]: 'REPORT.SEMINAR_KITA_PREVIOUS',
+      [TeacherTypeId.TRAINING]: '',
+      [TeacherTypeId.MANHA]: 'REPORT.MANHA_PREVIOUS',
+      [TeacherTypeId.RESPONSIBLE]: '',
+      [TeacherTypeId.PDS]: 'REPORT.PDS_PREVIOUS',
+      [TeacherTypeId.KINDERGARTEN]: 'REPORT.KINDERGARTEN_PREVIOUS',
+      [TeacherTypeId.SPECIAL_EDUCATION]: 'REPORT.SPECIAL_EDUCATION_PREVIOUS',
     };
 
     const messageKey = reportMessages[this.teacher.teacherType?.key];
