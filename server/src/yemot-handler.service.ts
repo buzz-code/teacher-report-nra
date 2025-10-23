@@ -196,8 +196,26 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return;
     }
 
-    // Skip the "report for today" confirmation and go directly to date input
-    await this.getAndValidateReportDate();
+    // Ask user to choose between new report or viewing previous reports
+    const menuChoice = await this.askForInput(
+      await this.getTextByUserId('REPORT.MAIN_MENU'),
+      {
+        max_digits: 1,
+        min_digits: 1,
+        digits_allowed: ['1', '3'],
+      },
+    );
+
+    if (menuChoice === '1') {
+      // לתיקוף נוכחות - new report
+      await this.getAndValidateReportDate();
+    } else if (menuChoice === '3') {
+      // לשמיעת דיווחים קודמים - show previous reports
+      await this.showReports();
+    } else {
+      // Invalid choice, ask again
+      return this.getReportDate();
+    }
   }
 
   private async getAndValidateReportDate(): Promise<void> {
