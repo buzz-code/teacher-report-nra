@@ -9,7 +9,7 @@ import { Answer } from 'src/db/entities/Answer.entity';
 import { WorkingDate } from 'src/db/entities/WorkingDate.entity';
 import { TeacherQuestion } from 'src/db/entities/TeacherQuestion.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-import { Like, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Like, IsNull, LessThanOrEqual, MoreThanOrEqual, Between } from 'typeorm';
 import {
   formatHebrewDateForIVR,
   gematriyaLetters,
@@ -818,10 +818,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       where: {
         userId: this.user.id,
         teacherReferenceId: this.teacher.id,
-        reportDate: {
-          $gte: startDate,
-          $lte: endDate,
-        } as any,
+        reportDate: Between(startDate, endDate),
         isConfirmed: false,
       },
     });
