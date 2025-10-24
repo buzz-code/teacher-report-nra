@@ -907,7 +907,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const existingReportAbsences = this.existingReport?.howManyLessonsAbsence || 0;
 
     if (existingAbsences + newAbsences - existingReportAbsences > 10) {
-      this.hangupWithMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES'));
+      // יותר מ-10 חיסורים - נותן למורה הזדמנות להקליד שוב
+      this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES'));
+      
+      // קוראים לפונקציה שוב מההתחלה
+      return this.getSeminarKitaReport();
     }
   }
 
@@ -922,7 +926,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       parseInt(this.callParams.howManyLessonsAbsence || '0');
 
     if (totalCount !== reportedCount) {
-      this.hangupWithMessage(await this.getTextByUserId('VALIDATION.SEMINAR_KITA_LESSON_COUNT'));
+      // המספר לא תואם - נותן למורה הזדמנות להקליד שוב
+      this.sendMessage(await this.getTextByUserId('VALIDATION.SEMINAR_KITA_LESSON_COUNT'));
+      
+      // קוראים לפונקציה שוב מההתחלה
+      return this.getSeminarKitaReport();
     }
   }
 
