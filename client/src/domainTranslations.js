@@ -330,7 +330,7 @@ export default {
             }
         },
         reportable_item: {
-            name: 'פריט להקצאה |||| פריטים להקצאה',
+            name: 'פריט שכר |||| פריטי שכר',
             fields: {
                 ...generalResourceFieldsTranslation,
                 teacherReferenceId: 'מורה',
@@ -350,6 +350,57 @@ export default {
                     answer: 'תשובה',
                     attendance_report: 'דיווח נוכחות'
                 }
+            }
+        },
+        'att_report/pivot?extra.pivot=AttReportWithPricing': {
+            name: 'דוחות נוכחות עם תמחור',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                reportDate: 'תאריך דיווח',
+                'reportDate:$gte': 'תאריך דיווח מ-',
+                'reportDate:$lte': 'תאריך דיווח עד-',
+                year: 'שנה',
+                howManyStudents: 'כמה תלמידות',
+                howManyLessons: 'מספר שיעורים',
+                howManyMethodic: 'כמה מתודיקה',
+                activityType: 'סוג פעילות',
+                price: 'מחיר',
+                isConfirmed: 'מאושר',
+            }
+        },
+        'att_report/pivot?extra.pivot=AttReportByTeacherType': {
+            name: 'דוחות נוכחות לפי סוג מורה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                'teacher.teacherTypeReferenceId': 'סוג מורה',
+                teacherReferenceId: 'מורה',
+                reportDate: 'תאריך דיווח',
+                'reportDate:$gte': 'תאריך דיווח מ-',
+                'reportDate:$lte': 'תאריך דיווח עד-',
+                year: 'שנה',
+                isConfirmed: 'מאושר',
+                howManyStudents: 'כמה תלמידות',
+                howManyLessons: 'מספר שיעורים',
+                howManyWatchOrIndividual: 'מספר צפיות או אישיות',
+                howManyTeachedOrInterfering: 'מספר הוראות או התערבויות',
+                howManyMethodic: 'כמה מתודיקה',
+                teachedStudentTz: 'תלמידות שנלמדו (ת.ז.)',
+                howManyYalkutLessons: 'כמה שיעורי ילקוט',
+                howManyDiscussingLessons: 'כמה שיעורי דיון',
+                howManyStudentsTeached: 'מספר תלמידים שהורו',
+                howManyStudentsHelpTeached: 'כמה תלמידות עזרו ללמד',
+                howManyLessonsAbsence: 'כמה שיעורי היעדרות',
+                howManyWatchedLessons: 'כמה שיעורי צפייה',
+                howManyStudentsWatched: 'מספר תלמידים שנצפו',
+                wasDiscussing: 'היה דיון',
+                wasKamal: 'היה כמל',
+                wasStudentsGood: 'התלמידות היו טובות',
+                wasStudentsEnterOnTime: 'התלמידות נכנסו בזמן',
+                wasStudentsExitOnTime: 'התלמידות יצאו בזמן',
+                wasPhoneDiscussing: 'האם היה דיון טלפוני',
+                wasCollectiveWatch: 'היתה צפייה קבוצתית',
+                activityType: 'סוג פעילות',
             }
         }
     }
