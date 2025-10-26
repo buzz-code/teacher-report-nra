@@ -142,7 +142,7 @@ export function getFieldsForTeacherType(teacherTypeId: number): AttReportField[]
   }
 
   const teacherFields = TEACHER_TYPE_FIELDS[teacherTypeId] || [];
-  return [...UNIVERSAL_FIELDS, ...teacherFields];
+  return teacherFields;
 }
 
 /**

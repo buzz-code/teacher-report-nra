@@ -1,9 +1,9 @@
-import { 
-    DateInput, 
-    NumberField, 
-    TextField, 
-    ReferenceField, 
-    SelectField, 
+import {
+    DateInput,
+    NumberField,
+    TextField,
+    ReferenceField,
+    SelectField,
     BooleanInput,
     DateField,
     BooleanField,
@@ -18,12 +18,12 @@ import CommonAutocompleteInput from '@shared/components/fields/CommonAutocomplet
 
 const filters = [
     ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
-    <CommonReferenceInputFilter 
-        source="teacher.teacherTypeReferenceId" 
-        reference="teacher_type" 
+    <CommonReferenceInputFilter
+        source="teacher.teacherTypeReferenceId"
+        reference="teacher_type"
         label="סוג מורה"
-        alwaysOn 
-        dynamicFilter={filterByUserId} 
+        alwaysOn
+        dynamicFilter={filterByUserId}
     />,
     <DateInput source="reportDate:$gte" label="תאריך דיווח אחרי" alwaysOn />,
     <DateInput source="reportDate:$lte" label="תאריך דיווח לפני" alwaysOn />,
@@ -43,7 +43,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
         <CommonDatagrid {...props}>
             {children}
-            
+
             {/* Universal fields - always shown */}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
@@ -51,10 +51,12 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <DateField source="reportDate" />
             <SelectField source="year" choices={yearChoices} />
             {/* <BooleanField source="isConfirmed" /> */}
-            
+            <ReferenceField source="salaryReportId" reference="salary_report" />
+            <NumberField source="salaryMonth" />
+
             {/* Dynamic columns based on teacher type */}
             {getPivotColumns(data)}
-            
+
             {/* Fallback for when no teacher type is selected */}
             {!selectedTeacherType && (
                 <TextField source="comment" />
