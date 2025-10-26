@@ -34,7 +34,7 @@ export class AttReport implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([Teacher, AttType]);
+      dataSource = await getDataSource([Teacher, AttType, User]);
 
       this.teacherReferenceId = await findOneAndAssignReferenceId(
         dataSource,
