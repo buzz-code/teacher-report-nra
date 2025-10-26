@@ -368,6 +368,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       const attReport = {
         userId: this.user.id,
         teacherTz: this.teacher.tz,
+        teacherReferenceId: this.teacher.id,
         reportDate: new Date(this.reportDate),
         updateDate: new Date(),
         year: getCurrentHebrewYear(),

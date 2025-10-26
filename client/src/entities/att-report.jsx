@@ -1,16 +1,16 @@
-import { 
-    DateField, 
-    DateInput, 
-    DateTimeInput, 
-    maxLength, 
-    NumberInput, 
-    NumberField, 
-    ReferenceField, 
-    required, 
-    TextField, 
+import {
+    DateField,
+    DateInput,
+    DateTimeInput,
+    maxLength,
+    NumberInput,
+    NumberField,
+    ReferenceField,
+    required,
+    TextField,
     TextInput,
     BooleanField,
-    BooleanInput 
+    BooleanInput
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
@@ -20,6 +20,7 @@ import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } fro
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
 
 const filters = [
     ...commonAdminFilters,
@@ -37,8 +38,12 @@ const filterDefaultValues = {
 };
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
+    const additionalBulkButtons = [
+        isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך מורה" />
+    ];
+
     return (
-        <CommonDatagrid {...props}>
+        <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
@@ -75,44 +80,44 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <DateTimeInput source="updateDate" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         {/* <BooleanInput source="isConfirmed" /> */}
-        
+
         {/* Salary fields */}
         <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />
         <NumberInput source="salaryMonth" />
         <TextInput source="comment" multiline />
-        
+
         {/* Activity fields */}
         <NumberInput source="howManyStudents" />
         <NumberInput source="howManyMethodic" />
         <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
-        
+
         {/* Teaching fields */}
         <TextInput source="teachedStudentTz" multiline helperText="תעודות זהות של תלמידים שנלמדו" />
         <NumberInput source="howManyYalkutLessons" />
         <NumberInput source="howManyDiscussingLessons" />
-        
+
         {/* Assessment fields */}
         <NumberInput source="howManyStudentsHelpTeached" />
         <NumberInput source="howManyLessonsAbsence" />
         <NumberInput source="howManyWatchedLessons" />
-        
+
         {/* Boolean flags */}
         <BooleanInput source="wasDiscussing" />
         <BooleanInput source="wasKamal" />
         <BooleanInput source="wasStudentsGood" />
         <BooleanInput source="wasStudentsEnterOnTime" />
         <BooleanInput source="wasStudentsExitOnTime" />
-        
+
         {/* Special fields */}
         <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} />
         <NumberInput source="teacherToReportFor" />
         <BooleanInput source="wasCollectiveWatch" />
-        
+
         {/* Tariff fields */}
         <BooleanInput source="isTaarifHulia" />
         <BooleanInput source="isTaarifHulia2" />
         <BooleanInput source="isTaarifHulia3" />
-        
+
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>

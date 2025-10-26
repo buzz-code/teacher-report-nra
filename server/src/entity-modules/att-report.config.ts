@@ -7,6 +7,8 @@ import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
 import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
+import { fixReferences } from '@shared/utils/entity/fixReference.util';
+import { Repository } from 'typeorm';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -49,6 +51,20 @@ interface AttReportWithHeaders extends AttReport {
 }
 
 class AttReportPricingService<T extends Entity | AttReport> extends BaseEntityService<T> {
+  async doAction(req: CrudRequest, body: any): Promise<any> {
+    const extra = req.parsed.extra as any;
+
+    switch (extra?.action) {
+      case 'fixReferences': {
+        const ids = extra.ids.toString().split(',').map(Number);
+        return fixReferences(this.repo as Repository<AttReport>, ids, { teacherTz: 'teacherReferenceId' });
+      }
+
+      default:
+        return super.doAction(req, body);
+    }
+  }
+
   protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any[], auth: any): Promise<void> {
     const data = list as AttReport[];
 
