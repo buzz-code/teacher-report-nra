@@ -14,6 +14,7 @@ import {
 import { User } from './User.entity';
 import { Teacher } from './Teacher.entity';
 import { AttType } from './AttType.entity';
+import { TeacherType } from './TeacherType.entity';
 import { SalaryReport } from './SalaryReport.entity';
 import { IsOptional, ValidateIf } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
@@ -34,7 +35,7 @@ export class AttReport implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([Teacher, AttType, User]);
+      dataSource = await getDataSource([Teacher, AttType, TeacherType, User]);
 
       this.teacherReferenceId = await findOneAndAssignReferenceId(
         dataSource,
