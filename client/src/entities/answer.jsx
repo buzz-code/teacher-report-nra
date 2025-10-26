@@ -67,7 +67,10 @@ const Inputs = ({ isCreate, isAdmin }) => {
     </>
 }
 
-const Representation = CommonRepresentation;
+const Representation = (record) => {
+  if (!record) return null;
+  return `${record.reportDate} - ${record.answer}`;
+};
 
 const importer = {
     fields: ['teacherTz', 'questionId', 'salaryReportId', 'answer', 'reportDate'],

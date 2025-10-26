@@ -59,12 +59,19 @@ const Inputs = ({ isCreate, isAdmin }) => {
         reference="question"
         dynamicFilter={filterByUserId}
         validate={required()}
+        sort={{ field: 'content', order: 'ASC' }}
+        filterToQuery={searchText => ({ 'content:$contL': searchText })}
       />
-      <CommonReferenceInput
-        source="answerReferenceId"
-        reference="answer"
-        dynamicFilter={filterByUserId}
-      />
+      {!isCreate && (
+        <CommonReferenceInput
+          source="answerReferenceId"
+          reference="answer"
+          dynamicFilter={{ ...filterByUserId, 'teacherReferenceId': 'teacherReferenceId' }}
+          disabled={!isAdmin}
+          sort={{ field: 'answer', order: 'ASC' }}
+          filterToQuery={searchText => ({ 'answer:$contL': searchText })}
+        />
+      )}
       {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
       {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
     </>
