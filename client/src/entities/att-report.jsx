@@ -46,7 +46,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <DateField source="reportDate" />
             <DateField showDate showTime source="updateDate" />
             <NumberField source="year" />
-            <BooleanField source="isConfirmed" />
+            {/* <BooleanField source="isConfirmed" /> */}
             <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="salaryMonth" />
             <TextField source="comment" />
@@ -74,7 +74,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         <DateInput source="reportDate" validate={[required()]} />
         <DateTimeInput source="updateDate" />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
-        <BooleanInput source="isConfirmed" />
+        {/* <BooleanInput source="isConfirmed" /> */}
         
         {/* Salary fields */}
         <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />
@@ -122,7 +122,7 @@ const Representation = CommonRepresentation;
 
 const importer = {
     fields: [
-        'teacherTz', 'reportDate', 'updateDate', 'year', 'isConfirmed',
+        'teacherTz', 'reportDate', 'updateDate', 'year', /* 'isConfirmed', */
         'salaryReportId', 'salaryMonth', 'comment',
         'howManyStudents', 'howManyMethodic', 'fourLastDigitsOfTeacherPhone',
         'teachedStudentTz', 'howManyYalkutLessons', 'howManyDiscussingLessons',
