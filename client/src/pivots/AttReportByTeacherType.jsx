@@ -29,7 +29,7 @@ const filters = [
     <DateInput source="reportDate:$lte" label="תאריך דיווח לפני" alwaysOn />,
     <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <BooleanInput source="isConfirmed" label="מאושר" />,
+    // <BooleanInput source="isConfirmed" label="מאושר" />,
 ];
 
 const filterDefaultValues = {
@@ -50,7 +50,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <MultiReferenceField source="teacherReferenceId" sortBy="teacher.name" reference="teacher" />
             <DateField source="reportDate" />
             <SelectField source="year" choices={yearChoices} />
-            <BooleanField source="isConfirmed" />
+            {/* <BooleanField source="isConfirmed" /> */}
             
             {/* Dynamic columns based on teacher type */}
             {getPivotColumns(data)}

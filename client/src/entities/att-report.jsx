@@ -28,7 +28,7 @@ const filters = [
     <DateInput source="reportDate:$gte" />,
     <DateInput source="reportDate:$lte" />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <BooleanInput source="isConfirmed" />,
+    // <BooleanInput source="isConfirmed" />,
     <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
 ];

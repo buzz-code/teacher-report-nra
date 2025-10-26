@@ -21,7 +21,7 @@ const filters = [
     <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
-    <BooleanInput source="isConfirmed" label="מאושר" />,
+    // <BooleanInput source="isConfirmed" label="מאושר" />,
 ];
 
 const filterDefaultValues = {
