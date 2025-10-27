@@ -52,14 +52,14 @@ export class TeacherQuestion {
   user: User;
 
   @ManyToOne(() => Teacher, { eager: false, createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'teacher_reference_id' })
+  @JoinColumn({ name: 'teacherReferenceId' })
   teacher: Teacher;
 
   @ManyToOne(() => Question, { eager: false, createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'question_reference_id' })
+  @JoinColumn({ name: 'questionReferenceId' })
   question: Question;
 
   @ManyToOne(() => Answer, { eager: false, createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'answer_reference_id' })
+  @JoinColumn({ name: 'answerReferenceId' })
   answer: Answer;
 }
