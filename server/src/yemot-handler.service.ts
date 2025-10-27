@@ -197,7 +197,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       while (!isValidAnswer) {
         // Build question message with skip instruction for optional questions
         const messageParts = [question.content];
-        
+
         if (!question.isMandatory) {
           const skipInstruction = await this.getTextByUserId('QUESTION.SKIP_INSTRUCTION');
           messageParts.push(skipInstruction);
@@ -297,14 +297,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     // Ask user to choose between new report or viewing previous reports
-    const menuChoice = await this.askForInput(
-      await this.getTextByUserId('REPORT.MAIN_MENU'),
-      {
-        max_digits: 1,
-        min_digits: 1,
-        digits_allowed: ['1', '3'],
-      },
-    );
+    const menuChoice = await this.askForInput(await this.getTextByUserId('REPORT.MAIN_MENU'), {
+      max_digits: 1,
+      min_digits: 1,
+      digits_allowed: ['1', '3'],
+    });
 
     if (menuChoice === '1') {
       // לתיקוף נוכחות - new report
@@ -319,8 +316,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async getAndValidateReportDate(): Promise<void> {
-    let reportDate: Date;
-
     // Always ask for date input instead of using today's date
     const dateInput = await this.askForInput(await this.getTextByUserId('REPORT.CHOOSE_DATE'), {
       max_digits: 8,
@@ -330,7 +325,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const day = parseInt(dateInput.substr(0, 2));
     const month = parseInt(dateInput.substr(2, 2)) - 1; // JS months are 0-based
     const year = parseInt(dateInput.substr(4, 4));
-    reportDate = new Date(year, month, day);
+    const reportDate = new Date(year, month, day);
 
     // Validate date
     if (isNaN(reportDate.getTime())) {
@@ -1026,7 +1021,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     if (existingAbsences + newAbsences - existingReportAbsences > 10) {
       // יותר מ-10 חיסורים - נותן למורה הזדמנות להקליד שוב
       this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES'));
-      
+
       // קוראים לפונקציה שוב מההתחלה
       return this.getSeminarKitaReport();
     }
@@ -1045,7 +1040,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     if (totalCount !== reportedCount) {
       // המספר לא תואם - נותן למורה הזדמנות להקליד שוב
       this.sendMessage(await this.getTextByUserId('VALIDATION.SEMINAR_KITA_LESSON_COUNT'));
-      
+
       // קוראים לפונקציה שוב מההתחלה
       return this.getSeminarKitaReport();
     }

@@ -1,6 +1,6 @@
 /**
  * Yemot Handler Service - Flow Tests
- * 
+ *
  * This file tests complete call flows using the scenario builder infrastructure.
  * Each test represents a complete user journey through the IVR system.
  */
@@ -10,7 +10,6 @@ import { scenario } from './helpers/yemot-scenario-builder';
 import { TeacherTypeId } from '../utils/fieldsShow.util';
 
 describe('YemotHandlerService - Complete Flow Tests', () => {
-  
   describe('SEMINAR_KITA Teacher Flows', () => {
     it('should complete full report flow with valid data', async () => {
       const today = new Date();
@@ -65,7 +64,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
     });
 
     it.todo('should complete flow with multiple date reporting');
-    
+
     it('should reject and retry when lesson count does not match formula', async () => {
       const today = new Date();
 
@@ -130,9 +129,9 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
 
       await runScenario(testScenario);
     });
-    
+
     it.todo('should reject and retry when absences exceed 10 total');
-    
+
     it('should reject when trying to report absences that would exceed 10 total', async () => {
       const today = new Date();
 
@@ -379,8 +378,14 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const tomorrowStr = `${String(tomorrow.getDate()).padStart(2, '0')}${String(tomorrow.getMonth() + 1).padStart(2, '0')}${tomorrow.getFullYear()}`;
-      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${today.getFullYear()}`;
+      const tomorrowStr = `${String(tomorrow.getDate()).padStart(2, '0')}${String(tomorrow.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${tomorrow.getFullYear()}`;
+      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${today.getFullYear()}`;
 
       const testScenario = scenario('Date validation - Future date rejected')
         .withUser({
@@ -428,8 +433,14 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
-      const yesterdayStr = `${String(yesterday.getDate()).padStart(2, '0')}${String(yesterday.getMonth() + 1).padStart(2, '0')}${yesterday.getFullYear()}`;
-      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${today.getFullYear()}`;
+      const yesterdayStr = `${String(yesterday.getDate()).padStart(2, '0')}${String(yesterday.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${yesterday.getFullYear()}`;
+      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${today.getFullYear()}`;
 
       const testScenario = scenario('Date validation - Non-working date rejected')
         .withUser({
@@ -474,7 +485,10 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
 
     it('should allow user to reject date confirmation and retry', async () => {
       const today = new Date();
-      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${today.getFullYear()}`;
+      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${today.getFullYear()}`;
 
       const testScenario = scenario('Date validation - User rejects confirmation')
         .withUser({
@@ -519,7 +533,10 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
     it('should handle invalid date format and retry', async () => {
       const today = new Date();
       const invalidDateStr = '99999999'; // Invalid date: 99th day of 99th month
-      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${today.getFullYear()}`;
+      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${today.getFullYear()}`;
 
       const testScenario = scenario('Date validation - Invalid format rejected')
         .withUser({

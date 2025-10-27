@@ -1,9 +1,9 @@
 /**
  * Testing Infrastructure for Yemot Handler Service
- * 
+ *
  * This module provides a scenario-based testing framework for IVR call flows.
  * It allows defining test scenarios as sequences of interactions between the system and user.
- * 
+ *
  * This extends the generic Yemot testing framework with project-specific entity definitions.
  */
 
@@ -34,13 +34,13 @@ export interface ScenarioStep extends GenericScenarioStep {
 export interface TestScenario {
   /** Scenario name/description */
   name: string;
-  
+
   /** Database setup before running scenario */
   setup: DatabaseSetup;
-  
+
   /** Array of interaction steps */
   steps: ScenarioStep[];
-  
+
   /** Expected final state after scenario completes */
   expectedResult: ExpectedResult;
 }
@@ -56,7 +56,7 @@ export interface DatabaseSetup {
     username: string;
     additionalData?: any;
   };
-  
+
   /** Teacher configuration */
   teacher: {
     id: number;
@@ -71,7 +71,7 @@ export interface DatabaseSetup {
       name: string;
     };
   };
-  
+
   /** Working dates for valid report dates */
   workingDates?: Array<{
     id: number;
@@ -79,19 +79,19 @@ export interface DatabaseSetup {
     teacherTypeReferenceId: number;
     userId: number;
   }>;
-  
+
   /** Existing reports (for testing overwrite scenarios) */
   existingReports?: any[];
-  
+
   /** Students (for student count and TZ lookup) */
   students?: any[];
-  
+
   /** Questions (for dynamic questions) */
   questions?: any[];
-  
+
   /** Teacher question assignments */
   teacherQuestions?: any[];
-  
+
   /** Text translations */
   texts?: Array<{
     userId: number;
@@ -99,13 +99,13 @@ export interface DatabaseSetup {
     value: string;
     filepath?: string;
   }>;
-  
+
   /** Other teachers (for MANHA lookup) */
   otherTeachers?: any[];
-  
+
   /** Saved reports tracking (populated during test) - convention: saved + PascalCase + s */
   savedAttReports?: any[];
-  
+
   /** Saved answers tracking (populated during test) */
   savedAnswers?: any[];
 }

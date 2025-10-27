@@ -84,12 +84,7 @@ const TEACHER_TYPE_FIELDS: Record<TeacherTypeId, AttReportField[]> = {
 /**
  * Universal fields that are relevant for all teacher types
  */
-const UNIVERSAL_FIELDS: AttReportField[] = [
-  'reportDate',
-  'updateDate',
-  'year',
-  'comment',
-];
+const UNIVERSAL_FIELDS: AttReportField[] = ['reportDate', 'updateDate', 'year', 'comment'];
 
 /**
  * Determines if a field should be shown for a specific teacher type

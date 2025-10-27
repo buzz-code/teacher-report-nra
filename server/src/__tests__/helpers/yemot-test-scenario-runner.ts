@@ -1,9 +1,9 @@
 /**
  * Yemot Test Scenario Runner
- * 
+ *
  * This module executes test scenarios defined in the scenario format.
  * It orchestrates the mock setup, step execution, and validation.
- * 
+ *
  * This extends the generic Yemot testing framework with project-specific
  * entity mocking and service execution logic.
  */
@@ -15,12 +15,7 @@ import { Call } from 'yemot-router2';
 import { GenericScenarioRunner } from '@shared/utils/yemot/testing/yemot-test-framework-runner';
 import { RepositoryMockBuilder } from '@shared/utils/testing/repository-mock-builder';
 import { YemotHandlerService } from '../../yemot-handler.service';
-import {
-  TestScenario,
-  TestContext,
-  DatabaseSetup,
-  ScenarioStep,
-} from './yemot-test-scenario.types';
+import { TestScenario, TestContext, DatabaseSetup, ScenarioStep } from './yemot-test-scenario.types';
 import { User } from '@shared/entities/User.entity';
 import { Teacher } from '../../db/entities/Teacher.entity';
 import { TeacherType } from '../../db/entities/TeacherType.entity';
@@ -35,11 +30,7 @@ import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 /**
  * Main test scenario runner (extends generic with project-specific logic)
  */
-export class YemotTestScenarioRunner extends GenericScenarioRunner<
-  TestScenario,
-  TestContext,
-  DatabaseSetup
-> {
+export class YemotTestScenarioRunner extends GenericScenarioRunner<TestScenario, TestContext, DatabaseSetup> {
   constructor() {
     super(YemotHandlerService);
   }
@@ -76,9 +67,7 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<
           // For MANHA teacher lookup by phone last 4 digits
           if (options?.where?.phone && setup.otherTeachers) {
             const phone = options.where.phone;
-            return Promise.resolve(
-              setup.otherTeachers.find((t) => t.phone && phone.test && phone.test(t.phone)),
-            );
+            return Promise.resolve(setup.otherTeachers.find((t) => t.phone && phone.test && phone.test(t.phone)));
           }
           return Promise.resolve(null);
         }),
@@ -175,9 +164,7 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<
 
     // Validate saved answers
     if (expectedResult.savedAnswers) {
-      expect(this.context.setup.savedAnswers).toEqual(
-        expect.arrayContaining(expectedResult.savedAnswers),
-      );
+      expect(this.context.setup.savedAnswers).toEqual(expect.arrayContaining(expectedResult.savedAnswers));
     }
   }
 }

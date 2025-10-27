@@ -22,7 +22,7 @@ export class AddQuestionSkipTexts1761165059342 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const textRepo = queryRunner.manager.getRepository(Text);
-    
+
     await textRepo.delete({ name: 'QUESTION.SKIP_INSTRUCTION' });
     await textRepo.delete({ name: 'QUESTION.CANNOT_SKIP_MANDATORY' });
   }

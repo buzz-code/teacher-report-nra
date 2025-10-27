@@ -1,18 +1,13 @@
 /**
  * Scenario Builder - Fluent API for creating test scenarios
- * 
+ *
  * Provides a more intuitive way to build test scenarios with method chaining.
  * This extends the generic framework with project-specific helper methods.
  */
 
 import { GenericScenarioBuilder } from '@shared/utils/yemot/testing/yemot-test-framework-builder';
 import { MessageMatcher } from '@shared/utils/yemot/testing/yemot-test-framework.types';
-import {
-  TestScenario,
-  DatabaseSetup,
-  ScenarioStep,
-  ExpectedResult,
-} from './yemot-test-scenario.types';
+import { TestScenario, DatabaseSetup, ScenarioStep, ExpectedResult } from './yemot-test-scenario.types';
 import { TeacherTypeId } from '../../utils/fieldsShow.util';
 
 export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, DatabaseSetup> {
@@ -154,7 +149,7 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
         this.addText('REPORT.HOW_MANY_LESSONS_ABSENCE_SEMINAR_KITA', 'כמה שיעורים התלמידות חסרו');
         this.addText(
           'REPORT.VALIDATION_CONFIRM_SEMINAR_KITA',
-          'דיווח: {students} תלמידות, {lessons} שיעורים, {watchIndiv} צפיות, {teachInterf} מסירות, קמל: {kamal}, {discuss} דיונים, {absence} חיסורים. לאישור הקישי 1'
+          'דיווח: {students} תלמידות, {lessons} שיעורים, {watchIndiv} צפיות, {teachInterf} מסירות, קמל: {kamal}, {discuss} דיונים, {absence} חיסורים. לאישור הקישי 1',
         );
         this.addText('VALIDATION.SEMINAR_KITA_LESSON_COUNT', 'המספר לא תואם, נסי שוב');
         this.addText('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES', 'לא ניתן לדווח על יותר מ-10 חיסורים');
@@ -209,9 +204,12 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
   /**
    * Helper: Add complete date selection flow
    */
-  dateSelectionFlow(date?: Date, confirmDate: boolean = true): this {
+  dateSelectionFlow(date?: Date, confirmDate = true): this {
     const dateToUse = date || new Date();
-    const dateStr = `${String(dateToUse.getDate()).padStart(2, '0')}${String(dateToUse.getMonth() + 1).padStart(2, '0')}${dateToUse.getFullYear()}`;
+    const dateStr = `${String(dateToUse.getDate()).padStart(2, '0')}${String(dateToUse.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}${dateToUse.getFullYear()}`;
 
     this.systemAsks({ contains: 'תאריך' }, dateStr, 'Enter date');
     if (confirmDate) {
@@ -243,11 +241,7 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
   /**
    * Helper: Add PDS data collection flow
    */
-  pdsDataFlow(data: {
-    watch: number;
-    teach: number;
-    discuss: number;
-  }): this {
+  pdsDataFlow(data: { watch: number; teach: number; discuss: number }): this {
     this.systemAsks({ contains: 'צפיה או פרטני' }, String(data.watch), 'Watch/individual');
     this.systemAsks({ contains: 'מסירה או מעורבות' }, String(data.teach), 'Teach/interfere');
     this.systemAsks({ contains: 'דיון' }, String(data.discuss), 'Discussing lessons');
@@ -276,7 +270,7 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
   /**
    * Expect call to end
    */
-  expectCallEnded(ended: boolean = true): this {
+  expectCallEnded(ended = true): this {
     if (!this.scenario.expectedResult) {
       this.scenario.expectedResult = { callEnded: ended };
     } else {
