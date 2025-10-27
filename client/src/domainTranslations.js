@@ -380,11 +380,17 @@ export default {
                 'reportDate:$lte': 'תאריך דיווח עד-',
                 year: 'שנה',
                 isConfirmed: 'מאושר',
+                salaryReportId: 'דוח שכר',
+                salaryMonth: 'חודש שכר',
                 howManyStudents: 'כמה תלמידות',
                 howManyLessons: 'מספר שיעורים',
                 howManyWatchOrIndividual: 'מספר צפיות או אישיות',
                 howManyTeachedOrInterfering: 'מספר הוראות או התערבויות',
                 howManyMethodic: 'כמה מתודיקה',
+                fourLastDigitsOfTeacherPhone: '4 ספרות אחרונות של טלפון המורה',
+                isTaarifHulia: 'תעריף חוליה',
+                isTaarifHulia2: 'תעריף חוליה 2',
+                isTaarifHulia3: 'תעריף חוליה 3',
                 teachedStudentTz: 'תלמידות שנלמדו (ת.ז.)',
                 howManyYalkutLessons: 'כמה שיעורי ילקוט',
                 howManyDiscussingLessons: 'כמה שיעורי דיון',
@@ -393,6 +399,7 @@ export default {
                 howManyLessonsAbsence: 'כמה שיעורי היעדרות',
                 howManyWatchedLessons: 'כמה שיעורי צפייה',
                 howManyStudentsWatched: 'מספר תלמידים שנצפו',
+                teacherToReportFor: 'מורה לדווח עבורו',
                 wasDiscussing: 'היה דיון',
                 wasKamal: 'היה כמל',
                 wasStudentsGood: 'התלמידות היו טובות',
@@ -400,7 +407,9 @@ export default {
                 wasStudentsExitOnTime: 'התלמידות יצאו בזמן',
                 wasPhoneDiscussing: 'האם היה דיון טלפוני',
                 wasCollectiveWatch: 'היתה צפייה קבוצתית',
+                whatIsYourSpeciality: 'מה ההתמחות שלך',
                 activityType: 'סוג פעילות',
+                comment: 'הערה'
             }
         }
     }

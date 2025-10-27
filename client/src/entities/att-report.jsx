@@ -10,8 +10,11 @@ import {
     TextField,
     TextInput,
     BooleanField,
-    BooleanInput
+    BooleanInput,
+    useDataProvider
 } from 'react-admin';
+import { useWatch } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -21,6 +24,17 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
+
+// Teacher type IDs matching server-side enum
+const TeacherTypeId = {
+    SEMINAR_KITA: 1,
+    TRAINING: 2, // not in use
+    MANHA: 3,
+    RESPONSIBLE: 4, // not in use
+    PDS: 5,
+    KINDERGARTEN: 6,
+    SPECIAL_EDUCATION: 7,
+};
 
 const filters = [
     ...commonAdminFilters,
@@ -72,51 +86,134 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 }
 
 const Inputs = ({ isCreate, isAdmin }) => {
+    const teacherReferenceId = useWatch({ name: 'teacherReferenceId' });
+    const dataProvider = useDataProvider();
+    const [teacherTypeKey, setTeacherTypeKey] = useState(null);
+
+    useEffect(() => {
+        if (!teacherReferenceId) {
+            setTeacherTypeKey(null);
+            return;
+        }
+
+        const fetchTeacherType = async () => {
+            try {
+                const teacher = await dataProvider.getOne('teacher', { id: teacherReferenceId });
+                if (!teacher?.data?.teacherTypeReferenceId) {
+                    setTeacherTypeKey(null);
+                    return;
+                }
+                
+                const teacherType = await dataProvider.getOne('teacher_type', { id: teacher.data.teacherTypeReferenceId });
+                setTeacherTypeKey(teacherType?.data?.key || null);
+            } catch (error) {
+                console.error('Error fetching teacher type:', error);
+                setTeacherTypeKey(null);
+            }
+        };
+
+        fetchTeacherType();
+    }, [teacherReferenceId, dataProvider]);
+
+    // Helper function to check if a field should be shown for the current teacher type
+    const shouldShow = (teacherTypes) => {
+        if (!teacherTypeKey) return true; // Show all fields if teacher type not yet loaded
+        return teacherTypes.includes(teacherTypeKey);
+    };
+
     return <>
+    teacher type key: {JSON.stringify(teacherTypeKey)}
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
         <DateInput source="reportDate" validate={[required()]} />
-        <DateTimeInput source="updateDate" />
+        {!isCreate && <DateTimeInput source="updateDate" disabled={!isAdmin} />}
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
         {/* <BooleanInput source="isConfirmed" /> */}
 
-        {/* Salary fields */}
+        {/* Salary fields - Universal */}
         <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />
         <NumberInput source="salaryMonth" />
         <TextInput source="comment" multiline />
 
-        {/* Activity fields */}
-        <NumberInput source="howManyStudents" />
-        <NumberInput source="howManyMethodic" />
-        <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
+        {/* SEMINAR_KITA, KINDERGARTEN */}
+        {shouldShow([TeacherTypeId.SEMINAR_KITA, TeacherTypeId.KINDERGARTEN]) && (
+            <NumberInput source="howManyStudents" />
+        )}
 
-        {/* Teaching fields */}
-        <TextInput source="teachedStudentTz" multiline helperText="תעודות זהות של תלמידים שנלמדו" />
-        <NumberInput source="howManyYalkutLessons" />
-        <NumberInput source="howManyDiscussingLessons" />
+        {/* SEMINAR_KITA, SPECIAL_EDUCATION */}
+        {shouldShow([TeacherTypeId.SEMINAR_KITA, TeacherTypeId.SPECIAL_EDUCATION]) && (
+            <NumberInput source="howManyLessons" />
+        )}
 
-        {/* Assessment fields */}
-        <NumberInput source="howManyStudentsHelpTeached" />
-        <NumberInput source="howManyLessonsAbsence" />
-        <NumberInput source="howManyWatchedLessons" />
+        {/* SEMINAR_KITA, PDS */}
+        {shouldShow([TeacherTypeId.SEMINAR_KITA, TeacherTypeId.PDS]) && (
+            <>
+                <NumberInput source="howManyWatchOrIndividual" />
+                <NumberInput source="howManyTeachedOrInterfering" />
+            </>
+        )}
 
-        {/* Boolean flags */}
-        <BooleanInput source="wasDiscussing" />
-        <BooleanInput source="wasKamal" />
-        <BooleanInput source="wasStudentsGood" />
-        <BooleanInput source="wasStudentsEnterOnTime" />
-        <BooleanInput source="wasStudentsExitOnTime" />
+        {/* SEMINAR_KITA only */}
+        {shouldShow([TeacherTypeId.SEMINAR_KITA]) && (
+            <>
+                <BooleanInput source="wasKamal" />
+                <NumberInput source="howManyLessonsAbsence" />
+            </>
+        )}
 
-        {/* Special fields */}
-        <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} />
-        <NumberInput source="teacherToReportFor" />
-        <BooleanInput source="wasCollectiveWatch" />
+        {/* SEMINAR_KITA, MANHA, PDS */}
+        {shouldShow([TeacherTypeId.SEMINAR_KITA, TeacherTypeId.MANHA, TeacherTypeId.PDS]) && (
+            <NumberInput source="howManyDiscussingLessons" />
+        )}
 
-        {/* Tariff fields */}
-        <BooleanInput source="isTaarifHulia" />
-        <BooleanInput source="isTaarifHulia2" />
-        <BooleanInput source="isTaarifHulia3" />
+        {/* MANHA only */}
+        {shouldShow([TeacherTypeId.MANHA]) && (
+            <>
+                <NumberInput source="howManyMethodic" />
+                <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
+                <BooleanInput source="isTaarifHulia" />
+                <BooleanInput source="isTaarifHulia2" />
+                <BooleanInput source="isTaarifHulia3" />
+                <NumberInput source="howManyWatchedLessons" />
+                <TextInput source="teachedStudentTz" multiline />
+                <NumberInput source="howManyYalkutLessons" />
+                <NumberInput source="howManyStudentsHelpTeached" />
+                <NumberInput source="teacherToReportFor" />
+            </>
+        )}
+
+        {/* MANHA, SPECIAL_EDUCATION */}
+        {shouldShow([TeacherTypeId.MANHA, TeacherTypeId.SPECIAL_EDUCATION]) && (
+            <NumberInput source="howManyStudentsTeached" />
+        )}
+
+        {/* KINDERGARTEN only */}
+        {shouldShow([TeacherTypeId.KINDERGARTEN]) && (
+            <>
+                <BooleanInput source="wasCollectiveWatch" />
+                <BooleanInput source="wasStudentsGood" />
+            </>
+        )}
+
+        {/* SPECIAL_EDUCATION only */}
+        {shouldShow([TeacherTypeId.SPECIAL_EDUCATION]) && (
+            <>
+                <NumberInput source="howManyStudentsWatched" />
+                <BooleanInput source="wasPhoneDiscussing" />
+                <TextInput source="whatIsYourSpeciality" />
+            </>
+        )}
+
+        {/* Legacy/unused fields - show for backwards compatibility or admin */}
+        {isAdmin && (
+            <>
+                <BooleanInput source="wasDiscussing" />
+                <BooleanInput source="wasStudentsEnterOnTime" />
+                <BooleanInput source="wasStudentsExitOnTime" />
+                <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} />
+            </>
+        )}
 
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
         {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
