@@ -203,9 +203,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           messageParts.push(skipInstruction);
         }
 
-        const inputMessage = await this.getTextByUserId('QUESTION.CHOOSE_ANSWER');
-        messageParts.push(inputMessage);
-
         answer = await this.askForInput(messageParts.join(', '), {
           max_digits: 2,
           min_digits: 1,
