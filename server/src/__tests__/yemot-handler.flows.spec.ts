@@ -70,7 +70,44 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
   });
 
   describe('MANHA Teacher Flows', () => {
-    it.todo('should complete MANHA Type 1: Self-report with methodic lessons');
+    it('should complete MANHA Type 1: Self-report with methodic lessons', async () => {
+      const today = new Date();
+
+      const testScenario = scenario('MANHA Type 1 - Self-report')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מנחה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.MANHA,
+        })
+        .withWorkingDates([today])
+        .withStandardTexts(TeacherTypeId.MANHA)
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        .systemAsks({ contains: 'עצמך או על מורות אחרות' }, '1', 'Report type: self (1)')
+        .systemAsks({ contains: 'מתודיקה' }, '3', 'Methodic lessons')
+        .systemAsks({ contains: 'לאישור' }, '1', 'Confirm report')
+        .systemSends(undefined, 'Success message')
+        .systemHangsUp(undefined, 'Goodbye')
+        .expectSavedReport({
+          userId: 1,
+          teacherReferenceId: 1,
+          isConfirmed: true,
+          howManyMethodic: 3,
+        })
+        .expectCallEnded(true)
+        .build();
+
+      await runScenario(testScenario);
+    });
+
     it.todo('should complete MANHA Type 2: Report on other teacher with teacher lookup');
     it.todo('should complete MANHA Type 2: With multiple student TZ collection');
     it.todo('should allow reporting on another teacher after completion');
@@ -353,10 +390,54 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
       await runScenario(testScenario);
     });
 
+    it('should handle invalid date format and retry', async () => {
+      const today = new Date();
+      const invalidDateStr = '99999999'; // Invalid date: 99th day of 99th month
+      const todayStr = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${today.getFullYear()}`;
+
+      const testScenario = scenario('Date validation - Invalid format rejected')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .addText('VALIDATION.INVALID_DATE', 'תאריך לא חוקי')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .systemAsks({ contains: 'תאריך' }, invalidDateStr, 'Enter invalid date')
+        .systemSends({ contains: 'לא חוקי' }, 'Invalid date error')
+        .systemAsks({ contains: 'תאריך' }, todayStr, 'Enter valid date')
+        .systemAsks({ contains: 'לאישור' }, '1', 'Confirm date')
+        .seminarKitaDataFlow({
+          lessons: 6,
+          watch: 2,
+          teach: 2,
+          kamal: true,
+          discuss: 1,
+          absence: 0,
+        })
+        .systemAsks({ contains: 'לאישור' }, '1', 'Confirm report')
+        .systemSends(undefined, 'Success message')
+        .systemAsks({ contains: 'יום נוסף' }, '2', 'No more reports')
+        .systemHangsUp(undefined, 'Goodbye')
+        .expectCallEnded(true)
+        .build();
+
+      await runScenario(testScenario);
+    });
+
     it.todo('should reject date with existing confirmed report');
-    it.todo('should allow overwriting existing unconfirmed report');
     it.todo('should reject date with salary report');
-    it.todo('should handle invalid date format and retry');
   });
 
   describe('Report Confirmation & Retry', () => {
@@ -416,6 +497,57 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
           wasKamal: false,
           howManyDiscussingLessons: 2,
           howManyLessonsAbsence: 0,
+        })
+        .expectCallEnded(true)
+        .build();
+
+      await runScenario(testScenario);
+    });
+
+    it('should allow PDS teacher to reject confirmation and retry', async () => {
+      const today = new Date();
+
+      const testScenario = scenario('PDS - Reject confirmation and retry')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורת פידיאס',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.PDS,
+        })
+        .withWorkingDates([today])
+        .withStandardTexts(TeacherTypeId.PDS)
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        // First attempt - wrong data
+        .pdsDataFlow({
+          watch: 2,
+          teach: 1,
+          discuss: 0,
+        })
+        .systemAsks({ contains: 'לאישור' }, '2', 'Reject report')
+        // Second attempt - correct data
+        .pdsDataFlow({
+          watch: 4,
+          teach: 3,
+          discuss: 2,
+        })
+        .systemAsks({ contains: 'לאישור' }, '1', 'Confirm report')
+        .systemSends(undefined, 'Success message')
+        .systemHangsUp(undefined, 'Goodbye')
+        .expectSavedReport({
+          userId: 1,
+          teacherReferenceId: 1,
+          isConfirmed: true,
+          howManyWatchOrIndividual: 4,
+          howManyTeachedOrInterfering: 3,
+          howManyDiscussingLessons: 2,
         })
         .expectCallEnded(true)
         .build();

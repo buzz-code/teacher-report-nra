@@ -374,11 +374,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
           return this.getAndValidateReportDate();
         }
-        if (this.existingReport.isConfirmed) {
-          this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
-          return this.getAndValidateReportDate();
-        }
-        this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
+        // if (this.existingReport.isConfirmed) {
+        // all reports should be created as confirmed - so this block is redundant
+        this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
+        return this.getAndValidateReportDate();
+        // }
+        // this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
       }
     }
 
