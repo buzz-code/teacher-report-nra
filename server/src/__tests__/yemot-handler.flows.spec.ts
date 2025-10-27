@@ -164,9 +164,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
         .systemAsks({ contains: 'לאישור' }, '1', 'Confirm first report')
         .systemSends(undefined, 'Success message')
         .systemAsks({ contains: 'יום נוסף' }, '1', 'Report another date')
-        // After saying yes to another date, system asks main menu again
-        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report (second time)')
-        // Second date - today
+        // Second date - today (goes directly to date selection, no main menu)
         .dateSelectionFlow(today, true)
         .seminarKitaDataFlow({
           lessons: 8,
