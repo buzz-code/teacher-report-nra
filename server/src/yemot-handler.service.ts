@@ -907,7 +907,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       if (anotherDateReport === '1') {
         this.reportDate = null; // Reset report date
-        return this.getAndValidateReportDate();
+        return this.askForReportDataAndSave();
       } else {
         this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
       }
