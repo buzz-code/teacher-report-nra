@@ -9,12 +9,9 @@ import { Answer } from 'src/db/entities/Answer.entity';
 import { WorkingDate } from 'src/db/entities/WorkingDate.entity';
 import { TeacherQuestion } from 'src/db/entities/TeacherQuestion.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
-import { Like, IsNull, LessThanOrEqual, MoreThanOrEqual, Between } from 'typeorm';
+import { Like, IsNull, Between } from 'typeorm';
 import {
   formatHebrewDateForIVR,
-  gematriyaLetters,
-  getGregorianDateFromHebrew,
-  getHebrewMonthsList,
 } from '@shared/utils/formatting/hebrew.util';
 import { TeacherTypeId } from 'src/utils/fieldsShow.util';
 
@@ -246,21 +243,21 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getQuestionsForTeacher(): Promise<Question[]> {
     const today = new Date();
 
-    // Get individual assignments (unanswered only)
-    const individualAssignments = await this.dataSource.getRepository(TeacherQuestion).find({
-      where: {
-        userId: this.user.id,
-        teacherReferenceId: this.teacher.id,
-        answerReferenceId: IsNull(), // Only unanswered
-        question: {
-          startDate: LessThanOrEqual(today),
-          endDate: MoreThanOrEqual(today),
-        },
-      },
-      relations: ['question'],
-    });
+    // Get individual assignments - include both unanswered and those with deleted answers
+    // Using query builder to detect deleted answers via left join
+    const individualAssignments = await this.dataSource
+      .getRepository(TeacherQuestion)
+      .createQueryBuilder('tq')
+      .innerJoinAndSelect('tq.question', 'question')
+      .leftJoin('tq.answer', 'answer')
+      .where('tq.userId = :userId', { userId: this.user.id })
+      .andWhere('tq.teacherReferenceId = :teacherId', { teacherId: this.teacher.id })
+      .andWhere('question.startDate <= :today', { today })
+      .andWhere('question.endDate >= :today', { today })
+      .andWhere('(tq.answerReferenceId IS NULL OR answer.id IS NULL)')
+      .getMany();
 
-    return individualAssignments.map((assignment) => assignment.question).filter(Boolean);
+    return individualAssignments.map((assignment) => assignment.question);
   }
 
   private async saveAnswerForQuestion(question: Question, answer: string): Promise<void> {

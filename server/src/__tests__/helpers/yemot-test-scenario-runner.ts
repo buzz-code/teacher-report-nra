@@ -86,6 +86,27 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<TestScenario,
           return Promise.resolve([]);
         }),
         update: jest.fn().mockResolvedValue(undefined),
+        createQueryBuilder: jest.fn().mockImplementation(() => {
+          const setup = getCurrentSetup();
+          // Return the teacherQuestions from setup with questions attached
+          const dataArray = setup.teacherQuestions
+            ? setup.teacherQuestions.map((tq) => {
+                const question = setup.questions?.find((q) => q.id === tq.questionReferenceId);
+                return { ...tq, question };
+              })
+            : [];
+
+          return {
+            innerJoinAndSelect: jest.fn().mockReturnThis(),
+            leftJoin: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+            andWhere: jest.fn().mockReturnThis(),
+            orWhere: jest.fn().mockReturnThis(),
+            getMany: jest.fn().mockResolvedValue(dataArray),
+            getOne: jest.fn().mockResolvedValue(dataArray[0] || null),
+          };
+        }),
       }),
 
       // With save tracking - uses setup.savedAttReports and setup.savedAnswers
