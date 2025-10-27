@@ -152,18 +152,18 @@ The system has existing pivot functionality that provides teacher-type-specific 
 
 **Note**: The specialized endpoints like `getSeminarKitaReport`, `getManhaReport`, etc. may not be needed as separate endpoints since the pivot functionality already provides teacher-type-specific views through filtering.
 
-#### 17. Report Management Endpoints (Backend)
+#### 17. Report Management Endpoints (Backend) (check ReportableItem config)
 - [ ] `POST /api/att-reports/updateSalaryMonth` - Update salary month for multiple reports
 - [ ] `POST /api/att-reports/updateSalaryComment` - Update comment for report
 - [ ] `POST /api/att-reports/createSalaryReport` - Create salary report grouping
 - [ ] `POST /api/att-reports/:report/export-pdf` - Export report as PDF with Hebrew RTL support
 
-#### 18. Dashboard Endpoint (Backend)
+#### 18. Dashboard Endpoint (Backend) (see how dashboard is implemented in this system, no new api is needed, just proper default dashboard items configuration)
 - [ ] `GET /api/dashboard` - Dashboard statistics and summary data
 
 ### 📱 Phone System Integration Gaps
 
-#### 19. Complete YemotHandlerService Implementation
+#### 19. Complete YemotHandlerService Implementation (compare to https://github.com/buzz-code/wolf-teacher-reports/blob/copilot/fix-3/YEMOT_PHONE_FLOW.md, some changes were made to the flow, so ask me if in doubt)
 Current implementation has many TODO comments and missing functionality:
 - [ ] Complete `getStudentByTz()` method - currently returns null, needs Student entity integration
 - [ ] Implement comprehensive question system logic with dynamic questions based on teacher type
@@ -179,7 +179,7 @@ Current implementation has many TODO comments and missing functionality:
 - [ ] Add support for question types 1-4 with proper logic
 - [ ] Implement Hebrew text message system integration
 
-#### 20. Text/Message System for Phone Integration
+#### 20. Text/Message System for Phone Integration (probably done, check migration scripts folder)
 - [ ] Populate TextByUser system with required Hebrew messages for phone system:
   - [ ] TEACHER.WELCOME messages
   - [ ] REPORT.* messages for all report flows
