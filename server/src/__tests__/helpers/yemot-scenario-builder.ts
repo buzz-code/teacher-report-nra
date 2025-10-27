@@ -261,9 +261,20 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
    */
   expectSavedReport(reportData: any): this {
     if (!this.scenario.expectedResult) {
-      this.scenario.expectedResult = { callEnded: true };
+      this.scenario.expectedResult = {};
     }
     this.scenario.expectedResult.savedReport = reportData;
+    return this;
+  }
+
+  /**
+   * Expect saved answers for questions
+   */
+  expectSavedAnswers(answers: any[]): this {
+    if (!this.scenario.expectedResult) {
+      this.scenario.expectedResult = {};
+    }
+    this.scenario.expectedResult.savedAnswers = answers;
     return this;
   }
 

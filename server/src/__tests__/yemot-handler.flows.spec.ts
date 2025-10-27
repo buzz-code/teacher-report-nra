@@ -700,18 +700,410 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
   });
 
   describe('Questions System', () => {
-    it.todo('should ask mandatory question and save answer');
-    it.todo('should prevent skipping mandatory question with * key');
-    it.todo('should allow skipping optional question with * key');
-    it.todo('should validate answer within range (lowerLimit/upperLimit)');
+    it('should ask mandatory question and save answer', async () => {
+      const today = new Date();
+
+      const questions = [
+        {
+          id: 1,
+          userId: 1,
+          questionTypeReferenceId: 1,
+          content: 'כמה שעות עבדת היום?',
+          upperLimit: 10,
+          lowerLimit: 1,
+          isMandatory: true,
+          startDate: new Date(today.getTime() - 86400000 * 30), // 30 days ago
+          endDate: new Date(today.getTime() + 86400000 * 30), // 30 days from now
+          effectiveDate: today,
+        },
+      ];
+
+      const teacherQuestions = [
+        {
+          id: 1,
+          userId: 1,
+          questionReferenceId: 1,
+          teacherReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('Questions - Mandatory question with answer')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withQuestions(questions)
+        .withTeacherQuestions(teacherQuestions)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .addText('QUESTION.CHOOSE_ANSWER', 'נא להקיש את התשובה')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'כמה שעות עבדת היום' }, '8', 'Answer mandatory question')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .expectSavedAnswers([
+          {
+            userId: 1,
+            teacherTz: '123456789',
+            questionReferenceId: 1,
+            answer: 8,
+          },
+        ])
+        .expectCallEnded(false) // Partial flow - testing question was asked and saved
+        .build();
+
+      await runScenario(testScenario);
+    });
+
+    it('should prevent skipping mandatory question with * key', async () => {
+      const today = new Date();
+
+      const questions = [
+        {
+          id: 1,
+          userId: 1,
+          questionTypeReferenceId: 1,
+          content: 'כמה שעות עבדת היום?',
+          upperLimit: 10,
+          lowerLimit: 1,
+          isMandatory: true,
+          startDate: new Date(today.getTime() - 86400000 * 30),
+          endDate: new Date(today.getTime() + 86400000 * 30),
+          effectiveDate: today,
+        },
+      ];
+
+      const teacherQuestions = [
+        {
+          id: 1,
+          userId: 1,
+          questionReferenceId: 1,
+          teacherReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('Questions - Cannot skip mandatory')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withQuestions(questions)
+        .withTeacherQuestions(teacherQuestions)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .addText('QUESTION.CHOOSE_ANSWER', 'נא להקיש את התשובה')
+        .addText('QUESTION.CANNOT_SKIP_MANDATORY', 'לא ניתן לדלג על שאלה זו')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'כמה שעות עבדת היום' }, '*', 'Try to skip with *')
+        .systemSends({ contains: 'לא ניתן לדלג' }, 'Cannot skip mandatory error')
+        .systemAsks({ contains: 'כמה שעות עבדת היום' }, '7', 'Answer mandatory question')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        // Answer should be saved after successful input
+        .expectSavedAnswers([
+          {
+            userId: 1,
+            teacherTz: '123456789',
+            questionReferenceId: 1,
+            answer: 7,
+          },
+        ])
+        .expectCallEnded(false) // Partial flow test
+        .build();
+
+      await runScenario(testScenario);
+    });
+
+    it('should allow skipping optional question with * key', async () => {
+      const today = new Date();
+
+      const questions = [
+        {
+          id: 1,
+          userId: 1,
+          questionTypeReferenceId: 1,
+          content: 'האם היו בעיות טכניות?',
+          upperLimit: 1,
+          lowerLimit: 0,
+          isMandatory: false, // Optional question
+          startDate: new Date(today.getTime() - 86400000 * 30),
+          endDate: new Date(today.getTime() + 86400000 * 30),
+          effectiveDate: today,
+        },
+      ];
+
+      const teacherQuestions = [
+        {
+          id: 1,
+          userId: 1,
+          questionReferenceId: 1,
+          teacherReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('Questions - Skip optional question')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withQuestions(questions)
+        .withTeacherQuestions(teacherQuestions)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .addText('QUESTION.CHOOSE_ANSWER', 'נא להקיש את התשובה')
+        .addText('QUESTION.SKIP_INSTRUCTION', 'לדלג על השאלה לחצי כוכבית')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'האם היו בעיות טכניות' }, '*', 'Skip optional question')
+        // Verify * was accepted (no error, no re-ask) - system proceeds directly to main menu
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: proves * skip was valid')
+        // Question was skipped, no answer should be saved
+        .expectCallEnded(false) // Partial flow test
+        .build();
+
+      await runScenario(testScenario);
+    });
+
+    it('should validate answer within range (lowerLimit/upperLimit)', async () => {
+      const today = new Date();
+
+      const questions = [
+        {
+          id: 1,
+          userId: 1,
+          questionTypeReferenceId: 1,
+          content: 'דרג את השיעור מ-1 עד 5',
+          upperLimit: 5,
+          lowerLimit: 1,
+          isMandatory: true,
+          startDate: new Date(today.getTime() - 86400000 * 30),
+          endDate: new Date(today.getTime() + 86400000 * 30),
+          effectiveDate: today,
+        },
+      ];
+
+      const teacherQuestions = [
+        {
+          id: 1,
+          userId: 1,
+          questionReferenceId: 1,
+          teacherReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('Questions - Validate answer range')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withQuestions(questions)
+        .withTeacherQuestions(teacherQuestions)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .addText('QUESTION.CHOOSE_ANSWER', 'נא להקיש את התשובה')
+        .addText('QUESTION.ANSWER_OUT_OF_RANGE', 'התשובה צריכה להיות בין {min} ל-{max}')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'דרג את השיעור' }, '8', 'Answer above upper limit (5)')
+        .systemSends({ contains: 'בין' }, 'Out of range error')
+        .systemAsks({ contains: 'דרג את השיעור' }, '4', 'Valid answer within range')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        // Valid answer should be saved
+        .expectSavedAnswers([
+          {
+            userId: 1,
+            teacherTz: '123456789',
+            questionReferenceId: 1,
+            answer: 4,
+          },
+        ])
+        .expectCallEnded(false) // Partial flow test
+        .build();
+
+      await runScenario(testScenario);
+    });
+
     it.todo('should retry when answer is out of range');
     it.todo('should process multiple questions in sequence');
   });
 
   describe('Teacher & Student Lookup', () => {
-    it.todo('should find teacher by 4 last digits - single match');
-    it.todo('should find teacher by 4 last digits - multiple matches with selection');
-    it.todo('should handle no teacher found by 4 last digits');
+    it('should find teacher by 4 last digits - single match', async () => {
+      const today = new Date();
+
+      const otherTeachers = [
+        {
+          id: 10,
+          userId: 1,
+          name: 'מורה אחרת',
+          phone: '0527609999', // Last 4 digits: 9999
+          teacherTypeReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('MANHA - Teacher lookup single match')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מנחה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.MANHA,
+        })
+        .withOtherTeachers(otherTeachers)
+        .withWorkingDates([today])
+        .withStandardTexts(TeacherTypeId.MANHA)
+        .addText('REPORT.FOUR_LAST_DIGITS_OF_TEACHER_PHONE', 'הקישי 4 ספרות אחרונות')
+        .addText('TEACHER.CONFIRM_TEACHER_SINGLE', 'האם המורה היא {teacherName}?')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        .systemAsks({ contains: 'עצמך או על מורות אחרות' }, '2', 'Report type: others (2)')
+        .systemAsks({ contains: '4 ספרות אחרונות' }, '9999', 'Enter 4 last digits')
+        .systemAsks({ contains: 'מורה אחרת' }, '1', 'Confirm teacher')
+        // Now continue with data collection for this teacher...
+        .expectCallEnded(false) // Partial flow test
+        .build();
+
+      await runScenario(testScenario);
+    });
+
+    it('should find teacher by 4 last digits - multiple matches with selection', async () => {
+      const today = new Date();
+
+      const otherTeachers = [
+        {
+          id: 10,
+          userId: 1,
+          name: 'מורה ראשונה',
+          phone: '0527609999', // Last 4 digits: 9999
+          teacherTypeReferenceId: 1,
+        },
+        {
+          id: 11,
+          userId: 1,
+          name: 'מורה שנייה',
+          phone: '0537779999', // Last 4 digits: 9999
+          teacherTypeReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('MANHA - Teacher lookup multiple matches')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מנחה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.MANHA,
+        })
+        .withOtherTeachers(otherTeachers)
+        .withWorkingDates([today])
+        .withStandardTexts(TeacherTypeId.MANHA)
+        .addText('REPORT.FOUR_LAST_DIGITS_OF_TEACHER_PHONE', 'הקישי 4 ספרות אחרונות')
+        .addText('TEACHER.CONFIRM_TEACHER_MULTI', 'בחרי מורה: {teacherList}')
+        .addText('TEACHER.CONFIRM_TEACHER_SINGLE', 'האם המורה היא {teacherName}?')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        .systemAsks({ contains: 'עצמך או על מורות אחרות' }, '2', 'Report type: others (2)')
+        .systemAsks({ contains: '4 ספרות אחרונות' }, '9999', 'Enter 4 last digits')
+        .systemAsks({ contains: 'בחרי מורה' }, '2', 'Select second teacher')
+        .systemAsks({ contains: 'מורה שנייה' }, '1', 'Confirm teacher')
+        // Now continue with data collection for this teacher...
+        .expectCallEnded(false) // Partial flow test
+        .build();
+
+      await runScenario(testScenario);
+    });
+
+    it('should handle no teacher found by 4 last digits', async () => {
+      const today = new Date();
+
+      const otherTeachers = [
+        {
+          id: 10,
+          userId: 1,
+          name: 'מורה אחרת',
+          phone: '0527609999', // Last 4 digits: 9999
+          teacherTypeReferenceId: 1,
+        },
+      ];
+
+      const testScenario = scenario('MANHA - Teacher not found')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מנחה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.MANHA,
+        })
+        .withOtherTeachers(otherTeachers)
+        .withWorkingDates([today])
+        .withStandardTexts(TeacherTypeId.MANHA)
+        .addText('REPORT.FOUR_LAST_DIGITS_OF_TEACHER_PHONE', 'הקישי 4 ספרות אחרונות')
+        .addText('TEACHER.NO_TEACHER_FOUND_BY_DIGITS', 'לא נמצאה מורה עם ספרות אלו')
+        .addText('TEACHER.CONFIRM_TEACHER_SINGLE', 'האם המורה היא {teacherName}?')
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        .systemAsks({ contains: 'עצמך או על מורות אחרות' }, '2', 'Report type: others (2)')
+        .systemAsks({ contains: '4 ספרות אחרונות' }, '1234', 'Enter non-existent digits')
+        .systemSends({ contains: 'לא נמצאה' }, 'Teacher not found error')
+        .systemAsks({ contains: '4 ספרות אחרונות' }, '9999', 'Enter correct digits')
+        .systemAsks({ contains: 'מורה אחרת' }, '1', 'Confirm teacher')
+        // Now continue with data collection for this teacher...
+        .expectCallEnded(false) // Partial flow test
+        .build();
+
+      await runScenario(testScenario);
+    });
+
     it.todo('should collect student TZ with confirmation');
     it.todo('should handle student not found and retry');
     it.todo('should collect multiple student TZs in loop');

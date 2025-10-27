@@ -51,7 +51,42 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<TestScenario,
         }),
       }),
       question: builder.standard(Question),
-      teacherQuestion: builder.standard(TeacherQuestion),
+      teacherQuestion: builder.custom(TeacherQuestion, {
+        find: jest.fn().mockImplementation((options) => {
+          const setup = getCurrentSetup();
+          if (setup.teacherQuestions && options?.where) {
+            // Filter by where conditions
+            return Promise.resolve(
+              setup.teacherQuestions
+                .filter((tq) => {
+                  // Match userId if specified
+                  if (options.where.userId && tq.userId !== options.where.userId) return false;
+                  // Match teacherReferenceId if specified
+                  if (options.where.teacherReferenceId && tq.teacherReferenceId !== options.where.teacherReferenceId)
+                    return false;
+                  // Match answerReferenceId: IsNull() means null or undefined
+                  if (
+                    options.where.answerReferenceId &&
+                    typeof options.where.answerReferenceId === 'object' &&
+                    tq.answerReferenceId != null
+                  )
+                    return false;
+                  return true;
+                })
+                .map((tq) => {
+                  // If relations include 'question', attach it from setup.questions
+                  if (options.relations?.includes('question') && setup.questions) {
+                    const question = setup.questions.find((q) => q.id === tq.questionReferenceId);
+                    return { ...tq, question };
+                  }
+                  return tq;
+                }),
+            );
+          }
+          return Promise.resolve([]);
+        }),
+        update: jest.fn().mockResolvedValue(undefined),
+      }),
 
       // With save tracking - uses setup.savedAttReports and setup.savedAnswers
       attReport: builder.withSaveTracking(AttReport),
@@ -164,7 +199,12 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<TestScenario,
 
     // Validate saved answers
     if (expectedResult.savedAnswers) {
-      expect(this.context.setup.savedAnswers).toEqual(expect.arrayContaining(expectedResult.savedAnswers));
+      expect(this.context.setup.savedAnswers).toBeDefined();
+      expect(this.context.setup.savedAnswers?.length).toBeGreaterThan(0);
+      // Use toMatchObject to allow partial matching (ignores id, reportDate, etc.)
+      expectedResult.savedAnswers.forEach((expectedAnswer, index) => {
+        expect(this.context.setup.savedAnswers[index]).toMatchObject(expectedAnswer);
+      });
     }
   }
 }
