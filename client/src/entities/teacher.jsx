@@ -28,8 +28,11 @@ const additionalBulkButtons = [
     <CommonReferenceInput
       source="questionId"
       reference="question"
+      label="שאלה לשיוך"
       dynamicFilter={filterByUserId}
       validate={required()}
+      sort={{ field: 'content', order: 'ASC' }}
+      filterToQuery={searchText => ({ 'content:$contL': searchText })}
     />
   </BulkActionButton>
 ];
