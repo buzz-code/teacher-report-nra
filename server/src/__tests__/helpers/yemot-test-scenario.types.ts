@@ -14,6 +14,8 @@ import {
   GenericExpectedResult,
   GenericTestContext,
 } from '@shared/utils/yemot/testing/yemot-test-framework.types';
+import { Call } from 'yemot-router2';
+import { YemotHandlerService } from '../../yemot-handler.service';
 
 // Re-export generic types for convenience
 export { MessageMatcher, StepType };
@@ -122,7 +124,7 @@ export interface ExpectedResult extends GenericExpectedResult {
 /**
  * Test execution context - tracks state during test execution (extends generic with project-specific repositories)
  */
-export interface TestContext extends GenericTestContext {
+export interface TestContext extends GenericTestContext<YemotHandlerService, Call> {
   /** Mock repositories */
   repositories: {
     user: any;

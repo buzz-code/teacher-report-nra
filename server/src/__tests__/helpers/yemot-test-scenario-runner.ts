@@ -40,57 +40,8 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<
   TestContext,
   DatabaseSetup
 > {
-  /**
-   * Get setup from scenario
-   */
-  protected getSetup(scenario: TestScenario): DatabaseSetup {
-    return scenario.setup;
-  }
-
-  /**
-   * Get steps from scenario
-   */
-  protected getSteps(scenario: TestScenario): ScenarioStep[] {
-    return scenario.steps;
-  }
-
-  /**
-   * Get mock call from context
-   */
-  protected getMockCall(): any {
-    return this.context.call;
-  }
-
-  /**
-   * Track interaction in context
-   */
-  protected trackInteraction(interaction: any): void {
-    this.context.interactionHistory.push(interaction);
-  }
-
-  /**
-   * Execute the service being tested
-   */
-  protected async executeService(): Promise<void> {
-    await this.context.service.processCall();
-  }
-
-  /**
-   * Initialize tracking arrays in setup
-   */
-  protected initializeTrackingArrays(setup: DatabaseSetup): void {
-    setup.savedAttReports = setup.savedAttReports || [];
-    setup.savedAnswers = setup.savedAnswers || [];
-  }
-
-  /**
-   * Build test context - override to set currentSetup for repository callbacks
-   */
-  protected buildContext(setup: DatabaseSetup, repositories: any, call: any, service: any): TestContext {
-    // Store setup for access in repository callbacks
-    this.currentSetup = setup;
-    // Call parent to build context
-    return super.buildContext(setup, repositories, call, service);
+  constructor() {
+    super(YemotHandlerService);
   }
 
   /**
@@ -195,39 +146,25 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<
   }
 
   /**
-   * Create mock call object
+   * Create mock call - override to set project-specific phone/did from setup
    */
-  protected createMockCall(setup: DatabaseSetup): any {
+  protected createMockCall(setup: DatabaseSetup): Call {
     return {
-      callId: 'test-call-' + Date.now(),
+      ...super.createMockCall(setup),
       did: setup.user.phoneNumber,
       phone: setup.teacher.phone,
       ApiPhone: setup.teacher.phone,
-      read: jest.fn(),
-      id_list_message: jest.fn(),
-      hangup: jest.fn(),
     };
   }
 
   /**
-   * Create service instance
-   */
-  protected createService(dataSource: any, call: any, callTracker: any): any {
-    return new YemotHandlerService(dataSource, call as Call, callTracker);
-  }
-
-  private currentSetup: DatabaseSetup;
-
-  /**
-   * Validate results against expected outcomes
+   * Validate results - calls parent for common validation then adds entity-specific validation
    */
   protected async validateResults(scenario: TestScenario): Promise<void> {
-    const { expectedResult } = scenario;
+    // Call parent for common validation
+    await super.validateResults(scenario);
 
-    // Validate call ended
-    if (expectedResult.callEnded) {
-      expect(this.context.call.hangup).toHaveBeenCalled();
-    }
+    const { expectedResult } = scenario;
 
     // Validate saved report
     if (expectedResult.savedReport) {
@@ -242,19 +179,7 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<
         expect.arrayContaining(expectedResult.savedAnswers),
       );
     }
-
-    // Run custom validation
-    if (expectedResult.customValidation) {
-      await expectedResult.customValidation(this.context);
-    }
   }
-}
-
-/**
- * Helper function to create test scenarios more easily
- */
-export function createScenario(scenario: TestScenario): TestScenario {
-  return scenario;
 }
 
 /**
