@@ -232,8 +232,8 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
     this.systemAsks({ contains: 'שיעורי סמינר כתה' }, String(data.lessons), 'How many lessons');
     this.systemAsks({ contains: 'צפיה או פרטני' }, String(data.watch), 'Watch/individual');
     this.systemAsks({ contains: 'מסירה או מעורבות' }, String(data.teach), 'Teach/interfere');
-    this.systemAsks({ contains: 'קמל' }, data.kamal ? '1' : '0', 'Was kamal');
     this.systemAsks({ contains: 'דיון' }, String(data.discuss), 'Discussing lessons');
+    this.systemAsks({ contains: 'קמל' }, data.kamal ? '1' : '0', 'Was kamal');
     this.systemAsks({ contains: 'חסרו' }, String(data.absence), 'Absences');
     return this;
   }

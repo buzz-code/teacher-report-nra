@@ -61,8 +61,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         { paramKey: 'howManyLessons', translationKey: 'lessons', formatter: FORMATTERS.number },
         { paramKey: 'howManyWatchOrIndividual', translationKey: 'watchIndiv', formatter: FORMATTERS.number },
         { paramKey: 'howManyTeachedOrInterfering', translationKey: 'teachInterf', formatter: FORMATTERS.number },
-        { paramKey: 'wasKamal', translationKey: 'kamal', formatter: FORMATTERS.boolean },
         { paramKey: 'howManyDiscussingLessons', translationKey: 'discuss', formatter: FORMATTERS.number },
+        { paramKey: 'wasKamal', translationKey: 'kamal', formatter: FORMATTERS.boolean },
         { paramKey: 'howManyLessonsAbsence', translationKey: 'absence', formatter: FORMATTERS.number },
       ],
       preValidation: async () => {
@@ -547,17 +547,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       { max_digits: 1, min_digits: 1 },
     );
 
-    // האם היה קמל?
-    this.callParams.wasKamal = await this.askForInput(await this.getTextByUserId('REPORT.WAS_KAMAL'), {
-      max_digits: 1,
-      min_digits: 1,
-    });
-
     // כמה שיעורי דיון
     this.callParams.howManyDiscussingLessons = await this.askForInput(
       await this.getTextByUserId('REPORT.HOW_MANY_DISCUSSING_LESSONS'),
       { max_digits: 1, min_digits: 1, digits_allowed: ['0', '1'] },
     );
+
+    // האם היה קמל?
+    this.callParams.wasKamal = await this.askForInput(await this.getTextByUserId('REPORT.WAS_KAMAL'), {
+      max_digits: 1,
+      min_digits: 1,
+    });
 
     // כמה שיעורים התלמידות חסרו מסיבות אישיות
     this.callParams.howManyLessonsAbsence = await this.askForInput(
