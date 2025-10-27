@@ -18,12 +18,111 @@ import {
 } from '@shared/utils/formatting/hebrew.util';
 import { TeacherTypeId } from 'src/utils/fieldsShow.util';
 
+// Interfaces for generic confirmation
+interface ConfirmationField {
+  paramKey: string;
+  translationKey: string;
+  formatter: (value: any, context?: any) => string;
+}
+
+interface ReportConfirmationConfig {
+  textKey: string;
+  fields: ConfirmationField[];
+  preValidation?: () => Promise<void>;
+}
+
+// Built-in formatters for common field types
+const FORMATTERS = {
+  boolean: (value: any) => (value === '1' ? '1' : '0'),
+  number: (value: any) => value?.toString() || '0',
+  string: (value: any) => value || '',
+  array: (value: any) => {
+    if (typeof value === 'string' && value.endsWith(',')) {
+      return value.slice(0, -1); // Remove trailing comma
+    }
+    return value || '';
+  },
+};
+
 @Injectable()
 export class YemotHandlerService extends BaseYemotHandlerService {
   private teacher: Teacher;
   private existingReport: AttReport;
   private reportDate: string;
   private callParams: any = {}; // Store call parameters
+  private teacherToReportFor: Teacher;
+
+  // Confirmation configurations for all teacher types
+  private readonly CONFIRMATION_CONFIGS: Record<TeacherTypeId, ReportConfirmationConfig> = {
+    [TeacherTypeId.SEMINAR_KITA]: {
+      textKey: 'REPORT.VALIDATION_CONFIRM_SEMINAR_KITA',
+      fields: [
+        { paramKey: 'howManyStudents', translationKey: 'students', formatter: FORMATTERS.number },
+        { paramKey: 'howManyLessons', translationKey: 'lessons', formatter: FORMATTERS.number },
+        { paramKey: 'howManyWatchOrIndividual', translationKey: 'watchIndiv', formatter: FORMATTERS.number },
+        { paramKey: 'howManyTeachedOrInterfering', translationKey: 'teachInterf', formatter: FORMATTERS.number },
+        { paramKey: 'wasKamal', translationKey: 'kamal', formatter: FORMATTERS.boolean },
+        { paramKey: 'howManyDiscussingLessons', translationKey: 'discuss', formatter: FORMATTERS.number },
+        { paramKey: 'howManyLessonsAbsence', translationKey: 'absence', formatter: FORMATTERS.number },
+      ],
+      preValidation: async () => {
+        await this.validateNoMoreThanTenAbsences();
+        await this.validateSeminarKitaLessonCount();
+      },
+    },
+    [TeacherTypeId.TRAINING]: {
+      textKey: '',
+      fields: [],
+    },
+    [TeacherTypeId.MANHA]: {
+      textKey: 'REPORT.VALIDATION_CONFIRM_MANHA',
+      fields: [
+        {
+          paramKey: 'teacherToReportFor',
+          translationKey: 'teacherName',
+          formatter: () => this.teacherToReportFor?.name || 'מורה',
+        },
+        { paramKey: 'howManyMethodic', translationKey: 'methodic', formatter: FORMATTERS.number },
+        { paramKey: 'isTaarifHulia', translationKey: 'hulia1', formatter: FORMATTERS.number },
+        { paramKey: 'isTaarifHulia2', translationKey: 'hulia2', formatter: FORMATTERS.number },
+        { paramKey: 'isTaarifHulia3', translationKey: 'hulia3', formatter: FORMATTERS.number },
+        { paramKey: 'howManyWatchedLessons', translationKey: 'watch', formatter: FORMATTERS.number },
+        { paramKey: 'howManyStudentsTeached', translationKey: 'teach', formatter: FORMATTERS.number },
+        { paramKey: 'howManyYalkutLessons', translationKey: 'yalkut', formatter: FORMATTERS.number },
+        { paramKey: 'howManyStudentsHelpTeached', translationKey: 'help', formatter: FORMATTERS.number },
+      ],
+    },
+    [TeacherTypeId.RESPONSIBLE]: {
+      textKey: '',
+      fields: [],
+    },
+    [TeacherTypeId.PDS]: {
+      textKey: 'REPORT.VALIDATION_CONFIRM_PDS',
+      fields: [
+        { paramKey: 'howManyWatchOrIndividual', translationKey: 'watchIndiv', formatter: FORMATTERS.number },
+        { paramKey: 'howManyTeachedOrInterfering', translationKey: 'teachInterf', formatter: FORMATTERS.number },
+        { paramKey: 'howManyDiscussingLessons', translationKey: 'discuss', formatter: FORMATTERS.number },
+      ],
+    },
+    [TeacherTypeId.KINDERGARTEN]: {
+      textKey: 'REPORT.VALIDATION_CONFIRM_KINDERGARTEN',
+      fields: [
+        { paramKey: 'wasCollectiveWatch', translationKey: 'collective', formatter: FORMATTERS.boolean },
+        { paramKey: 'howManyStudents', translationKey: 'students', formatter: FORMATTERS.number },
+        { paramKey: 'wasStudentsGood', translationKey: 'studentsGood', formatter: FORMATTERS.boolean },
+      ],
+    },
+    [TeacherTypeId.SPECIAL_EDUCATION]: {
+      textKey: 'REPORT.VALIDATION_CONFIRM_SPECIAL_EDUCATION',
+      fields: [
+        { paramKey: 'howManyLessons', translationKey: 'lessons', formatter: FORMATTERS.number },
+        { paramKey: 'howManyStudentsWatched', translationKey: 'studentsWatched', formatter: FORMATTERS.number },
+        { paramKey: 'howManyStudentsTeached', translationKey: 'studentsTeached', formatter: FORMATTERS.number },
+        { paramKey: 'wasPhoneDiscussing', translationKey: 'phoneDiscuss', formatter: FORMATTERS.boolean },
+        { paramKey: 'whatIsYourSpeciality', translationKey: 'speciality', formatter: FORMATTERS.string },
+      ],
+    },
+  };
 
   override async processCall(): Promise<void> {
     this.logger.log(`Processing call with ID: ${this.call.callId}`);
@@ -245,20 +344,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return this.getAndValidateReportDate();
     }
 
-    // Check for unconfirmed previous reports (not for "מורה מנחה" and not for previous month)
-    const reportDateIsPrevMonth = reportDate < new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    if (this.teacher.teacherType?.key !== TeacherTypeId.MANHA && !reportDateIsPrevMonth) {
-      const startReportsDate = new Date('1970-01-01');
-      const endReportsDate = new Date(new Date().getFullYear(), new Date().getMonth(), 0, 23, 59, 59); // Last day of previous month
-      const unconfirmedPreviousReports = await this.getUnconfirmedReportsByDateRange(startReportsDate, endReportsDate);
-
-      if (unconfirmedPreviousReports.length > 0) {
-        this.sendMessage(await this.getTextByUserId('VALIDATION.HAS_UNCONFIRMED_REPORTS'));
-        this.reportDate = null; // Reset report date
-        return this.getReportDate();
-      }
-    }
-
     // Check if it's a working day
     const dateStr = reportDate.toISOString().split('T')[0]; // YYYY-MM-DD format
     const isWorkingDay = await this.validateWorkingDateForTeacher(dateStr);
@@ -364,6 +449,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         break;
     }
 
+    // Ask for confirmation after data collection
+    await this.askForReportConfirmation();
+
     try {
       const attReport = {
         userId: this.user.id,
@@ -372,6 +460,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         reportDate: new Date(this.reportDate),
         updateDate: new Date(),
         year: getCurrentHebrewYear(),
+        isConfirmed: true, // Always set to true - reports are confirmed on creation
         howManyMethodic: this.callParams.howManyMethodic ? parseInt(this.callParams.howManyMethodic) : null,
         fourLastDigitsOfTeacherPhone: this.callParams.fourLastDigitsOfTeacherPhone,
         isTaarifHulia: this.callParams.isTaarifHulia === '1',
@@ -482,10 +571,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       await this.getTextByUserId('REPORT.HOW_MANY_LESSONS_ABSENCE_SEMINAR_KITA'),
       { max_digits: 1, min_digits: 1 },
     );
-
-    // TODO: Add validation methods
-    await this.validateNoMoreThanTenAbsences();
-    await this.validateSeminarKitaLessonCount();
   }
 
   private async getTrainingReport(): Promise<void> {
@@ -564,9 +649,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_HELP_TEACHED'),
         { max_digits: 1, min_digits: 1 },
       );
-
-      // TODO: Add validation method
-      await this.validateManhaReport();
     }
   }
 
@@ -596,9 +678,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       await this.getTextByUserId('REPORT.HOW_MANY_DISCUSSING_LESSONS'),
       { max_digits: 1, min_digits: 1, digits_allowed: ['0', '1'] },
     );
-
-    // TODO: Add validation method
-    await this.validatePdsReport();
   }
 
   private async getKindergartenReport(): Promise<void> {
@@ -758,6 +837,52 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     return null;
   }
 
+  /**
+   * Build confirmation parameters from callParams based on configuration
+   */
+  private buildConfirmationParams(fields: ConfirmationField[]): Record<string, string> {
+    const params: Record<string, string> = {};
+
+    for (const field of fields) {
+      const value = this.callParams[field.paramKey];
+      params[field.translationKey] = field.formatter(value, this);
+    }
+
+    return params;
+  }
+
+  /**
+   * Generic method to ask for report confirmation
+   * Uses this.teacher.teacherType.key to get the appropriate configuration
+   */
+  private async askForReportConfirmation(): Promise<void> {
+    const confirmationConfig = this.CONFIRMATION_CONFIGS[this.teacher.teacherType?.key];
+
+    if (!confirmationConfig || !confirmationConfig.textKey) {
+      // No confirmation configured for this teacher type (e.g., TRAINING, RESPONSIBLE)
+      return;
+    }
+
+    // Run pre-validation if configured
+    if (confirmationConfig.preValidation) {
+      await confirmationConfig.preValidation();
+    }
+
+    // Build the params object from callParams
+    const params = this.buildConfirmationParams(confirmationConfig.fields);
+
+    // Ask for confirmation using askConfirmation helper
+    const isConfirmed = await this.askConfirmation(confirmationConfig.textKey, params);
+
+    if (!isConfirmed) {
+      // Reset collected data to prevent stale conditional fields
+      this.callParams = {};
+      this.teacherToReportFor = null; // Also reset for Manha teachers
+      // Go back to start of data collection (keeps reportDate, existingReport, teacher, user)
+      return this.getReportAndSave();
+    }
+  }
+
   private async finishSavingReport(): Promise<void> {
     const isManhaAndOnOthers =
       this.teacher.teacherType?.key === TeacherTypeId.MANHA && this.callParams.manhaReportType === '2';
@@ -796,7 +921,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   }
 
   private async showReports(): Promise<void> {
-    // TODO: Implement show reports logic
     this.logger.log('Showing reports');
 
     const reportsMonth = await this.askForInput(await this.getTextByUserId('REPORT.CHOOSE_REPORTS_MONTH'), {
@@ -813,43 +937,35 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const startDate = new Date(year, month - 1, 1); // month is 0-based in JS
     const endDate = new Date(year, month, 0); // last day of month
 
-    const previousReports = await this.getUnconfirmedReportsByDateRange(startDate, endDate);
+    const reports = await this.getAllReportsByDateRange(startDate, endDate);
 
-    if (previousReports.length === 0) {
+    if (reports.length === 0) {
       this.hangupWithMessage(await this.getTextByUserId('REPORT.NO_REPORT_FOUND'));
     } else {
-      for (const report of previousReports) {
-        const reportConfirm = await this.askForInput(this.getReportMessage(report), { max_digits: 1, min_digits: 1 });
-
-        if (reportConfirm === '9') {
-          await this.saveReportAsConfirmed(report.id);
-        } else {
-          this.existingReport = report;
-          this.reportDate = report.reportDate.toISOString().split('T')[0]; // YYYY-MM-DD format
-          return this.getReportAndSave();
-        }
+      for (const report of reports) {
+        // Just read the report message, no user interaction
+        const message = await this.getReportMessage(report);
+        this.sendMessage(message);
       }
+      // After reading all reports, hangup
+      this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
     }
-
-    this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
   }
 
-  private async getUnconfirmedReportsByDateRange(startDate: Date, endDate: Date): Promise<AttReport[]> {
+  private async getAllReportsByDateRange(startDate: Date, endDate: Date): Promise<AttReport[]> {
     return await this.dataSource.getRepository(AttReport).find({
       where: {
         userId: this.user.id,
         teacherReferenceId: this.teacher.id,
         reportDate: Between(startDate, endDate),
-        isConfirmed: false,
+      },
+      order: {
+        reportDate: 'ASC',
       },
     });
   }
 
-  private async saveReportAsConfirmed(reportId: number): Promise<void> {
-    await this.dataSource.getRepository(AttReport).update({ id: reportId }, { isConfirmed: true });
-  }
-
-  private getReportMessage(report: AttReport): string {
+  private async getReportMessage(report: AttReport): Promise<string> {
     const reportDate = formatHebrewDateForIVR(report.reportDate);
 
     const reportMessages: Record<TeacherTypeId, string> = {
@@ -864,14 +980,14 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const messageKey = reportMessages[this.teacher.teacherType?.key];
     if (!messageKey) {
-      return `דיווח מתאריך ${reportDate} - לחץ 9 לאישור או מספר אחר לעריכה`;
+      return `דיווח מתאריך ${reportDate}`;
     }
 
     const params = {
       date: reportDate,
-      lessons: report.howManyLessons?.toString() || '0', // Fixed: use correct field name
-      watchIndiv: report.howManyWatchOrIndividual?.toString() || '0', // Fixed: use correct field name
-      teachInterf: report.howManyTeachedOrInterfering?.toString() || '0', // Fixed: use correct field name
+      lessons: report.howManyLessons?.toString() || '0',
+      watchIndiv: report.howManyWatchOrIndividual?.toString() || '0',
+      teachInterf: report.howManyTeachedOrInterfering?.toString() || '0',
       discuss: report.howManyDiscussingLessons?.toString() || '0',
       absence: report.howManyLessonsAbsence?.toString() || '0',
       kamal: report.wasKamal ? '1' : '0',
@@ -881,24 +997,23 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       hulia1: report.isTaarifHulia ? '1' : '0',
       hulia2: report.isTaarifHulia2 ? '1' : '0',
       watch: report.howManyWatchedLessons?.toString() || '0',
-      teach: report.howManyStudentsTeached?.toString() || '0', // Fixed: use correct field name
+      teach: report.howManyStudentsTeached?.toString() || '0',
       studentTz: report.teachedStudentTz || '',
       yalkut: report.howManyYalkutLessons?.toString() || '0',
       help: report.howManyStudentsHelpTeached?.toString() || '0',
       hulia3: report.isTaarifHulia3 ? '1' : '0',
-      studentsWatched: report.howManyStudentsWatched?.toString() || '0', // Fixed: use correct field name
-      studentsTeached: report.howManyStudentsTeached?.toString() || '0', // Fixed: use correct field name
-      phoneDiscuss: report.wasPhoneDiscussing ? '1' : '0', // Fixed: use correct field name
+      studentsWatched: report.howManyStudentsWatched?.toString() || '0',
+      studentsTeached: report.howManyStudentsTeached?.toString() || '0',
+      phoneDiscuss: report.wasPhoneDiscussing ? '1' : '0',
       trainingTeacher: report.teacherToReportFor?.toString() || '',
-      speciality: report.whatIsYourSpeciality?.toString() || '', // Fixed: use correct field name
+      speciality: report.whatIsYourSpeciality?.toString() || '',
       studentsGood: report.wasStudentsGood ? '1' : '0',
       enterOnTime: report.wasStudentsEnterOnTime ? '1' : '0',
       exitOnTime: report.wasStudentsExitOnTime ? '1' : '0',
       collective: report.wasCollectiveWatch ? '1' : '0',
     };
 
-    // This would ideally use the text system, but for now return a simple message
-    return `דיווח מתאריך ${reportDate} - לחץ 9 לאישור או מספר אחר לעריכה`;
+    return await this.getTextByUserId(messageKey, params);
   }
 
   private async validateNoMoreThanTenAbsences(): Promise<void> {
@@ -935,42 +1050,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
   }
 
-  private async validateManhaReport(): Promise<void> {
-    const confirmation = await this.askForInput(
-      await this.getTextByUserId('REPORT.VALIDATION_CONFIRM_MANHA', {
-        teacherName: this.teacherToReportFor?.name || 'מורה',
-        hulia1: this.callParams.isTaarifHulia || '0',
-        hulia2: this.callParams.isTaarifHulia2 || '0',
-        watch: this.callParams.howManyWatchedLessons || '0',
-        teach: this.callParams.howManyStudentsTeached || '0',
-        yalkut: this.callParams.howManyYalkutLessons || '0',
-        discuss: this.callParams.howManyDiscussingLessons || '0',
-        help: this.callParams.howManyStudentsHelpTeached || '0',
-        hulia3: this.callParams.isTaarifHulia3 || '0',
-      }),
-      { max_digits: 1, min_digits: 1 },
-    );
-
-    if (confirmation === '2') {
-      return this.askForReportDataAndSave();
-    }
-  }
-
-  private async validatePdsReport(): Promise<void> {
-    const confirmation = await this.askForInput(
-      await this.getTextByUserId('REPORT.VALIDATION_CONFIRM_PDS', {
-        watchIndiv: this.callParams.howManyWatchOrIndividual || '0',
-        teachInterf: this.callParams.howManyTeachedOrInterfering || '0',
-        discuss: this.callParams.howManyDiscussingLessons || '0',
-      }),
-      { max_digits: 1, min_digits: 1 },
-    );
-
-    if (confirmation === '2') {
-      return this.askForReportDataAndSave();
-    }
-  }
-
   private async getAbsencesCountForTeacher(): Promise<number> {
     const reports = await this.dataSource.getRepository(AttReport).find({
       where: {
@@ -1001,6 +1080,4 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     return count;
   }
-
-  private teacherToReportFor: Teacher;
 }
