@@ -41,6 +41,13 @@ const filters = [
     <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn />,
     <DateInput source="reportDate:$gte" />,
     <DateInput source="reportDate:$lte" />,
+    <CommonReferenceInputFilter
+        source="teacher.teacherTypeReferenceId"
+        reference="teacher_type"
+        label="סוג מורה"
+        alwaysOn
+        dynamicFilter={filterByUserId}
+    />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
     // <BooleanInput source="isConfirmed" />,
     <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
@@ -103,7 +110,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
                     setTeacherTypeKey(null);
                     return;
                 }
-                
+
                 const teacherType = await dataProvider.getOne('teacher_type', { id: teacher.data.teacherTypeReferenceId });
                 setTeacherTypeKey(teacherType?.data?.key || null);
             } catch (error) {
@@ -122,7 +129,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
     };
 
     return <>
-    teacher type key: {JSON.stringify(teacherTypeKey)}
+        teacher type key: {JSON.stringify(teacherTypeKey)}
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
