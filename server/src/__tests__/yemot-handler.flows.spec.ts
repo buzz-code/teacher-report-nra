@@ -65,8 +65,134 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
     });
 
     it.todo('should complete flow with multiple date reporting');
-    it.todo('should reject and retry when lesson count does not match formula');
+    
+    it('should reject and retry when lesson count does not match formula', async () => {
+      const today = new Date();
+
+      const testScenario = scenario('SEMINAR_KITA - Lesson count validation')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        // First attempt - invalid: lessons=6 but watch+teach+kamal+discuss+absence=5
+        .seminarKitaDataFlow({
+          lessons: 6,
+          watch: 2,
+          teach: 1,
+          kamal: false, // 0
+          discuss: 1,
+          absence: 1,
+          // Total: 2+1+0+1+1 = 5, but lessons=6 (mismatch!)
+        })
+        .systemSends({ contains: 'לא תואם' }, 'Lesson count mismatch error')
+        // Second attempt - valid: lessons=6 and watch+teach+kamal+discuss+absence=6
+        .seminarKitaDataFlow({
+          lessons: 6,
+          watch: 2,
+          teach: 2,
+          kamal: true, // 1
+          discuss: 1,
+          absence: 0,
+          // Total: 2+2+1+1+0 = 6, matches lessons=6 ✓
+        })
+        .systemAsks({ contains: 'לאישור' }, '1', 'Confirm report')
+        .systemSends(undefined, 'Success message')
+        .systemAsks({ contains: 'יום נוסף' }, '2', 'No more reports')
+        .systemHangsUp(undefined, 'Goodbye')
+        .expectSavedReport({
+          userId: 1,
+          teacherReferenceId: 1,
+          isConfirmed: true,
+          howManyStudents: 5,
+          howManyLessons: 6,
+          howManyWatchOrIndividual: 2,
+          howManyTeachedOrInterfering: 2,
+          wasKamal: true,
+          howManyDiscussingLessons: 1,
+          howManyLessonsAbsence: 0,
+        })
+        .expectCallEnded(true)
+        .build();
+
+      await runScenario(testScenario);
+    });
+    
     it.todo('should reject and retry when absences exceed 10 total');
+    
+    it('should reject when trying to report absences that would exceed 10 total', async () => {
+      const today = new Date();
+
+      // Create existing reports with 7 absences total
+      const existingReports = [
+        {
+          id: 100,
+          userId: 1,
+          teacherReferenceId: 1,
+          reportDate: new Date(today.getTime() - 86400000 * 2), // 2 days ago
+          howManyLessonsAbsence: 4,
+          isConfirmed: true,
+        },
+        {
+          id: 101,
+          userId: 1,
+          teacherReferenceId: 1,
+          reportDate: new Date(today.getTime() - 86400000), // 1 day ago
+          howManyLessonsAbsence: 3,
+          isConfirmed: true,
+        },
+      ];
+
+      const testScenario = scenario('SEMINAR_KITA - Absences validation')
+        .withUser({
+          id: 1,
+          phoneNumber: '035586526',
+          username: 'test-user',
+        })
+        .withTeacher({
+          id: 1,
+          userId: 1,
+          name: 'מורה טסט',
+          phone: '0527609942',
+          teacherTypeKey: TeacherTypeId.SEMINAR_KITA,
+        })
+        .withWorkingDates([today])
+        .withStudents(5)
+        .withExistingReports(existingReports)
+        .withStandardTexts(TeacherTypeId.SEMINAR_KITA)
+        .systemSends(undefined, 'Welcome message')
+        .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
+        .dateSelectionFlow(today, true)
+        // Attempt to report 4 absences - would make total 7+4=11 (exceeds 10!)
+        .seminarKitaDataFlow({
+          lessons: 6,
+          watch: 2,
+          teach: 0,
+          kamal: false,
+          discuss: 0,
+          absence: 4, // This would exceed limit!
+        })
+        .systemSends({ contains: 'יותר מ-10 חיסורים' }, 'Too many absences error')
+        // The system will ask for data collection again, but we stop testing here
+        // to verify that the validation error was properly shown
+        .expectCallEnded(false) // Test partial flow - validation error was triggered
+        .build();
+
+      await runScenario(testScenario);
+    });
   });
 
   describe('MANHA Teacher Flows', () => {
