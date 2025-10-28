@@ -57,7 +57,10 @@ const getDaysAgo = (days: number) => {
 };
 
 const formatDateForInput = (date: Date) => {
-  return `${String(date.getDate()).padStart(2, '0')}${String(date.getMonth() + 1).padStart(2, '0')}${date.getFullYear()}`;
+  return `${String(date.getDate()).padStart(2, '0')}${String(date.getMonth() + 1).padStart(
+    2,
+    '0',
+  )}${date.getFullYear()}`;
 };
 
 // ============================================================================
@@ -846,11 +849,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
         }),
       ];
 
-      const teacherQuestions = [
-        createTeacherQuestion(1),
-        createTeacherQuestion(2),
-        createTeacherQuestion(3),
-      ];
+      const teacherQuestions = [createTeacherQuestion(1), createTeacherQuestion(2), createTeacherQuestion(3)];
 
       const testScenario = createBaseScenario('Questions - Multiple in sequence', TeacherTypeId.SEMINAR_KITA)
         .withStudents(5)

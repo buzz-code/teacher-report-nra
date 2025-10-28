@@ -10,9 +10,7 @@ import { WorkingDate } from 'src/db/entities/WorkingDate.entity';
 import { TeacherQuestion } from 'src/db/entities/TeacherQuestion.entity';
 import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { Like, IsNull, Between } from 'typeorm';
-import {
-  formatHebrewDateForIVR,
-} from '@shared/utils/formatting/hebrew.util';
+import { formatHebrewDateForIVR } from '@shared/utils/formatting/hebrew.util';
 import { TeacherTypeId } from 'src/utils/fieldsShow.util';
 
 // Interfaces for generic confirmation
@@ -235,9 +233,22 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       // Only save answer if not skipped
       if (answer !== null) {
+        // Save the answer first
         await this.saveAnswerForQuestion(question, answer);
+
+        // Echo the question and answer back to the user
+        await this.echoAnswerBack(question.content, answer);
       }
     }
+  }
+
+  private async echoAnswerBack(questionContent: string, answer: string): Promise<void> {
+    // Echo back the question and answer to confirm
+    const answerMessage = await this.getTextByUserId('QUESTION.ANSWER_ECHO', {
+      questionText: questionContent,
+      answer,
+    });
+    await this.sendMessage(answerMessage);
   }
 
   private async getQuestionsForTeacher(): Promise<Question[]> {
