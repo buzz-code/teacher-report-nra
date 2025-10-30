@@ -577,6 +577,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getTrainingReport(): Promise<void> {
     // TODO: Implement training report logic (not in use)
     this.logger.log('Getting training report - not in use');
+    throw new Error('Training report not implemented');
   }
 
   private async getManhaReport(): Promise<void> {
@@ -656,6 +657,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
   private async getReponsibleReport(): Promise<void> {
     // TODO: Implement responsible report logic (not in use)
     this.logger.log('Getting responsible report - not in use');
+    throw new Error('Responsible report not implemented');
   }
 
   private async getPdsReport(): Promise<void> {
