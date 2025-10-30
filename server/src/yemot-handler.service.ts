@@ -584,74 +584,74 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     // TODO: Implement manha report logic
     this.logger.log('Getting manha report');
 
-    if (!this.callParams.manhaReportType) {
-      // האם מדווחת על עצמה או על מורות אחרות?
-      this.callParams.manhaReportType = await this.askForInput(await this.getTextByUserId('REPORT.MANHA_REPORT_TYPE'), {
-        max_digits: 1,
-        min_digits: 1,
-      });
-    }
+    // if (!this.callParams.manhaReportType) {
+    //   // האם מדווחת על עצמה או על מורות אחרות?
+    //   this.callParams.manhaReportType = await this.askForInput(await this.getTextByUserId('REPORT.MANHA_REPORT_TYPE'), {
+    //     max_digits: 1,
+    //     min_digits: 1,
+    //   });
+    // }
 
-    if (this.callParams.manhaReportType === '1') {
-      // מדווחת על עצמה - כמה שיעורי מתודיקה היו?
-      this.callParams.howManyMethodic = await this.askForInput(await this.getTextByUserId('REPORT.HOW_MANY_METHODIC'), {
-        max_digits: 1,
-        min_digits: 1,
-      });
-    } else {
-      // מדווחת על מורות אחרות
-      await this.getTeacherFourLastDigits();
+    // if (this.callParams.manhaReportType === '1') {
+    // מדווחת על עצמה - כמה שיעורי מתודיקה היו?
+    this.callParams.howManyMethodic = await this.askForInput(await this.getTextByUserId('REPORT.HOW_MANY_METHODIC'), {
+      max_digits: 1,
+      min_digits: 1,
+    });
+    // } else {
+    //   // מדווחת על מורות אחרות
+    //   await this.getTeacherFourLastDigits();
 
-      // כמה שיעורי צפיה בחוליה רגילה?
-      this.callParams.isTaarifHulia = await this.askForInput(await this.getTextByUserId('REPORT.IS_TAARIF_HULIA'), {
-        max_digits: 1,
-        min_digits: 1,
-      });
+    //   // כמה שיעורי צפיה בחוליה רגילה?
+    //   this.callParams.isTaarifHulia = await this.askForInput(await this.getTextByUserId('REPORT.IS_TAARIF_HULIA'), {
+    //     max_digits: 1,
+    //     min_digits: 1,
+    //   });
 
-      // כמה שעורי צפיה בחוליה גדולה?
-      this.callParams.isTaarifHulia2 = await this.askForInput(await this.getTextByUserId('REPORT.IS_TAARIF_HULIA2'), {
-        max_digits: 1,
-        min_digits: 1,
-      });
+    //   // כמה שעורי צפיה בחוליה גדולה?
+    //   this.callParams.isTaarifHulia2 = await this.askForInput(await this.getTextByUserId('REPORT.IS_TAARIF_HULIA2'), {
+    //     max_digits: 1,
+    //     min_digits: 1,
+    //   });
 
-      // כמה שיעורים היו בחוליה ה 2?
-      this.callParams.isTaarifHulia3 = await this.askForInput(await this.getTextByUserId('REPORT.IS_TAARIF_HULIA3'), {
-        max_digits: 1,
-        min_digits: 1,
-      });
+    //   // כמה שיעורים היו בחוליה ה 2?
+    //   this.callParams.isTaarifHulia3 = await this.askForInput(await this.getTextByUserId('REPORT.IS_TAARIF_HULIA3'), {
+    //     max_digits: 1,
+    //     min_digits: 1,
+    //   });
 
-      // כמה שיעורי צפיה?
-      this.callParams.howManyWatchedLessons = await this.askForInput(
-        await this.getTextByUserId('REPORT.HOW_MANY_WATCHED_LESSONS'),
-        { max_digits: 1, min_digits: 1 },
-      );
+    //   // כמה שיעורי צפיה?
+    //   this.callParams.howManyWatchedLessons = await this.askForInput(
+    //     await this.getTextByUserId('REPORT.HOW_MANY_WATCHED_LESSONS'),
+    //     { max_digits: 1, min_digits: 1 },
+    //   );
 
-      // כמה בנות מסרו היום שיעור?
-      this.callParams.howManyStudentsTeached = await this.askForInput(
-        await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_TEACHED'),
-        { max_digits: 1, min_digits: 1 },
-      );
+    //   // כמה בנות מסרו היום שיעור?
+    //   this.callParams.howManyStudentsTeached = await this.askForInput(
+    //     await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_TEACHED'),
+    //     { max_digits: 1, min_digits: 1 },
+    //   );
 
-      // אם התשובה גדולה מ0 אז הקישי את מ.ז. של התלמידה - וחוזר על עצמו כמספר התלמידות שהמורה הקלידה שמסרו
-      const numStudentsTeached = parseInt(this.callParams.howManyStudentsTeached);
-      if (numStudentsTeached > 0) {
-        for (let index = 0; index < numStudentsTeached; index++) {
-          await this.getTeachedStudentTz(index + 1);
-        }
-      }
+    //   // אם התשובה גדולה מ0 אז הקישי את מ.ז. של התלמידה - וחוזר על עצמו כמספר התלמידות שהמורה הקלידה שמסרו
+    //   const numStudentsTeached = parseInt(this.callParams.howManyStudentsTeached);
+    //   if (numStudentsTeached > 0) {
+    //     for (let index = 0; index < numStudentsTeached; index++) {
+    //       await this.getTeachedStudentTz(index + 1);
+    //     }
+    //   }
 
-      // כמה שיעורי ילקוט הרועים?
-      this.callParams.howManyYalkutLessons = await this.askForInput(
-        await this.getTextByUserId('REPORT.HOW_MANY_YALKUT_LESSONS'),
-        { max_digits: 1, min_digits: 1 },
-      );
+    //   // כמה שיעורי ילקוט הרועים?
+    //   this.callParams.howManyYalkutLessons = await this.askForInput(
+    //     await this.getTextByUserId('REPORT.HOW_MANY_YALKUT_LESSONS'),
+    //     { max_digits: 1, min_digits: 1 },
+    //   );
 
-      // כמה שיעורי מרתון עזרת לתלמידות למסור?
-      this.callParams.howManyStudentsHelpTeached = await this.askForInput(
-        await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_HELP_TEACHED'),
-        { max_digits: 1, min_digits: 1 },
-      );
-    }
+    //   // כמה שיעורי מרתון עזרת לתלמידות למסור?
+    //   this.callParams.howManyStudentsHelpTeached = await this.askForInput(
+    //     await this.getTextByUserId('REPORT.HOW_MANY_STUDENTS_HELP_TEACHED'),
+    //     { max_digits: 1, min_digits: 1 },
+    //   );
+    // }
   }
 
   private async getReponsibleReport(): Promise<void> {
