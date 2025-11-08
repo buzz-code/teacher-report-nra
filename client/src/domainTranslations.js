@@ -13,6 +13,7 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
+                teacherReferenceId: 'מורה',
             }
         },
         teacher: {
