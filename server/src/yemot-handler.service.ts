@@ -183,17 +183,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     this.logger.log(`Asking questions for teacher type: ${this.teacher.teacherTypeReferenceId}`);
 
-    const questions = await this.getQuestionsForTeacher();
-    for (const question of questions) {
+    const teacherQuestions = await this.getQuestionsForTeacher();
+    for (const teacherQuestion of teacherQuestions) {
       let isValidAnswer = false;
       let answer: string;
 
       // Keep asking until we get a valid answer or skip
       while (!isValidAnswer) {
         // Build question message with skip instruction for optional questions
-        const messageParts = [question.content];
+        const messageParts = [teacherQuestion.question.content];
 
-        if (!question.isMandatory) {
+        if (!teacherQuestion.question.isMandatory) {
           const skipInstruction = await this.getTextByUserId('QUESTION.SKIP_INSTRUCTION');
           messageParts.push(skipInstruction);
         }
@@ -205,13 +205,13 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
         // Check if teacher pressed * to skip
         if (answer === '*') {
-          if (question.isMandatory) {
+          if (teacherQuestion.question.isMandatory) {
             // Cannot skip mandatory questions
             await this.sendMessage(await this.getTextByUserId('QUESTION.CANNOT_SKIP_MANDATORY'));
             // Loop continues to re-ask
           } else {
             // Skip optional question - don't save answer, move to next question
-            this.logger.log(`Teacher skipped optional question: ${question.id}`);
+            this.logger.log(`Teacher skipped optional question: ${teacherQuestion.question.id}`);
             isValidAnswer = true; // Exit loop without saving
             answer = null; // Mark as skipped
           }
@@ -219,9 +219,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           // Validate numeric answer is within range
           const numericAnswer = parseInt(answer);
           if (
-            question.upperLimit !== null &&
-            question.lowerLimit !== null &&
-            (numericAnswer < question.lowerLimit || numericAnswer > question.upperLimit)
+            teacherQuestion.question.upperLimit !== null &&
+            teacherQuestion.question.lowerLimit !== null &&
+            (numericAnswer < teacherQuestion.question.lowerLimit || numericAnswer > teacherQuestion.question.upperLimit)
           ) {
             await this.sendMessage(await this.getTextByUserId('VALIDATION.OUT_OF_RANGE'));
             // Loop continues to re-ask
@@ -234,10 +234,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       // Only save answer if not skipped
       if (answer !== null) {
         // Save the answer first
-        await this.saveAnswerForQuestion(question, answer);
+        await this.saveAnswerForQuestion(teacherQuestion, answer);
 
         // Echo the question and answer back to the user
-        await this.echoAnswerBack(question.content, answer);
+        await this.echoAnswerBack(teacherQuestion.question.content, answer);
       }
     }
   }
@@ -251,7 +251,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     await this.sendMessage(answerMessage);
   }
 
-  private async getQuestionsForTeacher(): Promise<Question[]> {
+  private async getQuestionsForTeacher(): Promise<TeacherQuestion[]> {
     const today = new Date();
 
     // Get individual assignments - include both unanswered and those with deleted answers
@@ -268,32 +268,25 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       .andWhere('(tq.answerReferenceId IS NULL OR answer.id IS NULL)')
       .getMany();
 
-    return individualAssignments.map((assignment) => assignment.question);
+    return individualAssignments;
   }
 
-  private async saveAnswerForQuestion(question: Question, answer: string): Promise<void> {
+  private async saveAnswerForQuestion(teacherQuestion: TeacherQuestion, answer: string): Promise<void> {
     const answerRepo = this.dataSource.getRepository(Answer);
     const answerEntity = answerRepo.create({
       userId: this.user.id,
       teacherTz: this.teacher.tz,
-      questionReferenceId: question.id,
+      questionReferenceId: teacherQuestion.question.id,
       answer: parseInt(answer),
-      reportDate: question.effectiveDate || new Date(),
+      reportDate: teacherQuestion.question.effectiveDate || new Date(),
     });
     const savedAnswer = await answerRepo.save(answerEntity);
 
     // Link answer to teacher_question assignment if exists
-    await this.dataSource.getRepository(TeacherQuestion).update(
-      {
-        userId: this.user.id,
-        teacherReferenceId: this.teacher.id,
-        questionReferenceId: question.id,
-        answerReferenceId: IsNull(), // Only update unanswered assignments
-      },
-      {
-        answerReferenceId: savedAnswer.id,
-      },
-    );
+    const teacherQuestionRepo = this.dataSource.getRepository(TeacherQuestion);
+    await teacherQuestionRepo.update(teacherQuestion.id, {
+      answerReferenceId: savedAnswer.id,
+    });
   }
 
   private async getReportDate(): Promise<void> {
