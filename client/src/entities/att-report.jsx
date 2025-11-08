@@ -76,16 +76,41 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="salaryMonth" />
             <TextField source="comment" />
+
+            {/* Common fields across multiple teacher types */}
             <NumberField source="howManyStudents" />
+            <NumberField source="howManyLessons" />
+            <NumberField source="howManyWatchOrIndividual" />
+            <NumberField source="howManyTeachedOrInterfering" />
+            <NumberField source="howManyDiscussingLessons" />
+
+            {/* SEMINAR_KITA specific */}
+            <BooleanField source="wasKamal" />
+            <NumberField source="howManyLessonsAbsence" />
+
+            {/* MANHA specific */}
             <NumberField source="howManyMethodic" />
             <TextField source="fourLastDigitsOfTeacherPhone" />
-            <BooleanField source="wasDiscussing" />
-            <BooleanField source="wasKamal" />
-            <BooleanField source="wasStudentsGood" />
-            <ReferenceField source="activityType" reference="att_type" />
             <BooleanField source="isTaarifHulia" />
             <BooleanField source="isTaarifHulia2" />
             <BooleanField source="isTaarifHulia3" />
+            <NumberField source="howManyWatchedLessons" />
+            <NumberField source="teacherToReportFor" />
+            <TextField source="teachedStudentTz" />
+            <NumberField source="howManyYalkutLessons" />
+            <NumberField source="howManyStudentsHelpTeached" />
+
+            {/* KINDERGARTEN specific */}
+            <BooleanField source="wasCollectiveWatch" />
+            <BooleanField source="wasStudentsGood" />
+
+            {/* SPECIAL_EDUCATION specific */}
+            <NumberField source="howManyStudentsTeached" />
+            <NumberField source="howManyStudentsWatched" />
+            <BooleanField source="wasPhoneDiscussing" />
+            <NumberField source="whoIsYourTrainingTeacher" />
+            <TextField source="whatIsYourSpeciality" />
+
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
@@ -208,6 +233,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
             <>
                 <NumberInput source="howManyStudentsWatched" />
                 <BooleanInput source="wasPhoneDiscussing" />
+                <NumberInput source="whoIsYourTrainingTeacher" />
                 <TextInput source="whatIsYourSpeciality" />
             </>
         )}

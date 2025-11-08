@@ -79,6 +79,7 @@ export default {
                 howManyLessonsAbsence: 'כמה שיעורי היעדרות',
                 howManyWatchedLessons: 'כמה שיעורי צפייה',
                 howManyStudentsWatched: 'מספר תלמידים שנצפו',
+                whoIsYourTrainingTeacher: 'מי המורה המנחה שלך',
                 wasDiscussing: 'היה דיון',
                 wasKamal: 'היה כמל',
                 wasStudentsGood: 'התלמידות היו טובות',
