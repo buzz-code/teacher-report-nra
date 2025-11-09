@@ -14,6 +14,8 @@ export default {
                 ...generalResourceFieldsTranslation,
                 tz: 'תעודת זהות',
                 teacherReferenceId: 'מורה',
+                startDate: 'תאריך התחלה', 
+                endDate: 'תאריך סיום',
             }
         },
         teacher: {
