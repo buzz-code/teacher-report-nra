@@ -18,6 +18,8 @@ import { IsNotEmpty, IsUniqueCombination, MaxLength } from '@shared/utils/valida
 import { StringType, NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { Teacher } from './Teacher.entity';
+import { User } from './User.entity';
+import { TeacherType } from './TeacherType.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 
 @Entity('students')
@@ -34,7 +36,7 @@ export class Student implements IHasUserId {
   async fillFields() {
     let dataSource: DataSource;
     try {
-      dataSource = await getDataSource([Teacher]);
+      dataSource = await getDataSource([Teacher, User, TeacherType]);
 
       this.teacherReferenceId = await findOneAndAssignReferenceId(
         dataSource,
@@ -58,7 +60,7 @@ export class Student implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @IsUniqueCombination(['userId'], [Student, Teacher], { always: true })
+  @IsUniqueCombination(['userId'], [Student, Teacher, User, TeacherType], { always: true })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @Column()
   tz: string;
