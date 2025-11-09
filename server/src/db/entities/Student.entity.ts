@@ -58,7 +58,7 @@ export class Student implements IHasUserId {
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @StringType
   @MaxLength(255, { always: true })
-  @IsUniqueCombination(['userId'], [Student], { always: true })
+  @IsUniqueCombination(['userId'], [Student, Teacher], { always: true })
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @Column()
   tz: string;
