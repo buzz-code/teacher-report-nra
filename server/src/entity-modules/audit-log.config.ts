@@ -5,7 +5,7 @@ import { getJsonFormatter } from '@shared/utils/formatting/formatter.util';
 import { CrudRequest } from '@dataui/crud';
 import { BaseEntityService } from '@shared/base-entity/base-entity.service';
 import { In, Repository } from 'typeorm';
-import { Student } from 'src/db/entities/Student.entity';
+import { StudentGroup } from 'src/db/entities/StudentGroup.entity';
 import { Teacher } from 'src/db/entities/Teacher.entity';
 
 function getConfig(): BaseEntityModuleOptions {
@@ -28,7 +28,7 @@ function getConfig(): BaseEntityModuleOptions {
 }
 
 const ENTITY_NAME_MAP = {
-  student: Student,
+  student_group: StudentGroup,
   teacher: Teacher,
 };
 

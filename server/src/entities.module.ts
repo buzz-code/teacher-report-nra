@@ -10,7 +10,7 @@ import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 import textConfig from './entity-modules/text.config';
 
 // Shared entities used by teacher report system
-import studentConfig from './entity-modules/student.config';
+import studentGroupConfig from './entity-modules/student-group.config';
 import teacherConfig from './entity-modules/teacher.config';
 import teacherQuestionConfig from './entity-modules/teacher-question.config';
 
@@ -37,7 +37,7 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register(userConfig),
 
     // Shared entities used by teacher report system
-    BaseEntityModule.register(studentConfig),
+    BaseEntityModule.register(studentGroupConfig),
     BaseEntityModule.register(teacherConfig),
     BaseEntityModule.register(teacherQuestionConfig),
 

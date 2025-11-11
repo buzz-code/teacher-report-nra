@@ -2,6 +2,18 @@ import { AttReport } from '../db/entities/AttReport.entity';
 import { TeacherTypeId, isValidTeacherType } from './fieldsShow.util';
 
 /**
+ * Calculate rate multiplier based on student count for StudentGroup pricing
+ * @param studentCount - Number of students in the group
+ * @returns Rate multiplier: 0.5 for 1 student, 1.0 for 2 students, 1.5 for 3+ students
+ */
+export function getStudentGroupRateMultiplier(studentCount: number): number {
+  if (studentCount === 1) return 0.5; // Half rate (חצי תעריף)
+  if (studentCount === 2) return 1.0; // Regular rate (תעריף רגיל)
+  if (studentCount >= 3) return 1.5; // 1.5x rate (תעריף 1.5)
+  return 1.0; // Default to regular rate
+}
+
+/**
  * Price map interface - either an array of prices with key-value pairs or a Map
  */
 type PriceMap = { key: number; price: number }[] | Map<number, number>;

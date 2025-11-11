@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseYemotHandlerService } from '../shared/utils/yemot/v2/yemot-router.service';
 import { Teacher } from 'src/db/entities/Teacher.entity';
-import { Student } from 'src/db/entities/Student.entity';
+import { StudentGroup } from 'src/db/entities/StudentGroup.entity';
 import { TeacherType } from 'src/db/entities/TeacherType.entity';
 import { AttReport } from 'src/db/entities/AttReport.entity';
 import { Question } from 'src/db/entities/Question.entity';
@@ -1066,16 +1066,17 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     const today = new Date();
-    const studentRepository = this.dataSource.getRepository(Student);
+    const studentGroupRepository = this.dataSource.getRepository(StudentGroup);
 
-    const count = await studentRepository
-      .createQueryBuilder('student')
-      .where('student.userId = :userId', { userId: this.user.id })
-      .andWhere('student.teacherReferenceId = :teacherId', { teacherId: this.teacher.id })
-      .andWhere('(student.startDate IS NULL OR student.startDate <= :today)', { today })
-      .andWhere('(student.endDate IS NULL OR student.endDate >= :today)', { today })
-      .getCount();
+    const result = await studentGroupRepository
+      .createQueryBuilder('group')
+      .select('SUM(group.studentCount)', 'total')
+      .where('group.userId = :userId', { userId: this.user.id })
+      .andWhere('group.teacherReferenceId = :teacherId', { teacherId: this.teacher.id })
+      .andWhere('(group.startDate IS NULL OR group.startDate <= :today)', { today })
+      .andWhere('(group.endDate IS NULL OR group.endDate >= :today)', { today })
+      .getRawOne();
 
-    return count;
+    return parseInt(result?.total) || 0;
   }
 }

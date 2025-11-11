@@ -22,7 +22,7 @@ import { Dashboard, Layout } from 'src/GeneralLayout';
 import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
 
 // Shared entities (used by teacher reporting system)
-import student from "src/entities/student";
+import studentGroup from "src/entities/student-group";
 import teacher from "src/entities/teacher";
 
 // Teacher Report System Entities
@@ -101,7 +101,7 @@ const App = () => (
         {permissions => (
           <>
             {/* Shared entities (used by teacher reporting) */}
-            <Resource name="student" {...student} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
+            <Resource name="student_group" {...studentGroup} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
             
             {/* Teacher Report System Resources */}

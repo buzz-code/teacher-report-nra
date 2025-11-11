@@ -8,14 +8,15 @@ export default {
         admin: 'ניהול',
     },
     resources: {
-        student: {
-            name: 'תלמידה |||| תלמידות',
+        student_group: {
+            name: 'קבוצת תלמידות |||| קבוצות תלמידות',
             fields: {
                 ...generalResourceFieldsTranslation,
-                tz: 'תעודת זהות',
+                teacherTz: 'ת.ז. מורה',
                 teacherReferenceId: 'מורה',
-                startDate: 'תאריך התחלה', 
-                endDate: 'תאריך סיום',
+                startDate: 'מתאריך',
+                endDate: 'עד תאריך',
+                studentCount: 'מספר תלמידות',
             }
         },
         teacher: {
