@@ -1,10 +1,10 @@
-import { 
-    DateInput, 
-    NumberField, 
-    TextField, 
-    ReferenceField, 
-    SelectField, 
-    TextInput, 
+import {
+    DateInput,
+    NumberField,
+    TextField,
+    ReferenceField,
+    SelectField,
+    TextInput,
     BooleanInput,
     DateField
 } from 'react-admin';
@@ -19,7 +19,6 @@ const filters = [
     <DateInput source="reportDate:$gte" label="תאריך דיווח אחרי" alwaysOn />,
     <DateInput source="reportDate:$lte" label="תאריך דיווח לפני" alwaysOn />,
     <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
-    <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
     // <BooleanInput source="isConfirmed" label="מאושר" />,
 ];
@@ -34,21 +33,57 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <ReferenceField source="teacherReferenceId" sortBy="teacher.name" reference="teacher" />
+            <ReferenceField source="teacherReferenceId" reference="teacher" />
             <DateField source="reportDate" />
-            <SelectField source="year" choices={yearChoices} />
+            <DateField showDate showTime source="updateDate" />
+            <NumberField source="year" />
+            {/* <BooleanField source="isConfirmed" /> */}
+            <ReferenceField source="salaryReportId" reference="salary_report" />
+            <NumberField source="salaryMonth" />
+            <TextField source="comment" />
+
+            {/* Common fields across multiple teacher types */}
             <NumberField source="howManyStudents" />
             <NumberField source="howManyLessons" />
+            <NumberField source="howManyWatchOrIndividual" />
+            <NumberField source="howManyTeachedOrInterfering" />
+            <NumberField source="howManyDiscussingLessons" />
+
+            {/* SEMINAR_KITA specific */}
+            <BooleanField source="wasKamal" />
+            <NumberField source="howManyLessonsAbsence" />
+
+            {/* MANHA specific */}
             <NumberField source="howManyMethodic" />
-            <ReferenceField source="activityType" reference="att_type" />
-            <NumberField 
-                source="price" 
+            <TextField source="fourLastDigitsOfTeacherPhone" />
+            <BooleanField source="isTaarifHulia" />
+            <BooleanField source="isTaarifHulia2" />
+            <BooleanField source="isTaarifHulia3" />
+            <NumberField source="howManyWatchedLessons" />
+            <NumberField source="teacherToReportFor" />
+            <TextField source="teachedStudentTz" />
+            <NumberField source="howManyYalkutLessons" />
+            <NumberField source="howManyStudentsHelpTeached" />
+
+            {/* KINDERGARTEN specific */}
+            <BooleanField source="wasCollectiveWatch" />
+            <BooleanField source="wasStudentsGood" />
+
+            {/* SPECIAL_EDUCATION specific */}
+            <NumberField source="howManyStudentsTeached" />
+            <NumberField source="howManyStudentsWatched" />
+            <BooleanField source="wasPhoneDiscussing" />
+            <NumberField source="whoIsYourTrainingTeacher" />
+            <TextField source="whatIsYourSpeciality" />
+
+            <NumberField
+                source="price"
                 sortable={false}
-                options={{ 
-                    style: 'currency', 
-                    currency: 'ILS', 
+                options={{
+                    style: 'currency',
+                    currency: 'ILS',
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2 
+                    maximumFractionDigits: 2
                 }}
             />
             <TextField source="comment" />
