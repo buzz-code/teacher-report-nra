@@ -22,7 +22,8 @@ class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntit
 
     switch (extra?.action) {
       case 'assignToSalaryReport': {
-        return this.assignItemsToSalaryReport(userId, extra.ids, {
+        const ids = String(extra.ids).split(',');
+        return this.assignItemsToSalaryReport(userId, ids, {
           name: extra.salaryReportName,
           date: extra.salaryReportDate ? new Date(extra.salaryReportDate) : undefined,
           existingSalaryReportId: Number(extra.existingSalaryReportId),
