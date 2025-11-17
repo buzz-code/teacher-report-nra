@@ -14,37 +14,48 @@ export function getStudentGroupRateMultiplier(studentCount: number): number {
 }
 
 /**
- * Price map interface - either an array of prices with key-value pairs or a Map
+ * Price map interface - Map of semantic code to price value
+ * Example codes: 'lesson.base', 'seminar.student_multiplier', 'manha.methodic_multiplier'
  */
-type PriceMap = { key: number; price: number }[] | Map<number, number>;
+type PriceMap = Map<string, number>;
 
 /**
- * Pricing configuration for different activity types
+ * Get teacher type prefix for semantic price codes
+ * @param teacherTypeId - Teacher type ID
+ * @returns Prefix string for the teacher type (e.g., 'seminar.', 'manha.', etc.)
  */
-interface PricingConfig {
-  basePrice: number;
-  studentMultiplier: number;
-  lessonMultiplier: number;
-  methodicMultiplier: number;
-  yalkutLessonMultiplier: number;
-  discussingLessonMultiplier: number;
-  helpTeachedMultiplier: number;
-  watchedLessonMultiplier: number;
-  individualWatchMultiplier: number;
-  interfereTeachMultiplier: number;
-  phoneDiscussingBonus: number;
-  kamalBonus: number;
-  collectiveWatchBonus: number;
-  taarifHuliaBonus: number;
-  taarifHulia2Bonus: number;
-  taarifHulia3Bonus: number;
+function getTeacherTypePrefix(teacherTypeId: TeacherTypeId): string {
+  switch (teacherTypeId) {
+    case 1: // SEMINAR_KITA
+      return 'seminar.';
+    case 3: // MANHA
+      return 'manha.';
+    case 5: // PDS
+      return 'pds.';
+    case 6: // KINDERGARTEN
+      return 'kindergarten.';
+    case 7: // SPECIAL_EDUCATION
+      return 'special.';
+    default:
+      return '';
+  }
 }
 
 /**
- * Calculate the total price for an attendance report based on teacher type and pricing configuration
+ * Helper function to get price by semantic code
+ * @param priceMap - Map of semantic codes to prices
+ * @param code - Semantic price code (e.g., 'lesson.base', 'seminar.student_multiplier')
+ * @returns The price value or 0 if not found
+ */
+function getPrice(priceMap: Map<string, number>, code: string): number {
+  return priceMap.get(code) ?? 0;
+}
+
+/**
+ * Calculate the total price for an attendance report based on teacher type and semantic pricing
  * @param attReport - The attendance report data
  * @param teacherTypeId - The teacher type ID from TeacherTypeId enum
- * @param priceMap - Either an array of price objects with key-value pairs or a Map of key to price
+ * @param priceMap - Map of semantic price codes to values (e.g., 'lesson.base', 'seminar.student_multiplier')
  * @returns The calculated price as a number
  */
 export function calculateAttendanceReportPrice(
@@ -57,130 +68,63 @@ export function calculateAttendanceReportPrice(
     throw new Error(`Invalid teacher type ID: ${teacherTypeId}`);
   }
 
-  // Convert priceMap to a consistent format for lookup
-  const priceData = convertPriceMapToObject(priceMap);
+  // Get teacher type prefix for semantic codes
+  const prefix = getTeacherTypePrefix(teacherTypeId);
 
-  // Get base pricing configuration for this teacher type
-  const config = getPricingConfigForTeacherType(teacherTypeId, priceData);
+  // Start with base price (universal for all teacher types)
+  let totalPrice = getPrice(priceMap, 'lesson.base');
 
-  // Calculate price based on various report metrics
-  let totalPrice = config.basePrice;
-
-  // Helper function to add numeric field pricing
-  const addNumericPrice = (value: number | null | undefined, multiplier: number, factor = 1): void => {
+  // Helper function to add numeric field pricing using semantic codes
+  const addNumericPrice = (
+    value: number | null | undefined,
+    codeSuffix: string,
+    factor = 1,
+  ): void => {
+    const code = prefix + codeSuffix;
+    const multiplier = getPrice(priceMap, code);
     totalPrice += (value || 0) * multiplier * factor;
   };
 
-  // Helper function to add boolean field pricing
-  const addBooleanPrice = (condition: boolean | null | undefined, bonus: number): void => {
+  // Helper function to add boolean field pricing using semantic codes
+  const addBooleanPrice = (
+    condition: boolean | null | undefined,
+    codeSuffix: string,
+  ): void => {
     if (condition) {
+      const code = prefix + codeSuffix;
+      const bonus = getPrice(priceMap, code);
       totalPrice += bonus;
     }
   };
 
   // Add pricing based on student counts
-  addNumericPrice(attReport.howManyStudents, config.studentMultiplier);
-  addNumericPrice(attReport.howManyStudentsTeached, config.studentMultiplier);
-  addNumericPrice(attReport.howManyStudentsWatched, config.studentMultiplier, 0.5); // Watch is less intensive
-  addNumericPrice(attReport.howManyStudentsHelpTeached, config.helpTeachedMultiplier);
+  addNumericPrice(attReport.howManyStudents, 'student_multiplier');
+  addNumericPrice(attReport.howManyStudentsTeached, 'student_multiplier');
+  addNumericPrice(attReport.howManyStudentsWatched, 'student_multiplier', 0.5); // Watch is less intensive
+  addNumericPrice(attReport.howManyStudentsHelpTeached, 'help_taught_multiplier');
 
   // Add pricing based on lesson counts
-  addNumericPrice(attReport.howManyLessons, config.lessonMultiplier);
-  addNumericPrice(attReport.howManyYalkutLessons, config.yalkutLessonMultiplier);
-  addNumericPrice(attReport.howManyDiscussingLessons, config.discussingLessonMultiplier);
-  addNumericPrice(attReport.howManyWatchedLessons, config.watchedLessonMultiplier);
-  addNumericPrice(attReport.howManyWatchOrIndividual, config.individualWatchMultiplier);
-  addNumericPrice(attReport.howManyTeachedOrInterfering, config.interfereTeachMultiplier);
+  addNumericPrice(attReport.howManyLessons, 'lesson_multiplier');
+  addNumericPrice(attReport.howManyYalkutLessons, 'yalkut_lesson_multiplier');
+  addNumericPrice(attReport.howManyDiscussingLessons, 'discussing_lesson_multiplier');
+  addNumericPrice(attReport.howManyWatchedLessons, 'watched_lesson_multiplier');
+  addNumericPrice(attReport.howManyWatchOrIndividual, 'watch_individual_multiplier');
+  addNumericPrice(attReport.howManyTeachedOrInterfering, 'interfere_teach_multiplier');
 
   // Add pricing based on methodical work
-  addNumericPrice(attReport.howManyMethodic, config.methodicMultiplier);
+  addNumericPrice(attReport.howManyMethodic, 'methodic_multiplier');
 
   // Subtract for absences (negative impact on payment)
-  addNumericPrice(attReport.howManyLessonsAbsence, config.lessonMultiplier, -0.5);
+  addNumericPrice(attReport.howManyLessonsAbsence, 'lesson_multiplier', -0.5);
 
   // Add bonuses for special activities
-  addBooleanPrice(attReport.wasPhoneDiscussing, config.phoneDiscussingBonus);
-  addBooleanPrice(attReport.wasKamal, config.kamalBonus);
-  addBooleanPrice(attReport.wasCollectiveWatch, config.collectiveWatchBonus);
-  addBooleanPrice(attReport.isTaarifHulia, config.taarifHuliaBonus);
-  addBooleanPrice(attReport.isTaarifHulia2, config.taarifHulia2Bonus);
-  addBooleanPrice(attReport.isTaarifHulia3, config.taarifHulia3Bonus);
+  addBooleanPrice(attReport.wasPhoneDiscussing, 'phone_discussion_bonus');
+  addBooleanPrice(attReport.wasKamal, 'kamal_bonus');
+  addBooleanPrice(attReport.wasCollectiveWatch, 'collective_watch_bonus');
+  addBooleanPrice(attReport.isTaarifHulia, 'taarif_hulia_bonus');
+  addBooleanPrice(attReport.isTaarifHulia2, 'taarif_hulia2_bonus');
+  addBooleanPrice(attReport.isTaarifHulia3, 'taarif_hulia3_bonus');
 
   // Ensure the price doesn't go below zero
   return Math.max(0, Math.round(totalPrice * 100) / 100); // Round to 2 decimal places
-}
-
-/**
- * Convert various price map formats to a consistent object format
- */
-function convertPriceMapToObject(priceMap: PriceMap): Record<number, number> {
-  if (Array.isArray(priceMap)) {
-    return priceMap.reduce((obj, item) => {
-      obj[item.key] = item.price;
-      return obj;
-    }, {} as Record<number, number>);
-  } else if (priceMap instanceof Map) {
-    return Object.fromEntries(priceMap.entries());
-  }
-
-  // If it's already an object format, return as-is
-  return priceMap as Record<number, number>;
-}
-
-/**
- * Get pricing configuration based on teacher type ID and available price data
- */
-function getPricingConfigForTeacherType(
-  teacherTypeId: TeacherTypeId,
-  priceData: Record<number, number>,
-): PricingConfig {
-  // Default configuration
-  const defaultConfig: PricingConfig = {
-    basePrice: 50,
-    studentMultiplier: 5,
-    lessonMultiplier: 10,
-    methodicMultiplier: 8,
-    yalkutLessonMultiplier: 12,
-    discussingLessonMultiplier: 15,
-    helpTeachedMultiplier: 6,
-    watchedLessonMultiplier: 8,
-    individualWatchMultiplier: 10,
-    interfereTeachMultiplier: 12,
-    phoneDiscussingBonus: 20,
-    kamalBonus: 25,
-    collectiveWatchBonus: 15,
-    taarifHuliaBonus: 30,
-    taarifHulia2Bonus: 35,
-    taarifHulia3Bonus: 40,
-  };
-
-  // Override with specific pricing data if available
-  // Price keys mapping (these would be configured based on actual pricing structure):
-  // 1-20: base configurations
-  // 21-40: multipliers
-  // 41-60: bonuses
-
-  const config = { ...defaultConfig };
-
-  // Map price keys to configuration properties based on teacher type
-  const baseKey = teacherTypeId * 100; // Each teacher type gets a range of 100 keys
-
-  if (priceData[baseKey + 1]) config.basePrice = priceData[baseKey + 1];
-  if (priceData[baseKey + 2]) config.studentMultiplier = priceData[baseKey + 2];
-  if (priceData[baseKey + 3]) config.lessonMultiplier = priceData[baseKey + 3];
-  if (priceData[baseKey + 4]) config.methodicMultiplier = priceData[baseKey + 4];
-  if (priceData[baseKey + 5]) config.yalkutLessonMultiplier = priceData[baseKey + 5];
-  if (priceData[baseKey + 6]) config.discussingLessonMultiplier = priceData[baseKey + 6];
-  if (priceData[baseKey + 7]) config.helpTeachedMultiplier = priceData[baseKey + 7];
-  if (priceData[baseKey + 8]) config.watchedLessonMultiplier = priceData[baseKey + 8];
-  if (priceData[baseKey + 9]) config.individualWatchMultiplier = priceData[baseKey + 9];
-  if (priceData[baseKey + 10]) config.interfereTeachMultiplier = priceData[baseKey + 10];
-  if (priceData[baseKey + 11]) config.phoneDiscussingBonus = priceData[baseKey + 11];
-  if (priceData[baseKey + 12]) config.kamalBonus = priceData[baseKey + 12];
-  if (priceData[baseKey + 13]) config.collectiveWatchBonus = priceData[baseKey + 13];
-  if (priceData[baseKey + 14]) config.taarifHuliaBonus = priceData[baseKey + 14];
-  if (priceData[baseKey + 15]) config.taarifHulia2Bonus = priceData[baseKey + 15];
-  if (priceData[baseKey + 16]) config.taarifHulia3Bonus = priceData[baseKey + 16];
-
-  return config;
 }

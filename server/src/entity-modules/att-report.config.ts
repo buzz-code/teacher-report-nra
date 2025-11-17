@@ -5,6 +5,7 @@ import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
+import { PriceByUser } from '../db/view-entities/PriceByUser.entity';
 import { calculateAttendanceReportPrice } from '../utils/pricing.util';
 import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
@@ -82,21 +83,39 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
   }
 
   private async handlePricingPivot(data: AttReport[], auth: any): Promise<void> {
-    // Get pricing data from Price entity
-    const priceData = await this.dataSource.getRepository(Price).find({
-      where: { userId: getUserIdFromUser(auth) },
+    const userId = getUserIdFromUser(auth);
+
+    // Get pricing data from PriceByUser view (includes system defaults + user overrides)
+    const priceByUserRepo = this.dataSource.getRepository(PriceByUser);
+    const prices = await priceByUserRepo.find({
+      where: { userId },
     });
+
+    // Build a Map of semantic code to price value for efficient lookup
+    const priceMap = new Map<string, number>();
+    prices.forEach((price) => {
+      priceMap.set(price.code, price.price);
+    });
+
+    // Log loaded prices for debugging
+    console.log(`Loaded ${prices.length} prices for user ${userId}`);
 
     // Calculate pricing for each report and update in place
     data.forEach((report: AttReportWithPricing) => {
       const teacherTypeId = report.teacher?.teacherTypeKey;
 
+      if (!teacherTypeId) {
+        console.warn(`Report ${report.id} has no teacher type, skipping pricing`);
+        report.price = 0;
+        return;
+      }
+
       try {
-        // Calculate price using the pricing utility
-        const price = calculateAttendanceReportPrice(report, teacherTypeId, priceData);
+        // Calculate price using the semantic pricing utility
+        const price = calculateAttendanceReportPrice(report, teacherTypeId, priceMap);
         report.price = price;
       } catch (error) {
-        console.warn(`Failed to calculate price for report ${report.id}:`, error.message);
+        console.error(`Failed to calculate price for report ${report.id}:`, error);
         report.price = 0;
       }
     });
