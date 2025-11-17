@@ -25,23 +25,23 @@ export class SeedPriceDefaults1763412506251 implements MigrationInterface {
             { userId: 0, code: 'lesson.base', description: 'תעריף בסיס לשיעור', price: 50.00 },
             
             // SEMINAR_KITA (Type 1)
-            { userId: 0, code: 'seminar.student_multiplier', description: 'סמינר - תעריף לכל תלמידה', price: 5.00 },
-            { userId: 0, code: 'seminar.lesson_multiplier', description: 'סמינר - תעריף לכל שיעור', price: 10.00 },
-            { userId: 0, code: 'seminar.watch_individual_multiplier', description: 'סמינר - תעריף צפייה/אישי', price: 8.00 },
-            { userId: 0, code: 'seminar.interfere_teach_multiplier', description: 'סמינר - תעריף התערבות/הוראה', price: 12.00 },
-            { userId: 0, code: 'seminar.kamal_bonus', description: 'סמינר - בונוס כמל', price: 15.00 },
-            { userId: 0, code: 'seminar.discussing_lesson_multiplier', description: 'סמינר - תעריף שיעור דיון', price: 7.00 },
+            { userId: 0, code: 'seminar.student_multiplier', description: 'סמינר כיתה - תעריף לכל תלמידה', price: 5.00 },
+            { userId: 0, code: 'seminar.lesson_multiplier', description: 'סמינר כיתה - תעריף לכל שיעור', price: 10.00 },
+            { userId: 0, code: 'seminar.watch_individual_multiplier', description: 'סמינר כיתה - תעריף צפייה/אישי', price: 8.00 },
+            { userId: 0, code: 'seminar.interfere_teach_multiplier', description: 'סמינר כיתה - תעריף התערבות/הוראה', price: 12.00 },
+            { userId: 0, code: 'seminar.kamal_bonus', description: 'סמינר כיתה - בונוס כמל', price: 15.00 },
+            { userId: 0, code: 'seminar.discussing_lesson_multiplier', description: 'סמינר כיתה - תעריף שיעור דיון', price: 7.00 },
             
             // MANHA (Type 3)
-            { userId: 0, code: 'manha.methodic_multiplier', description: 'מנהלת - תעריף עבודה מתודית', price: 8.00 },
-            { userId: 0, code: 'manha.taarif_hulia_bonus', description: 'מנהלת - בונוס תעריף חוליה', price: 10.00 },
-            { userId: 0, code: 'manha.taarif_hulia2_bonus', description: 'מנהלת - בונוס תעריף חוליה 2', price: 10.00 },
-            { userId: 0, code: 'manha.taarif_hulia3_bonus', description: 'מנהלת - בונוס תעריף חוליה 3', price: 10.00 },
-            { userId: 0, code: 'manha.watched_lesson_multiplier', description: 'מנהלת - תעריף שיעור נצפה', price: 6.00 },
-            { userId: 0, code: 'manha.student_multiplier', description: 'מנהלת - תעריף לכל תלמידה', price: 5.00 },
-            { userId: 0, code: 'manha.yalkut_lesson_multiplier', description: 'מנהלת - תעריף שיעור ילקוט', price: 9.00 },
-            { userId: 0, code: 'manha.discussing_lesson_multiplier', description: 'מנהלת - תעריף שיעור דיון', price: 7.00 },
-            { userId: 0, code: 'manha.help_taught_multiplier', description: 'מנהלת - תעריף עזרה בהוראה', price: 11.00 },
+            { userId: 0, code: 'manha.methodic_multiplier', description: 'מורה מנחה - תעריף עבודה מתודית', price: 8.00 },
+            { userId: 0, code: 'manha.taarif_hulia_bonus', description: 'מורה מנחה - בונוס תעריף חוליה', price: 10.00 },
+            { userId: 0, code: 'manha.taarif_hulia2_bonus', description: 'מורה מנחה - בונוס תעריף חוליה 2', price: 10.00 },
+            { userId: 0, code: 'manha.taarif_hulia3_bonus', description: 'מורה מנחה - בונוס תעריף חוליה 3', price: 10.00 },
+            { userId: 0, code: 'manha.watched_lesson_multiplier', description: 'מורה מנחה - תעריף שיעור נצפה', price: 6.00 },
+            { userId: 0, code: 'manha.student_multiplier', description: 'מורה מנחה - תעריף לכל תלמידה', price: 5.00 },
+            { userId: 0, code: 'manha.yalkut_lesson_multiplier', description: 'מורה מנחה - תעריף שיעור ילקוט', price: 9.00 },
+            { userId: 0, code: 'manha.discussing_lesson_multiplier', description: 'מורה מנחה - תעריף שיעור דיון', price: 7.00 },
+            { userId: 0, code: 'manha.help_taught_multiplier', description: 'מורה מנחה - תעריף עזרה בהוראה', price: 11.00 },
             
             // PDS (Type 5)
             { userId: 0, code: 'pds.watch_individual_multiplier', description: 'פד"ס - תעריף צפייה/אישי', price: 8.00 },
@@ -49,8 +49,8 @@ export class SeedPriceDefaults1763412506251 implements MigrationInterface {
             { userId: 0, code: 'pds.discussing_lesson_multiplier', description: 'פד"ס - תעריף שיעור דיון', price: 7.00 },
             
             // KINDERGARTEN (Type 6)
-            { userId: 0, code: 'kindergarten.collective_watch_bonus', description: 'גן - בונוס צפייה קבוצתית', price: 20.00 },
-            { userId: 0, code: 'kindergarten.student_multiplier', description: 'גן - תעריף לכל תלמיד', price: 3.00 },
+            { userId: 0, code: 'kindergarten.collective_watch_bonus', description: 'גננות - בונוס צפייה קבוצתית', price: 20.00 },
+            { userId: 0, code: 'kindergarten.student_multiplier', description: 'גננות - תעריף לכל תלמיד', price: 3.00 },
             
             // SPECIAL_EDUCATION (Type 7)
             { userId: 0, code: 'special.lesson_multiplier', description: 'חינוך מיוחד - תעריף לכל שיעור', price: 10.00 },
