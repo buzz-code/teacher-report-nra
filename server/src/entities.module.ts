@@ -17,8 +17,8 @@ import teacherQuestionConfig from './entity-modules/teacher-question.config';
 // Teacher Report System entities
 import { TeacherType } from './db/entities/TeacherType.entity';
 import attReportConfig from './entity-modules/att-report.config';
+import priceConfig from './entity-modules/price.config';
 import { AttType } from './db/entities/AttType.entity';
-import { Price } from './db/entities/Price.entity';
 import { Question } from './db/entities/Question.entity';
 import { QuestionType } from './db/entities/QuestionType.entity';
 import { Answer } from './db/entities/Answer.entity';
@@ -31,6 +31,9 @@ import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 import { RecievedMail } from '@shared/entities/RecievedMail.entity';
 import { Image } from '@shared/entities/Image.entity';
+
+// View entities
+import { PriceByUser } from './db/view-entities/PriceByUser.entity';
 
 @Module({
   imports: [
@@ -45,7 +48,7 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register({ entity: TeacherType }),
     BaseEntityModule.register(attReportConfig),
     BaseEntityModule.register({ entity: AttType }),
-    BaseEntityModule.register({ entity: Price }),
+    BaseEntityModule.register(priceConfig),
     BaseEntityModule.register({ entity: Question }),
     BaseEntityModule.register({ entity: QuestionType }),
     BaseEntityModule.register({ entity: Answer }),
@@ -62,6 +65,7 @@ import { Image } from '@shared/entities/Image.entity';
     BaseEntityModule.register({ entity: RecievedMail }),
     BaseEntityModule.register(pageConfig),
     BaseEntityModule.register({ entity: TextByUser }),
+    BaseEntityModule.register({ entity: PriceByUser }),
     BaseEntityModule.register({ entity: Image }),
     BaseEntityModule.register(paymentTrackConfig),
   ],
