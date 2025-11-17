@@ -101,23 +101,22 @@ const App = () => (
         requireAuth>
         {permissions => (
           <>
-            {/* Shared entities (used by teacher reporting) */}
-            <Resource name="student_group" {...studentGroup} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
+            {/* Shared entities (data) - Core master data */}
+            <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'data' }} icon={PersonIcon} />
             <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+            <Resource name="student_group" {...studentGroup} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
+            <Resource name="question_type" {...questionType} options={{ menuGroup: 'data' }} icon={CategoryIcon} />
+            <Resource name="question" {...question} options={{ menuGroup: 'data' }} icon={QuestionAnswerIcon} />
+            <Resource name="teacher_question" {...teacherQuestion} options={{ menuGroup: 'data' }} icon={AssignmentTurnedInIcon} />
+            <Resource name="working_date" {...workingDate} options={{ menuGroup: 'data' }} icon={CalendarTodayIcon} />
+            <Resource name="att_report" {...attReport} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
+            <Resource name="answer" {...answer} options={{ menuGroup: 'data' }} icon={RateReviewIcon} />
 
-            {/* Teacher Report System Resources */}
-            <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'reports' }} icon={PersonIcon} />
-            <Resource name="teacher_question" {...teacherQuestion} options={{ menuGroup: 'reports' }} icon={AssignmentTurnedInIcon} />
-            <Resource name="att_report" {...attReport} options={{ menuGroup: 'reports' }} icon={AssignmentIcon} />
-            <Resource name="att_type" {...attType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
-            <Resource name="question" {...question} options={{ menuGroup: 'reports' }} icon={QuestionAnswerIcon} />
-            <Resource name="question_type" {...questionType} options={{ menuGroup: 'reports' }} icon={CategoryIcon} />
-            <Resource name="answer" {...answer} options={{ menuGroup: 'reports' }} icon={RateReviewIcon} />
-            <Resource name="working_date" {...workingDate} options={{ menuGroup: 'reports' }} icon={CalendarTodayIcon} />
+            {/* Configuration (reports) - Report configuration and types */}
             <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
             <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
 
-            {/* Common settings and utilities */}
+            {/* User customization (settings) - User-specific settings */}
             <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />
             <Resource name="price_by_user" {...priceByUser} options={{ menuGroup: 'settings' }} icon={MonetizationOnIcon} />
             <Resource name="mail_address" {...mailAddress} options={{ menuGroup: 'settings' }} icon={AlternateEmailIcon} />
@@ -125,11 +124,13 @@ const App = () => (
             <Resource name="import_file" {...importFile} options={{ menuGroup: 'settings' }} icon={UploadFileIcon} />
 
             {isAdmin(permissions) && <>
+              {/* Admin resources (admin) - System-wide configuration */}
               <Resource name="text" {...text} options={{ menuGroup: 'admin' }} />
-              <Resource name="price" {...price} options={{ menuGroup: 'reports' }} icon={PaymentIcon} />
+              <Resource name="price" {...price} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />
               <Resource name="yemot_call" {...yemotCall} options={{ menuGroup: 'admin' }} icon={SettingsPhoneIcon} />
               <Resource name="recieved_mail" {...recievedMail} options={{ menuGroup: 'admin' }} icon={EmailIcon} />
               <Resource name="audit_log" {...auditLog} options={{ menuGroup: 'admin' }} icon={LogoDevIcon} />
+              <Resource name="att_type" {...attType} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />
             </>}
 
             {isShowUsersData(permissions) && <>
