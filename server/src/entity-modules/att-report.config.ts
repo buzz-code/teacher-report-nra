@@ -17,12 +17,14 @@ function getConfig(): BaseEntityModuleOptions {
     query: {
       join: {
         teacher: { eager: true },
+          'teacher.teacherType': { eager: true },
       },
     },
     exporter: {
       processReqForExport(req: CrudRequest, innerFunc) {
         req.options.query.join = {
           teacher: { eager: true },
+          'teacher.teacherType': { eager: true },
         };
         return innerFunc(req);
       },
@@ -102,7 +104,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
 
     // Calculate pricing for each report and update in place
     data.forEach((report: AttReportWithPricing) => {
-      const teacherTypeId = report.teacher?.teacherTypeKey;
+      const teacherTypeId = report.teacher?.teacherType?.key;
 
       if (!teacherTypeId) {
         console.warn(`Report ${report.id} has no teacher type, skipping pricing`);
