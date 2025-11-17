@@ -197,6 +197,24 @@ export default {
                 maintainanceMessage: 'הודעה לסגירת המערכת הטלפונית',
             }
         },
+        price: {
+            name: 'מחיר |||| מחירים - טבלת אדמין',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                code: 'מזהה',
+                description: 'תיאור',
+                price: 'מחיר',
+            }
+        },
+        price_by_user: {
+            name: 'מחיר פעיל |||| מחירים פעילים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                code: 'מזהה',
+                description: 'תיאור',
+                price: 'מחיר נוכחי',
+            }
+        },
 
         // Entities from shared/components/common-entities
         text: {
