@@ -5,7 +5,7 @@ import {
     ReferenceField,
     SelectField,
     TextInput,
-    BooleanInput,
+    BooleanField,
     DateField
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
