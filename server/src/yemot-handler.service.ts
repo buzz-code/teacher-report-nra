@@ -84,6 +84,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         { paramKey: 'howManyWatchedLessons', translationKey: 'watch', formatter: FORMATTERS.number },
         { paramKey: 'howManyStudentsTeached', translationKey: 'teach', formatter: FORMATTERS.number },
         { paramKey: 'howManyYalkutLessons', translationKey: 'yalkut', formatter: FORMATTERS.number },
+        { paramKey: 'howManyDiscussingLessons', translationKey: 'discuss', formatter: FORMATTERS.number },
         { paramKey: 'howManyStudentsHelpTeached', translationKey: 'help', formatter: FORMATTERS.number },
       ],
     },
@@ -591,6 +592,13 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       max_digits: 1,
       min_digits: 1,
     });
+
+    // כמה שיעורי דיון
+    this.callParams.howManyDiscussingLessons = await this.askForInput(
+      await this.getTextByUserId('REPORT.HOW_MANY_DISCUSSING_LESSONS'),
+      { max_digits: 1, min_digits: 1, digits_allowed: ['0', '1'] },
+    );
+
     // } else {
     //   // מדווחת על מורות אחרות
     //   await this.getTeacherFourLastDigits();
