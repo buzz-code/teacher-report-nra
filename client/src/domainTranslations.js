@@ -380,6 +380,7 @@ export default {
             fields: {
                 ...generalResourceFieldsTranslation,
                 teacherReferenceId: 'מורה',
+                'teacher.teacherTypeReferenceId': 'סוג מורה',
                 reportDate: 'תאריך דוח',
                 'reportDate:$gte': 'תאריך דוח מ-',
                 'reportDate:$lte': 'תאריך דוח עד-',
