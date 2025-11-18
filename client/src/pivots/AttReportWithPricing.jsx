@@ -13,12 +13,14 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } from '@shared/components/fields/CommonReferenceInputFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { adminUserFilter } from '@shared/components/fields/PermissionFilter';
 
 const filters = [
-    ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
+    adminUserFilter,
     <DateInput source="reportDate:$gte" label="תאריך דיווח אחרי" alwaysOn />,
     <DateInput source="reportDate:$lte" label="תאריך דיווח לפני" alwaysOn />,
-    <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
+    <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn />,
+    <CommonReferenceInputFilter source="teacher.teacherTypeReferenceId" reference="teacher_type" dynamicFilter={filterByUserId} alwaysOn />,
     <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
     // <BooleanInput source="isConfirmed" label="מאושר" />,
 ];

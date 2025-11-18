@@ -15,9 +15,10 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { adminUserFilter } from '@shared/components/fields/PermissionFilter';
 
 const filters = [
-    ({ isAdmin }) => isAdmin && <CommonReferenceInputFilter source="userId" reference="user" />,
+    adminUserFilter,
     <CommonReferenceInputFilter
         source="teacher.teacherTypeReferenceId"
         reference="teacher_type"
