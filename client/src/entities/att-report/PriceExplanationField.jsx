@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslate } from 'react-admin';
+import { useRecordContext, useTranslate } from 'react-admin';
 import { Tooltip, IconButton, Box, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
