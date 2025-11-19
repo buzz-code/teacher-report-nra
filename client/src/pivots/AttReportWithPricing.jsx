@@ -78,6 +78,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <BooleanField source="wasPhoneDiscussing" />
             <NumberField source="whoIsYourTrainingTeacher" />
             <TextField source="whatIsYourSpeciality" />
+            <TextField source="comment" />
 
             <NumberField
                 source="price"
@@ -90,7 +91,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                 }}
             />
             <PriceExplanationField source="priceExplanation" />
-            <TextField source="comment" />
         </CommonDatagrid>
     );
 }
