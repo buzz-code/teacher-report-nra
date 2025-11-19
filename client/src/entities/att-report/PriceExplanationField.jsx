@@ -2,6 +2,7 @@ import React from 'react';
 import { useRecordContext, useTranslate } from 'react-admin';
 import { Tooltip, IconButton, Box, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import get from 'lodash/get';
 
 /**
  * Component to display price explanation as a tooltip
