@@ -1,11 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { IsOptional } from 'class-validator';
 import { CrudValidationGroups } from '@dataui/crud';
 import { IsNotEmpty, MaxLength } from '@shared/utils/validation/class-validator-he';

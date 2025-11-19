@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class ReplaceStudentWithStudentGroup1762883018027 implements MigrationInterface {
-    name = 'ReplaceStudentWithStudentGroup1762883018027'
+  name = 'ReplaceStudentWithStudentGroup1762883018027';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE \`student_groups\` (
                 \`id\` int NOT NULL AUTO_INCREMENT,
                 \`user_id\` int NOT NULL,
@@ -22,31 +22,30 @@ export class ReplaceStudentWithStudentGroup1762883018027 implements MigrationInt
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             ALTER TABLE \`student_groups\`
             ADD CONSTRAINT \`FK_f4177214adb5b7e3d2cf2d0918a\` FOREIGN KEY (\`teacherReferenceId\`) REFERENCES \`teachers\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             ALTER TABLE \`student_groups\` DROP FOREIGN KEY \`FK_f4177214adb5b7e3d2cf2d0918a\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_groups_user_id_idx\` ON \`student_groups\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_groups_teacher_id_idx\` ON \`student_groups\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_groups_start_date_idx\` ON \`student_groups\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX \`student_groups_end_date_idx\` ON \`student_groups\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE \`student_groups\`
         `);
-    }
-
+  }
 }
