@@ -46,18 +46,18 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="comment" />
 
             {/* Common fields across multiple teacher types */}
-            <NumberField source="howManyStudents" />
+            {/* <NumberField source="howManyStudents" />
             <NumberField source="howManyLessons" />
             <NumberField source="howManyWatchOrIndividual" />
             <NumberField source="howManyTeachedOrInterfering" />
-            <NumberField source="howManyDiscussingLessons" />
+            <NumberField source="howManyDiscussingLessons" /> */}
 
             {/* SEMINAR_KITA specific */}
-            <BooleanField source="wasKamal" />
-            <NumberField source="howManyLessonsAbsence" />
+            {/* <BooleanField source="wasKamal" />
+            <NumberField source="howManyLessonsAbsence" /> */}
 
             {/* MANHA specific */}
-            <NumberField source="howManyMethodic" />
+            {/* <NumberField source="howManyMethodic" />
             <TextField source="fourLastDigitsOfTeacherPhone" />
             <BooleanField source="isTaarifHulia" />
             <BooleanField source="isTaarifHulia2" />
@@ -66,19 +66,18 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <NumberField source="teacherToReportFor" />
             <TextField source="teachedStudentTz" />
             <NumberField source="howManyYalkutLessons" />
-            <NumberField source="howManyStudentsHelpTeached" />
+            <NumberField source="howManyStudentsHelpTeached" /> */}
 
             {/* KINDERGARTEN specific */}
-            <BooleanField source="wasCollectiveWatch" />
-            <BooleanField source="wasStudentsGood" />
+            {/* <BooleanField source="wasCollectiveWatch" />
+            <BooleanField source="wasStudentsGood" /> */}
 
             {/* SPECIAL_EDUCATION specific */}
-            <NumberField source="howManyStudentsTeached" />
+            {/* <NumberField source="howManyStudentsTeached" />
             <NumberField source="howManyStudentsWatched" />
             <BooleanField source="wasPhoneDiscussing" />
             <NumberField source="whoIsYourTrainingTeacher" />
-            <TextField source="whatIsYourSpeciality" />
-            <TextField source="comment" />
+            <TextField source="whatIsYourSpeciality" /> */}
 
             <NumberField
                 source="price"
