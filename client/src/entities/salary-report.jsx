@@ -6,6 +6,7 @@ import {
     NumberField,
     ReferenceField,
     required,
+    SelectField,
     TextField,
     TextInput,
     useRecordContext
@@ -52,7 +53,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <TextField source="ids" />
             <DateField showDate showTime source="date" />
             <TextField source="name" />
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
             <ShowReportablesButton resource="att_report" />

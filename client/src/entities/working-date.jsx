@@ -5,6 +5,7 @@ import {
     NumberField, 
     ReferenceField, 
     required, 
+    SelectField, 
     TextField, 
     TextInput 
 } from 'react-admin';
@@ -37,7 +38,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
             <DateField source="workingDate" />
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>

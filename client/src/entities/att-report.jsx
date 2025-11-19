@@ -11,7 +11,8 @@ import {
     TextInput,
     BooleanField,
     BooleanInput,
-    useDataProvider
+    useDataProvider,
+    SelectField
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
 import { useState, useEffect } from 'react';
@@ -71,7 +72,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <DateField source="reportDate" />
             <DateField showDate showTime source="updateDate" />
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             {/* <BooleanField source="isConfirmed" /> */}
             <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="salaryMonth" />

@@ -39,7 +39,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <DateField source="reportDate" />
             <DateField showDate showTime source="updateDate" />
-            <NumberField source="year" />
+            <SelectField source="year" choices={yearChoices} />
             {/* <BooleanField source="isConfirmed" /> */}
             <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="salaryMonth" />
