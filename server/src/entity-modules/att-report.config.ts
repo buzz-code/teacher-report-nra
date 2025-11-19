@@ -6,7 +6,7 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Price } from '../db/entities/Price.entity';
 import { PriceByUser } from '../db/view-entities/PriceByUser.entity';
-import { calculateAttendanceReportPrice } from '../utils/pricing.util';
+import { calculateAttendanceReportPriceWithExplanation, PriceExplanation } from '../utils/pricing.util';
 import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { Repository } from 'typeorm';
@@ -17,7 +17,7 @@ function getConfig(): BaseEntityModuleOptions {
     query: {
       join: {
         teacher: { eager: true },
-          'teacher.teacherType': { eager: true },
+        'teacher.teacherType': { eager: true },
       },
     },
     exporter: {
@@ -47,6 +47,7 @@ function getConfig(): BaseEntityModuleOptions {
 
 interface AttReportWithPricing extends AttReport {
   price?: number;
+  priceExplanation?: PriceExplanation;
 }
 
 interface AttReportWithHeaders extends AttReport {
@@ -113,9 +114,10 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
       }
 
       try {
-        // Calculate price using the semantic pricing utility
-        const price = calculateAttendanceReportPrice(report, teacherTypeId, priceMap);
-        report.price = price;
+        // Calculate price using the semantic pricing utility with explanation
+        const result = calculateAttendanceReportPriceWithExplanation(report, teacherTypeId, priceMap);
+        report.price = result.price;
+        report.priceExplanation = result.explanation;
       } catch (error) {
         console.error(`Failed to calculate price for report ${report.id}:`, error);
         report.price = 0;

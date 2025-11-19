@@ -14,6 +14,7 @@ import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } fro
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { adminUserFilter } from '@shared/components/fields/PermissionFilter';
+import PriceExplanationField from '../entities/att-report/PriceExplanationField';
 
 const filters = [
     adminUserFilter,
@@ -88,6 +89,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
                     maximumFractionDigits: 2
                 }}
             />
+            <PriceExplanationField source="priceExplanation" />
             <TextField source="comment" />
         </CommonDatagrid>
     );

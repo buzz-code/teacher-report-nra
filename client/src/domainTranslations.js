@@ -97,6 +97,7 @@ export default {
                 isTaarifHulia3: 'תעריף חוליה 3',
                 whatIsYourSpeciality: 'מה ההתמחות שלך',
                 price: 'מחיר',
+                priceExplanation: 'פירוט מחיר',
             }
         },
         att_type: {
@@ -464,5 +465,12 @@ export default {
                 comment: 'הערה'
             }
         }
+    },
+    priceExplanation: {
+        basePrice: 'תעריף בסיס',
+        total: 'סה"כ',
+        currency: '₪',
+        multiplier: '×',
+        equals: '=',
     }
 };

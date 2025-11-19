@@ -4,6 +4,29 @@ import { TeacherTypeId } from '../fieldsShow.util';
 
 describe('pricing.util', () => {
   describe('calculateAttendanceReportPrice', () => {
+    // Helper function to create a price map with semantic codes
+    const createPriceMap = (overrides: Record<string, number> = {}): Map<string, number> => {
+      const defaults = {
+        'lesson.base': 50,
+        'seminar.student_multiplier': 5,
+        'seminar.lesson_multiplier': 10,
+        'seminar.yalkut_lesson_multiplier': 12,
+        'seminar.discussing_lesson_multiplier': 15,
+        'seminar.help_taught_multiplier': 6,
+        'seminar.watched_lesson_multiplier': 8,
+        'seminar.watch_individual_multiplier': 10,
+        'seminar.interfere_teach_multiplier': 12,
+        'seminar.methodic_multiplier': 8,
+        'seminar.phone_discussion_bonus': 20,
+        'seminar.kamal_bonus': 25,
+        'seminar.collective_watch_bonus': 15,
+        'seminar.taarif_hulia_bonus': 30,
+        'seminar.taarif_hulia2_bonus': 35,
+        'seminar.taarif_hulia3_bonus': 40,
+      };
+      return new Map(Object.entries({ ...defaults, ...overrides }));
+    };
+
     const mockAttReport: Partial<AttReport> = {
       id: 1,
       userId: 1,
@@ -32,10 +55,7 @@ describe('pricing.util', () => {
     };
 
     it('should calculate basic price with default configuration', () => {
-      const priceMap = [
-        { key: 1, price: 10 },
-        { key: 2, price: 20 },
-      ];
+      const priceMap = createPriceMap();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
@@ -49,10 +69,10 @@ describe('pricing.util', () => {
     });
 
     it('should handle price map as Map object', () => {
-      const priceMap = new Map([
-        [101, 100], // base price for teacher type 1
-        [102, 8], // student multiplier for teacher type 1
-      ]);
+      const priceMap = createPriceMap({
+        'lesson.base': 100,
+        'seminar.student_multiplier': 8,
+      });
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
@@ -73,7 +93,7 @@ describe('pricing.util', () => {
         isTaarifHulia3: true,
       };
 
-      const priceMap = [];
+      const priceMap = createPriceMap();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(specialReport as AttReport, teacherTypeId, priceMap);
@@ -90,7 +110,7 @@ describe('pricing.util', () => {
         howManyLessonsAbsence: 2,
       };
 
-      const priceMap = [];
+      const priceMap = createPriceMap();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(reportWithAbsences as AttReport, teacherTypeId, priceMap);
@@ -115,7 +135,7 @@ describe('pricing.util', () => {
         wasKamal: false,
       };
 
-      const priceMap = [];
+      const priceMap = createPriceMap();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(reportWithNulls as AttReport, teacherTypeId, priceMap);
@@ -133,7 +153,7 @@ describe('pricing.util', () => {
         howManyLessons: 0,
       };
 
-      const priceMap = [];
+      const priceMap = createPriceMap();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(reportWithManyAbsences as AttReport, teacherTypeId, priceMap);
@@ -142,9 +162,9 @@ describe('pricing.util', () => {
     });
 
     it('should round to 2 decimal places', () => {
-      const priceMap = [
-        { key: 101, price: 33.333 }, // This should create decimal results
-      ];
+      const priceMap = createPriceMap({
+        'lesson.base': 33.333,
+      });
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
@@ -154,29 +174,32 @@ describe('pricing.util', () => {
     });
 
     it('should handle different teacher types with custom pricing', () => {
-      const priceMap = [
-        { key: 101, price: 100 }, // Base price for teacher type 1
-        { key: 102, price: 10 }, // Student multiplier for teacher type 1
-        { key: 201, price: 200 }, // Base price for teacher type 2
-        { key: 202, price: 20 }, // Student multiplier for teacher type 2
-      ];
+      const priceMap1 = createPriceMap({
+        'lesson.base': 100,
+        'seminar.student_multiplier': 10,
+      });
 
-      const result1 = calculateAttendanceReportPrice(mockAttReport as AttReport, 1, priceMap);
+      const priceMap2 = createPriceMap({
+        'lesson.base': 200,
+        'manha.student_multiplier': 20,
+      });
 
-      const result2 = calculateAttendanceReportPrice(mockAttReport as AttReport, 2, priceMap);
+      const result1 = calculateAttendanceReportPrice(mockAttReport as AttReport, 1, priceMap1);
 
-      // Teacher type 2 should have higher base price and multipliers
+      const result2 = calculateAttendanceReportPrice(mockAttReport as AttReport, 3, priceMap2);
+
+      // Teacher type 3 (manha) should have higher base price
       expect(result2).toBeGreaterThan(result1);
     });
 
     it('should handle empty price map', () => {
-      const priceMap = [];
+      const priceMap = new Map<string, number>();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
-      // Should use default configuration
-      expect(result).toBeGreaterThan(0);
+      // Should use default of 0 for all values, returning 0
+      expect(result).toBe(0);
     });
 
     it('should calculate correctly with only watched students (half rate)', () => {
@@ -191,7 +214,7 @@ describe('pricing.util', () => {
         howManyStudentsTeached: 0,
       };
 
-      const priceMap = [];
+      const priceMap = createPriceMap();
       const teacherTypeId = TeacherTypeId.SEMINAR_KITA;
 
       const result = calculateAttendanceReportPrice(watchOnlyReport as AttReport, teacherTypeId, priceMap);
@@ -201,7 +224,7 @@ describe('pricing.util', () => {
     });
 
     it('should throw error for invalid teacher type', () => {
-      const priceMap = [];
+      const priceMap = createPriceMap();
       const invalidTeacherTypeId = 99 as TeacherTypeId; // Cast to avoid TypeScript error
 
       expect(() => {

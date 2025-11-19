@@ -17,7 +17,28 @@ export function getStudentGroupRateMultiplier(studentCount: number): number {
  * Price map interface - Map of semantic code to price value
  * Example codes: 'lesson.base', 'seminar.student_multiplier', 'manha.methodic_multiplier'
  */
-type PriceMap = Map<string, number>;
+export type PriceMap = Map<string, number>;
+
+/**
+ * Interface for a single pricing component in the explanation
+ */
+export interface PriceComponent {
+  fieldKey: string; // Field name for translation lookup (e.g., 'howManyStudents')
+  value?: number; // Numeric value (for numeric fields)
+  multiplier: number; // Price per unit
+  factor?: number; // Additional factor (e.g., 0.5 for watched students, -0.5 for absences)
+  subtotal: number; // Calculated amount
+  isBonus?: boolean; // True for boolean bonus fields
+}
+
+/**
+ * Interface for the complete pricing explanation
+ */
+export interface PriceExplanation {
+  basePrice: number;
+  components: PriceComponent[];
+  totalPrice: number;
+}
 
 /**
  * Get teacher type prefix for semantic price codes
@@ -63,6 +84,23 @@ export function calculateAttendanceReportPrice(
   teacherTypeId: TeacherTypeId,
   priceMap: PriceMap,
 ): number {
+  // Delegate to the explanation version and return only the price
+  const result = calculateAttendanceReportPriceWithExplanation(attReport, teacherTypeId, priceMap);
+  return result.price;
+}
+
+/**
+ * Calculate attendance report price with detailed explanation
+ * @param attReport - The attendance report data
+ * @param teacherTypeId - The teacher type ID from TeacherTypeId enum
+ * @param priceMap - Map of semantic price codes to values
+ * @returns Object containing price and structured explanation
+ */
+export function calculateAttendanceReportPriceWithExplanation(
+  attReport: AttReport,
+  teacherTypeId: TeacherTypeId,
+  priceMap: PriceMap,
+): { price: number; explanation: PriceExplanation } {
   // Validate teacher type using shared validation function
   if (!isValidTeacherType(teacherTypeId)) {
     throw new Error(`Invalid teacher type ID: ${teacherTypeId}`);
@@ -72,59 +110,87 @@ export function calculateAttendanceReportPrice(
   const prefix = getTeacherTypePrefix(teacherTypeId);
 
   // Start with base price (universal for all teacher types)
-  let totalPrice = getPrice(priceMap, 'lesson.base');
+  const basePrice = getPrice(priceMap, 'lesson.base');
+  let totalPrice = basePrice;
 
-  // Helper function to add numeric field pricing using semantic codes
+  const components: PriceComponent[] = [];
+
+  // Helper function to add numeric field pricing with explanation
   const addNumericPrice = (
     value: number | null | undefined,
+    fieldKey: string,
     codeSuffix: string,
     factor = 1,
   ): void => {
-    const code = prefix + codeSuffix;
-    const multiplier = getPrice(priceMap, code);
-    totalPrice += (value || 0) * multiplier * factor;
+    if (value && value !== 0) {
+      const code = prefix + codeSuffix;
+      const multiplier = getPrice(priceMap, code);
+      const subtotal = value * multiplier * factor;
+      totalPrice += subtotal;
+
+      components.push({
+        fieldKey,
+        value,
+        multiplier,
+        factor: factor !== 1 ? factor : undefined,
+        subtotal: Math.round(subtotal * 100) / 100,
+      });
+    }
   };
 
-  // Helper function to add boolean field pricing using semantic codes
-  const addBooleanPrice = (
-    condition: boolean | null | undefined,
-    codeSuffix: string,
-  ): void => {
+  // Helper function to add boolean field pricing with explanation
+  const addBooleanPrice = (condition: boolean | null | undefined, fieldKey: string, codeSuffix: string): void => {
     if (condition) {
       const code = prefix + codeSuffix;
       const bonus = getPrice(priceMap, code);
       totalPrice += bonus;
+
+      components.push({
+        fieldKey,
+        multiplier: bonus,
+        subtotal: Math.round(bonus * 100) / 100,
+        isBonus: true,
+      });
     }
   };
 
   // Add pricing based on student counts
-  addNumericPrice(attReport.howManyStudents, 'student_multiplier');
-  addNumericPrice(attReport.howManyStudentsTeached, 'student_multiplier');
-  addNumericPrice(attReport.howManyStudentsWatched, 'student_multiplier', 0.5); // Watch is less intensive
-  addNumericPrice(attReport.howManyStudentsHelpTeached, 'help_taught_multiplier');
+  addNumericPrice(attReport.howManyStudents, 'howManyStudents', 'student_multiplier');
+  addNumericPrice(attReport.howManyStudentsTeached, 'howManyStudentsTeached', 'student_multiplier');
+  addNumericPrice(attReport.howManyStudentsWatched, 'howManyStudentsWatched', 'student_multiplier', 0.5);
+  addNumericPrice(attReport.howManyStudentsHelpTeached, 'howManyStudentsHelpTeached', 'help_taught_multiplier');
 
   // Add pricing based on lesson counts
-  addNumericPrice(attReport.howManyLessons, 'lesson_multiplier');
-  addNumericPrice(attReport.howManyYalkutLessons, 'yalkut_lesson_multiplier');
-  addNumericPrice(attReport.howManyDiscussingLessons, 'discussing_lesson_multiplier');
-  addNumericPrice(attReport.howManyWatchedLessons, 'watched_lesson_multiplier');
-  addNumericPrice(attReport.howManyWatchOrIndividual, 'watch_individual_multiplier');
-  addNumericPrice(attReport.howManyTeachedOrInterfering, 'interfere_teach_multiplier');
+  addNumericPrice(attReport.howManyLessons, 'howManyLessons', 'lesson_multiplier');
+  addNumericPrice(attReport.howManyYalkutLessons, 'howManyYalkutLessons', 'yalkut_lesson_multiplier');
+  addNumericPrice(attReport.howManyDiscussingLessons, 'howManyDiscussingLessons', 'discussing_lesson_multiplier');
+  addNumericPrice(attReport.howManyWatchedLessons, 'howManyWatchedLessons', 'watched_lesson_multiplier');
+  addNumericPrice(attReport.howManyWatchOrIndividual, 'howManyWatchOrIndividual', 'watch_individual_multiplier');
+  addNumericPrice(attReport.howManyTeachedOrInterfering, 'howManyTeachedOrInterfering', 'interfere_teach_multiplier');
 
   // Add pricing based on methodical work
-  addNumericPrice(attReport.howManyMethodic, 'methodic_multiplier');
+  addNumericPrice(attReport.howManyMethodic, 'howManyMethodic', 'methodic_multiplier');
 
   // Subtract for absences (negative impact on payment)
-  addNumericPrice(attReport.howManyLessonsAbsence, 'lesson_multiplier', -0.5);
+  addNumericPrice(attReport.howManyLessonsAbsence, 'howManyLessonsAbsence', 'lesson_multiplier', -0.5);
 
   // Add bonuses for special activities
-  addBooleanPrice(attReport.wasPhoneDiscussing, 'phone_discussion_bonus');
-  addBooleanPrice(attReport.wasKamal, 'kamal_bonus');
-  addBooleanPrice(attReport.wasCollectiveWatch, 'collective_watch_bonus');
-  addBooleanPrice(attReport.isTaarifHulia, 'taarif_hulia_bonus');
-  addBooleanPrice(attReport.isTaarifHulia2, 'taarif_hulia2_bonus');
-  addBooleanPrice(attReport.isTaarifHulia3, 'taarif_hulia3_bonus');
+  addBooleanPrice(attReport.wasPhoneDiscussing, 'wasPhoneDiscussing', 'phone_discussion_bonus');
+  addBooleanPrice(attReport.wasKamal, 'wasKamal', 'kamal_bonus');
+  addBooleanPrice(attReport.wasCollectiveWatch, 'wasCollectiveWatch', 'collective_watch_bonus');
+  addBooleanPrice(attReport.isTaarifHulia, 'isTaarifHulia', 'taarif_hulia_bonus');
+  addBooleanPrice(attReport.isTaarifHulia2, 'isTaarifHulia2', 'taarif_hulia2_bonus');
+  addBooleanPrice(attReport.isTaarifHulia3, 'isTaarifHulia3', 'taarif_hulia3_bonus');
 
   // Ensure the price doesn't go below zero
-  return Math.max(0, Math.round(totalPrice * 100) / 100); // Round to 2 decimal places
+  const finalPrice = Math.max(0, Math.round(totalPrice * 100) / 100);
+
+  return {
+    price: finalPrice,
+    explanation: {
+      basePrice: Math.round(basePrice * 100) / 100,
+      components,
+      totalPrice: finalPrice,
+    },
+  };
 }
