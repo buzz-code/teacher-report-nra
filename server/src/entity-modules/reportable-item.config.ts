@@ -7,6 +7,7 @@ import { AttReport } from '../db/entities/AttReport.entity';
 import { Answer } from '../db/entities/Answer.entity';
 import { SalaryReport } from '../db/entities/SalaryReport.entity';
 import { In, IsNull } from 'typeorm';
+import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -62,6 +63,7 @@ class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntit
         name: salaryReportData.name,
         date: salaryReportData.date,
         userId,
+        year: getCurrentHebrewYear(),
       });
     }
 
