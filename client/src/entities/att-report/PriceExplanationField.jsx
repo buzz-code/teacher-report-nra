@@ -7,14 +7,16 @@ import InfoIcon from '@mui/icons-material/Info';
  * Component to display price explanation as a tooltip
  * Shows detailed breakdown of pricing calculation
  */
-const PriceExplanationField = ({ record }) => {
+const PriceExplanationField = ({ source }) => {
+  const record = useRecordContext();
   const translate = useTranslate();
+  const value = get(record, source);
 
-  if (!record || !record.priceExplanation) {
+  if (!value) {
     return null;
   }
 
-  const { basePrice, components, totalPrice } = record.priceExplanation;
+  const { basePrice, components, totalPrice } = value;
 
   // Build the explanation string with Hebrew translations
   const buildExplanationText = () => {
