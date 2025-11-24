@@ -31,6 +31,7 @@ const filters = [
   <DateInput source="reportDate:$gte" alwaysOn />,
   <DateInput source="reportDate:$lte" alwaysOn />,
   <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" />,
+  <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
   <SelectInput
     source="type"
     choices={[
