@@ -20,6 +20,7 @@ import { Teacher } from './Teacher.entity';
 import { User } from './User.entity';
 import { TeacherType } from './TeacherType.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
 
 @Entity('student_groups')
 @Index('student_groups_user_id_idx', ['userId'], {})
@@ -30,6 +31,8 @@ export class StudentGroup implements IHasUserId {
   @BeforeInsert()
   @BeforeUpdate()
   async fillFields() {
+    fillDefaultYearValue(this);
+
     let dataSource: DataSource;
     try {
       dataSource = await getDataSource([Teacher, User, TeacherType]);
@@ -77,6 +80,11 @@ export class StudentGroup implements IHasUserId {
   @Column('date', { name: 'end_date', nullable: true })
   endDate: Date;
 
+  @IsOptional({ always: true })
+  @NumberType
+  @Column('int', { nullable: true })
+  year: number;
+
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
   @NumberType
@@ -84,6 +92,12 @@ export class StudentGroup implements IHasUserId {
   @Min(1, { always: true })
   @Column('int', { name: 'student_count' })
   studentCount: number;
+
+  @IsOptional({ always: true })
+  @StringType
+  @MaxLength(255, { always: true })
+  @Column({ length: 255, nullable: true, name: 'training_teacher' })
+  trainingTeacher: string;
 
   @CreateDateColumn()
   createdAt: Date;

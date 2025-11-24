@@ -17,6 +17,7 @@ export default {
                 startDate: 'מתאריך',
                 endDate: 'עד תאריך',
                 studentCount: 'מספר תלמידות',
+                trainingTeacher: 'מורה מכשירה',
             }
         },
         teacher: {
@@ -30,8 +31,8 @@ export default {
                 school: 'בית ספר',
                 teacherTypeKey: 'סוג מורה',
                 teacherTypeReferenceId: 'סוג מורה',
-                trainingTeacher: 'מורה מכשירה',
-                studentCount: 'מספר תלמידות',
+                trainingTeacher: 'מורה מכשירה - ישן',
+                studentCount: 'מספר תלמידות - ישן',
             }
         },
         

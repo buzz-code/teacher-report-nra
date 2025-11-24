@@ -25,6 +25,7 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'startDate', label: 'מתאריך' },
           { value: 'endDate', label: 'עד תאריך' },
           { value: 'studentCount', label: 'מספר תלמידות' },
+          { value: 'trainingTeacher', label: 'מורה מכשירה' },
         ];
       },
     },
