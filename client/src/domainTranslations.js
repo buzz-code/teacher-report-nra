@@ -56,7 +56,7 @@ export default {
             }
         },
         att_report: {
-            name: 'דוח נוכחות |||| דוחות נוכחות',
+            name: 'תיקוף נוכחות |||| תיקופי נוכחות',
             fields: {
                 ...generalResourceFieldsTranslation,
                 teacherReferenceId: 'מורה',
