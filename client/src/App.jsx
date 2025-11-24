@@ -113,8 +113,8 @@ const App = () => (
             <Resource name="answer" {...answer} options={{ menuGroup: 'data' }} icon={RateReviewIcon} />
 
             {/* Configuration (reports) - Report configuration and types */}
-            <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
             <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
+            <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
 
             {/* User customization (settings) - User-specific settings */}
             <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />
