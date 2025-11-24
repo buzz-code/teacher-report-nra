@@ -8,8 +8,11 @@ import {
     ReferenceField,
     required,
     TextField,
-    TextInput
+    TextInput,
+    useRecordContext
 } from 'react-admin';
+import { Tooltip, IconButton, Box, Typography } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -18,6 +21,62 @@ import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/f
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 
 const questionSortBy = { field: 'content', order: 'ASC' };
+
+/**
+ * Calculate payment based on answer and question tariff
+ * @param {Object} record - The answer record
+ * @returns {number} - Calculated payment amount
+ */
+const calculatePayment = (record) => {
+  if (!record || !record.answer) return 0;
+  const tariff = record.question?.tariff || 0;
+  return record.answer * tariff;
+};
+
+/**
+ * Build payment explanation text for tooltip
+ * @param {Object} record - The answer record
+ * @returns {string} - Formatted explanation text
+ */
+const buildPaymentExplanation = (record) => {
+  if (!record || !record.answer) return '';
+  
+  const answer = record.answer;
+  const tariff = record.question?.tariff || 0;
+  const payment = calculatePayment(record);
+  const questionContent = record.question?.content || 'שאלה';
+
+  return `${questionContent}\n${answer} × ₪${tariff.toFixed(2)} = ₪${payment.toFixed(2)}`;
+};
+
+/**
+ * Component to display payment explanation as a tooltip
+ */
+const PaymentExplanationField = () => {
+  const record = useRecordContext();
+  
+  if (!record || !record.answer) return null;
+
+  const explanationText = buildPaymentExplanation(record);
+
+  return (
+    <Tooltip
+      title={
+        <Box sx={{ whiteSpace: 'pre-line', direction: 'rtl', textAlign: 'right' }}>
+          <Typography variant="body2" component="div">
+            {explanationText}
+          </Typography>
+        </Box>
+      }
+      arrow
+      placement="left"
+    >
+      <IconButton size="small" sx={{ padding: 0.5 }}>
+        <InfoIcon fontSize="small" color="primary" />
+      </IconButton>
+    </Tooltip>
+  );
+};
 
 const filters = [
     ...commonAdminFilters,
@@ -42,10 +101,11 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <FunctionField
                 label="resources.answer.fields.calculatedPayment"
                 render={record => {
-                    const payment = record.answer * (record.question?.tariff || 0);
+                    const payment = calculatePayment(record);
                     return payment ? `₪${payment.toFixed(2)}` : '-';
                 }}
             />
+            <PaymentExplanationField />
             <DateField source="reportDate" />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
