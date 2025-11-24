@@ -78,6 +78,7 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
         break;
       }
 
+      // TODO: Delete this pivot as not needed anymore
       case 'AttReportByTeacherType': {
         await this.handleTeacherTypePivot(data, extra, filter, auth);
         break;
