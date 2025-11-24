@@ -32,6 +32,14 @@ const filters = [
   <DateInput source="reportDate:$lte" alwaysOn />,
   <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" />,
   <SelectInput
+    source="type"
+    choices={[
+      { id: 'report', name: 'דיווח נוכחות' },
+      { id: 'answer', name: 'תשובה' }
+    ]}
+    alwaysOn
+  />,
+  <SelectInput
     source="salaryReportId:$isnull"
     choices={[
       { id: 'true', name: 'לא מוקצה' },
@@ -75,7 +83,7 @@ const TypeChip = ({ source }) => {
 
   if (!record) return null;
 
-  const isAnswer = record.id.startsWith('answer_');
+  const isAnswer = record.type === 'answer';
   const typeKey = isAnswer ? 'answer' : 'attendance_report';
   const typeLabel = translate(`resources.reportable_item.values.type.${typeKey}`);
 
