@@ -18,12 +18,12 @@ import teacherQuestionConfig from './entity-modules/teacher-question.config';
 import { TeacherType } from './db/entities/TeacherType.entity';
 import attReportConfig from './entity-modules/att-report.config';
 import priceConfig from './entity-modules/price.config';
+import salaryReportConfig from './entity-modules/salary-report.config';
 import { AttType } from './db/entities/AttType.entity';
 import { Question } from './db/entities/Question.entity';
 import { QuestionType } from './db/entities/QuestionType.entity';
 import { Answer } from './db/entities/Answer.entity';
 import { WorkingDate } from './db/entities/WorkingDate.entity';
-import { SalaryReport } from './db/entities/SalaryReport.entity';
 import reportableItemConfig from './entity-modules/reportable-item.config';
 
 // Shared entities
@@ -53,7 +53,7 @@ import { PriceByUser } from './db/view-entities/PriceByUser.entity';
     BaseEntityModule.register({ entity: QuestionType }),
     BaseEntityModule.register({ entity: Answer }),
     BaseEntityModule.register({ entity: WorkingDate }),
-    BaseEntityModule.register({ entity: SalaryReport }),
+    BaseEntityModule.register(salaryReportConfig),
     BaseEntityModule.register(reportableItemConfig),
 
     // Common entities and utilities

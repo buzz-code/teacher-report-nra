@@ -466,6 +466,20 @@ export default {
                 activityType: 'סוג פעילות',
                 comment: 'הערה'
             }
+        },
+        'salary_report/pivot?extra.pivot=SalaryReportWithTotals': {
+            name: 'דוחות שכר עם מחירים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                date: 'תאריך',
+                'date:$gte': 'תאריך מ-',
+                'date:$lte': 'תאריך עד-',
+                answerCount: 'מספר תשובות',
+                answersTotal: 'סכום תשובות',
+                attReportCount: 'מספר דוחות נוכחות',
+                attReportsTotal: 'סכום דוחות נוכחות',
+                grandTotal: 'סה"כ כולל',
+            }
         }
     },
     priceExplanation: {

@@ -57,6 +57,7 @@ import Settings from 'src/settings/Settings';
 // Import pivot components
 import AttReportWithPricing from 'src/pivots/AttReportWithPricing';
 import AttReportByTeacherType from 'src/pivots/AttReportByTeacherType';
+import SalaryReportWithTotals from 'src/pivots/SalaryReportWithTotals';
 
 import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
 import YemotSimulator from "@shared/components/views/YemotSimulator";
@@ -114,7 +115,7 @@ const App = () => (
 
             {/* Configuration (reports) - Report configuration and types */}
             <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
-            <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+            <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
 
             {/* User customization (settings) - User-specific settings */}
             <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />
@@ -152,6 +153,7 @@ const App = () => (
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
               <Route path="/att-report-pricing" element={<AttReportWithPricing />} />
               <Route path="/att-report-by-teacher-type" element={<AttReportByTeacherType />} />
+              <Route path="/salary-report-totals" element={<SalaryReportWithTotals />} />
             </CustomRoutes>
 
             <CustomRoutes noLayout>

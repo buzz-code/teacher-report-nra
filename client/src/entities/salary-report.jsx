@@ -50,14 +50,13 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
-            <TextField source="ids" />
             <DateField showDate showTime source="date" />
             <TextField source="name" />
             <SelectField source="year" choices={yearChoices} />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
-            <ShowReportablesButton resource="att_report" />
-            <ShowReportablesButton resource="answer" />
+            <ShowReportablesButton resource="att_report" label="דיווחים" />
+            <ShowReportablesButton resource="answer" label="תשובות" />
         </CommonDatagrid>
     );
 }
@@ -66,7 +65,6 @@ const Inputs = ({ isCreate, isAdmin }) => {
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="ids" multiline helperText="מזהי דוחות, מופרדים בפסיק" />
         <DateInput source="date" validate={[required()]} />
         <TextInput source="name" validate={[maxLength(255)]} />
         <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
