@@ -47,7 +47,7 @@ const filters = [
 ];
 
 const filterDefaultValues = {
-  ...defaultYearFilter,
+  'salaryReport.year': defaultYearFilter.year,
 };
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
