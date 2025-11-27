@@ -86,3 +86,35 @@ export const getVisibleFields = (teacherTypeKey) => {
     fieldVisibility[fieldName].includes(teacherTypeKey)
   );
 };
+
+/**
+ * Fetch teacher type key from teacher type ID using data provider
+ * @param {Object} dataProvider - React Admin data provider
+ * @param {number|null} teacherTypeId - The teacher type ID
+ * @returns {Promise<number|null>} - The teacher type key or null
+ */
+export const getTeacherTypeKeyByTeacherTypeId = (dataProvider, teacherTypeId) => {
+  if (!teacherTypeId) return Promise.resolve(null);
+  return dataProvider.getOne('teacher_type', { id: teacherTypeId })
+    .then(response => response?.data?.key || null)
+    .catch((error) => {
+      console.error('Error fetching teacher type:', error);
+      return null;
+    });
+};
+
+/**
+ * Fetch teacher type key from teacher ID using data provider
+ * @param {Object} dataProvider - React Admin data provider
+ * @param {number|null} teacherId - The teacher ID
+ * @returns {Promise<number|null>} - The teacher type key or null
+ */
+export const getTeacherTypeKeyByTeacherId = (dataProvider, teacherId) => {
+  if (!teacherId) return Promise.resolve(null);
+  return dataProvider.getOne('teacher', { id: teacherId })
+    .then(response => getTeacherTypeKeyByTeacherTypeId(dataProvider, response?.data?.teacherTypeReferenceId))
+    .catch((error) => {
+      console.error('Error fetching teacher:', error);
+      return null;
+    });
+};

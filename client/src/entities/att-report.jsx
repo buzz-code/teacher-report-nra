@@ -27,7 +27,7 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
-import { shouldShowField } from '../utils/attReportFields';
+import { shouldShowField, getTeacherTypeKeyByTeacherTypeId, getTeacherTypeKeyByTeacherId } from '../utils/attReportFields';
 
 const filters = [
     ...commonAdminFilters,
@@ -50,25 +50,6 @@ const filters = [
 const filterDefaultValues = {
     ...defaultYearFilter,
 };
-
-function getTeacherTypeKeyByTeacherTypeId(dataProvider, teacherTypeId) {
-    if (!teacherTypeId) return Promise.resolve(null);
-    return dataProvider.getOne('teacher_type', { id: teacherTypeId })
-        .then(response => response?.data?.key || null)
-        .catch((error) => {
-            console.error('Error fetching teacher type:', error);
-            return null;
-        });
-}
-function getTeacherTypeKeyByTeacherId(dataProvider, teacherId) {
-    if (!teacherId) return Promise.resolve(null);
-    return dataProvider.getOne('teacher', { id: teacherId })
-        .then(response => getTeacherTypeKeyByTeacherTypeId(dataProvider, response?.data?.teacherTypeReferenceId))
-        .catch((error) => {
-            console.error('Error fetching teacher:', error);
-            return null;
-        });
-}
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     const { filterValues } = useListContext();
