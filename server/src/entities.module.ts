@@ -25,6 +25,7 @@ import { QuestionType } from './db/entities/QuestionType.entity';
 import { Answer } from './db/entities/Answer.entity';
 import { WorkingDate } from './db/entities/WorkingDate.entity';
 import reportableItemConfig from './entity-modules/reportable-item.config';
+import salaryReportByTeacherConfig from './entity-modules/salary-report-by-teacher.config';
 
 // Shared entities
 import { YemotCall } from '@shared/entities/YemotCall.entity';
@@ -55,6 +56,7 @@ import { PriceByUser } from './db/view-entities/PriceByUser.entity';
     BaseEntityModule.register({ entity: WorkingDate }),
     BaseEntityModule.register(salaryReportConfig),
     BaseEntityModule.register(reportableItemConfig),
+    BaseEntityModule.register(salaryReportByTeacherConfig),
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),

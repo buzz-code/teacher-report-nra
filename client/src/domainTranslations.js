@@ -480,6 +480,24 @@ export default {
                 attReportsTotal: 'סכום דוחות נוכחות',
                 grandTotal: 'סה"כ כולל',
             }
+        },
+        'salary_report_by_teacher/pivot?extra.pivot=WithTotals': {
+            name: 'דוחות שכר לפי מורה',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                salaryReportId: 'דוח שכר',
+                teacherReferenceId: 'מורה',
+                'salaryReport.name': 'שם דוח',
+                'salaryReport.date': 'תאריך',
+                'salaryReport.year': 'שנה',
+                'salaryReport.createdAt': 'נוצר',
+                'salaryReport.updatedAt': 'עודכן',
+                answerCount: 'מספר תשובות',
+                answersTotal: 'סכום תשובות',
+                attReportCount: 'מספר דוחות נוכחות',
+                attReportsTotal: 'סכום דוחות נוכחות',
+                grandTotal: 'סה"כ כולל',
+            }
         }
     },
     priceExplanation: {

@@ -28,6 +28,7 @@ class SalaryReportService<T extends Entity | SalaryReport> extends BaseEntitySer
     const data = list as SalaryReport[];
 
     switch (pivotName) {
+      // TODO: Delete this pivot as not needed anymore
       case 'SalaryReportWithTotals': {
         await this.handleTotalsPivot(data, auth);
         break;

@@ -58,6 +58,7 @@ import Settings from 'src/settings/Settings';
 import AttReportWithPricing from 'src/pivots/AttReportWithPricing';
 import AttReportByTeacherType from 'src/pivots/AttReportByTeacherType';
 import SalaryReportWithTotals from 'src/pivots/SalaryReportWithTotals';
+import SalaryReportPerTeacher from 'src/pivots/SalaryReportPerTeacher';
 
 import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
 import YemotSimulator from "@shared/components/views/YemotSimulator";
@@ -154,6 +155,7 @@ const App = () => (
               <Route path="/att-report-pricing" element={<AttReportWithPricing />} />
               <Route path="/att-report-by-teacher-type" element={<AttReportByTeacherType />} />
               <Route path="/salary-report-totals" element={<SalaryReportWithTotals />} />
+              <Route path="/salary-report-per-teacher" element={<SalaryReportPerTeacher />} />
             </CustomRoutes>
 
             <CustomRoutes noLayout>
