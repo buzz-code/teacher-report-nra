@@ -77,10 +77,12 @@ const filterDefaultValues = {
     ...defaultYearFilter,
 };
 
+const defaultMailSubject = "דיווחי נוכחות - {name}";
+const defaultMailBody = "<p>שלום {name},</p><p>מצורף קובץ דיווחי הנוכחות שלך.</p>";
 const additionalBulkButtons = [
     <BulkActionButton label='שליחת אקסל למורה' icon={<AttachEmailIcon />} name='teacherReportFile' >
-        <TextInput key="mailSubject" source="mailSubject" label="נושא המייל" validate={required()} />
-        <CommonRichTextInput key="mailBody" source="mailBody" label="תוכן המייל" validate={required()} />
+        <TextInput key="mailSubject" source="mailSubject" label="נושא המייל" validate={required()} defaultValue={defaultMailSubject} />
+        <CommonRichTextInput key="mailBody" source="mailBody" label="תוכן המייל" validate={required()} defaultValue={defaultMailBody} />
     </BulkActionButton>,
 ];
 
