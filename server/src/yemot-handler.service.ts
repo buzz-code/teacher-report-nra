@@ -12,6 +12,8 @@ import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 import { Like, IsNull, Between } from 'typeorm';
 import { formatHebrewDateForIVR } from '@shared/utils/formatting/hebrew.util';
 import { TeacherTypeId } from 'src/utils/fieldsShow.util';
+import { calculateReportPriceSafe, getPriceMapForUser } from 'src/utils/pricing.util';
+import { isYes, parseIntOrNull } from 'src/utils/reportData.util';
 
 // Interfaces for generic confirmation
 interface ConfirmationField {
@@ -456,49 +458,31 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         updateDate: new Date(),
         year: getCurrentHebrewYear(),
         isConfirmed: true, // Always set to true - reports are confirmed on creation
-        howManyMethodic: this.callParams.howManyMethodic ? parseInt(this.callParams.howManyMethodic) : null,
+        howManyMethodic: parseIntOrNull(this.callParams.howManyMethodic),
         fourLastDigitsOfTeacherPhone: this.callParams.fourLastDigitsOfTeacherPhone,
-        isTaarifHulia: this.callParams.isTaarifHulia === '1',
-        isTaarifHulia2: this.callParams.isTaarifHulia2 === '1',
-        isTaarifHulia3: this.callParams.isTaarifHulia3 === '1',
+        isTaarifHulia: isYes(this.callParams.isTaarifHulia),
+        isTaarifHulia2: isYes(this.callParams.isTaarifHulia2),
+        isTaarifHulia3: isYes(this.callParams.isTaarifHulia3),
         teachedStudentTz: this.callParams.teachedStudentTz,
-        howManyYalkutLessons: this.callParams.howManyYalkutLessons
-          ? parseInt(this.callParams.howManyYalkutLessons)
-          : null,
-        howManyDiscussingLessons: this.callParams.howManyDiscussingLessons
-          ? parseInt(this.callParams.howManyDiscussingLessons)
-          : null,
-        howManyStudentsHelpTeached: this.callParams.howManyStudentsHelpTeached
-          ? parseInt(this.callParams.howManyStudentsHelpTeached)
-          : null,
-        howManyLessonsAbsence: this.callParams.howManyLessonsAbsence
-          ? parseInt(this.callParams.howManyLessonsAbsence)
-          : null,
-        howManyWatchedLessons: this.callParams.howManyWatchedLessons
-          ? parseInt(this.callParams.howManyWatchedLessons)
-          : null,
-        wasDiscussing: this.callParams.wasDiscussing === '1',
-        wasKamal: this.callParams.wasKamal === '1',
-        wasStudentsGood: this.callParams.wasStudentsGood === '1',
-        wasStudentsEnterOnTime: this.callParams.wasStudentsEnterOnTime === '1',
-        wasStudentsExitOnTime: this.callParams.wasStudentsExitOnTime === '1',
-        teacherToReportFor: this.callParams.teacherToReportFor ? parseInt(this.callParams.teacherToReportFor) : null,
-        wasCollectiveWatch: this.callParams.wasCollectiveWatch === '1',
-        howManyStudents: this.callParams.howManyStudents ? parseInt(this.callParams.howManyStudents) : null,
-        howManyLessons: this.callParams.howManyLessons ? parseInt(this.callParams.howManyLessons) : null,
-        howManyWatchOrIndividual: this.callParams.howManyWatchOrIndividual
-          ? parseInt(this.callParams.howManyWatchOrIndividual)
-          : null,
-        howManyTeachedOrInterfering: this.callParams.howManyTeachedOrInterfering
-          ? parseInt(this.callParams.howManyTeachedOrInterfering)
-          : null,
-        howManyStudentsTeached: this.callParams.howManyStudentsTeached
-          ? parseInt(this.callParams.howManyStudentsTeached)
-          : null,
-        howManyStudentsWatched: this.callParams.howManyStudentsWatched
-          ? parseInt(this.callParams.howManyStudentsWatched)
-          : null,
-        wasPhoneDiscussing: this.callParams.wasPhoneDiscussing === '1',
+        howManyYalkutLessons: parseIntOrNull(this.callParams.howManyYalkutLessons),
+        howManyDiscussingLessons: parseIntOrNull(this.callParams.howManyDiscussingLessons),
+        howManyStudentsHelpTeached: parseIntOrNull(this.callParams.howManyStudentsHelpTeached),
+        howManyLessonsAbsence: parseIntOrNull(this.callParams.howManyLessonsAbsence),
+        howManyWatchedLessons: parseIntOrNull(this.callParams.howManyWatchedLessons),
+        wasDiscussing: isYes(this.callParams.wasDiscussing),
+        wasKamal: isYes(this.callParams.wasKamal),
+        wasStudentsGood: isYes(this.callParams.wasStudentsGood),
+        wasStudentsEnterOnTime: isYes(this.callParams.wasStudentsEnterOnTime),
+        wasStudentsExitOnTime: isYes(this.callParams.wasStudentsExitOnTime),
+        teacherToReportFor: parseIntOrNull(this.callParams.teacherToReportFor),
+        wasCollectiveWatch: isYes(this.callParams.wasCollectiveWatch),
+        howManyStudents: parseIntOrNull(this.callParams.howManyStudents),
+        howManyLessons: parseIntOrNull(this.callParams.howManyLessons),
+        howManyWatchOrIndividual: parseIntOrNull(this.callParams.howManyWatchOrIndividual),
+        howManyTeachedOrInterfering: parseIntOrNull(this.callParams.howManyTeachedOrInterfering),
+        howManyStudentsTeached: parseIntOrNull(this.callParams.howManyStudentsTeached),
+        howManyStudentsWatched: parseIntOrNull(this.callParams.howManyStudentsWatched),
+        wasPhoneDiscussing: isYes(this.callParams.wasPhoneDiscussing),
         whatIsYourSpeciality: this.callParams.whatIsYourSpeciality,
       };
 
@@ -875,6 +859,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     // Build the params object from callParams
     const params = this.buildConfirmationParams(confirmationConfig.fields);
 
+    // Calculate estimated price for the report
+    const estimatedPrice = await this.calculateEstimatedPrice();
+    params.price = estimatedPrice.toFixed(2);
+
     // Ask for confirmation using askConfirmation helper
     const isConfirmed = await this.askConfirmation(confirmationConfig.textKey, params);
 
@@ -885,6 +873,46 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       // Go back to start of data collection (keeps reportDate, existingReport, teacher, user)
       return this.getReportAndSave();
     }
+  }
+
+  /**
+   * Calculate estimated price for the current report based on callParams
+   */
+  private async calculateEstimatedPrice(): Promise<number> {
+    const teacherTypeKey = this.teacher.teacherType?.key;
+    if (!teacherTypeKey) {
+      return 0;
+    }
+
+    // Build a temporary report object from callParams
+    const tempReport = {
+      howManyMethodic: parseIntOrNull(this.callParams.howManyMethodic),
+      isTaarifHulia: isYes(this.callParams.isTaarifHulia),
+      isTaarifHulia2: isYes(this.callParams.isTaarifHulia2),
+      isTaarifHulia3: isYes(this.callParams.isTaarifHulia3),
+      howManyYalkutLessons: parseIntOrNull(this.callParams.howManyYalkutLessons),
+      howManyDiscussingLessons: parseIntOrNull(this.callParams.howManyDiscussingLessons),
+      howManyStudentsHelpTeached: parseIntOrNull(this.callParams.howManyStudentsHelpTeached),
+      howManyLessonsAbsence: parseIntOrNull(this.callParams.howManyLessonsAbsence),
+      howManyWatchedLessons: parseIntOrNull(this.callParams.howManyWatchedLessons),
+      wasKamal: isYes(this.callParams.wasKamal),
+      wasStudentsGood: isYes(this.callParams.wasStudentsGood),
+      wasCollectiveWatch: isYes(this.callParams.wasCollectiveWatch),
+      howManyStudents: parseIntOrNull(this.callParams.howManyStudents),
+      howManyLessons: parseIntOrNull(this.callParams.howManyLessons),
+      howManyWatchOrIndividual: parseIntOrNull(this.callParams.howManyWatchOrIndividual),
+      howManyTeachedOrInterfering: parseIntOrNull(this.callParams.howManyTeachedOrInterfering),
+      howManyStudentsTeached: parseIntOrNull(this.callParams.howManyStudentsTeached),
+      howManyStudentsWatched: parseIntOrNull(this.callParams.howManyStudentsWatched),
+      wasPhoneDiscussing: isYes(this.callParams.wasPhoneDiscussing),
+    } as any;
+
+    // Get price map for user
+    const priceMap = await getPriceMapForUser(this.user.id, this.dataSource);
+
+    // Calculate price
+    const { price } = calculateReportPriceSafe(tempReport, teacherTypeKey, priceMap);
+    return price;
   }
 
   private async finishSavingReport(): Promise<void> {

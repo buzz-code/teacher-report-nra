@@ -6,6 +6,23 @@ export function getNumericValueOrNull(val: string): number {
   return val === 'null' ? null : Number(val);
 }
 
+/**
+ * Parse a string to integer, returning null if the value is empty/undefined/null
+ */
+export function parseIntOrNull(val: string | undefined | null): number | null {
+  if (val === undefined || val === null || val === '') {
+    return null;
+  }
+  return parseInt(val);
+}
+
+/**
+ * Check if a string value equals '1', commonly used for boolean flags from IVR
+ */
+export function isYes(val: string | undefined | null): boolean {
+  return val === '1';
+}
+
 export function calcSum<T>(arr: T[], getValue: (item: T) => number): number {
   return arr.reduce((val, item) => val + (getValue(item) ?? 0), 0);
 }
