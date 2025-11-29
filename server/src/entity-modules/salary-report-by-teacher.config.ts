@@ -29,13 +29,7 @@ interface SalaryReportByTeacherWithTotals extends SalaryReportByTeacher {
 }
 
 class SalaryReportByTeacherService<T extends Entity | SalaryReportByTeacher> extends BaseEntityService<T> {
-  protected async populatePivotData(
-    pivotName: string,
-    list: T[],
-    extra: any,
-    filter: any[],
-    auth: any,
-  ): Promise<void> {
+  protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any[], auth: any): Promise<void> {
     const data = list as SalaryReportByTeacherWithTotals[];
 
     switch (pivotName) {

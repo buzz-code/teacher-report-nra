@@ -66,10 +66,12 @@ class SalaryReportService<T extends Entity | SalaryReport> extends BaseEntitySer
 
         // Calculate answers total (answer × question.tariff)
         report.answerCount = answers.length;
-        report.answersTotal = roundToTwoDecimals(answers.reduce((sum, answer) => {
-          const tariff = answer.question?.tariff || 0;
-          return sum + (answer.answer * tariff);
-        }, 0));
+        report.answersTotal = roundToTwoDecimals(
+          answers.reduce((sum, answer) => {
+            const tariff = answer.question?.tariff || 0;
+            return sum + answer.answer * tariff;
+          }, 0),
+        );
 
         // Load related att_reports with pricing information
         const attReports = await attReportRepo.find({
@@ -79,22 +81,24 @@ class SalaryReportService<T extends Entity | SalaryReport> extends BaseEntitySer
 
         // Calculate att_reports total using pricing utility
         report.attReportCount = attReports.length;
-        report.attReportsTotal = roundToTwoDecimals(attReports.reduce((sum, attReport) => {
-          const teacherTypeId = attReport.teacher?.teacherType?.key;
+        report.attReportsTotal = roundToTwoDecimals(
+          attReports.reduce((sum, attReport) => {
+            const teacherTypeId = attReport.teacher?.teacherType?.key;
 
-          if (!teacherTypeId) {
-            console.warn(`AttReport ${attReport.id} has no teacher type, skipping pricing`);
-            return sum;
-          }
+            if (!teacherTypeId) {
+              console.warn(`AttReport ${attReport.id} has no teacher type, skipping pricing`);
+              return sum;
+            }
 
-          try {
-            const price = calculateAttendanceReportPrice(attReport, teacherTypeId, priceMap);
-            return sum + price;
-          } catch (error) {
-            console.error(`Failed to calculate price for att_report ${attReport.id}:`, error);
-            return sum;
-          }
-        }, 0));
+            try {
+              const price = calculateAttendanceReportPrice(attReport, teacherTypeId, priceMap);
+              return sum + price;
+            } catch (error) {
+              console.error(`Failed to calculate price for att_report ${attReport.id}:`, error);
+              return sum;
+            }
+          }, 0),
+        );
 
         // Calculate grand total
         report.grandTotal = roundToTwoDecimals((report.answersTotal || 0) + (report.attReportsTotal || 0));
