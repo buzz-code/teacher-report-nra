@@ -30,6 +30,35 @@ export enum TeacherTypeId {
  */
 export type AttReportField = keyof AttReport;
 
+export const fieldTranslations: Partial<Record<AttReportField, string>> = {
+  howManyStudents: 'מספר תלמידות',
+  howManyLessons: 'מספר שיעורים',
+  howManyWatchOrIndividual: 'צפיה או פרטני',
+  howManyTeachedOrInterfering: 'מסירה או מעורבות',
+  howManyMethodic: 'כמה מתודיקה',
+  fourLastDigitsOfTeacherPhone: '4 ספרות אחרונות של טלפון',
+  teachedStudentTz: 'תלמידות שנלמדו (ת.ז.)',
+  howManyYalkutLessons: 'כמה שיעורי ילקוט',
+  howManyDiscussingLessons: 'כמה שיעורי דיון',
+  howManyStudentsTeached: 'מספר תלמידים שהורו',
+  howManyStudentsHelpTeached: 'כמה תלמידות עזרו ללמד',
+  howManyLessonsAbsence: 'כמה שיעורי היעדרות',
+  howManyWatchedLessons: 'כמה שיעורי צפייה',
+  howManyStudentsWatched: 'מספר תלמידים שנצפו',
+  wasDiscussing: 'דיון',
+  wasKamal: 'קמל',
+  wasStudentsGood: 'התלמידות היו טובות',
+  wasStudentsEnterOnTime: 'התלמידות נכנסו בזמן',
+  wasStudentsExitOnTime: 'התלמידות יצאו בזמן',
+  wasPhoneDiscussing: 'האם היה דיון טלפוני',
+  wasCollectiveWatch: 'היתה צפייה קבוצתית',
+  teacherToReportFor: 'מורה לדווח עליה',
+  isTaarifHulia: 'תעריף חוליה',
+  isTaarifHulia2: 'תעריף חוליה 2',
+  isTaarifHulia3: 'תעריף חוליה 3',
+  whatIsYourSpeciality: 'מה ההתמחות שלך',
+};
+
 /**
  * Field mapping for each teacher type
  * Based on the YEMOT phone flow documentation requirements

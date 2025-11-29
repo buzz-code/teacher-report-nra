@@ -4,10 +4,9 @@ import { BaseEntityService } from '@shared/base-entity/base-entity.service';
 import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { IHeader } from '@shared/utils/exporter/types';
 import { AttReport } from '../db/entities/AttReport.entity';
-import { Price } from '../db/entities/Price.entity';
 import { PriceByUser } from '../db/view-entities/PriceByUser.entity';
 import { calculateAttendanceReportPriceWithExplanation, PriceExplanation } from '../utils/pricing.util';
-import { buildHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
+import { buildHeadersForTeacherType, fieldTranslations, ITableHeader } from '../utils/fieldsShow.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { Repository } from 'typeorm';
 
@@ -28,16 +27,22 @@ function getConfig(): BaseEntityModuleOptions {
         };
         return innerFunc(req);
       },
-      getExportHeaders(entityColumns: string[]): IHeader[] {
-        // For dynamic teacher type exports, we would need the request context
-        // but it's not available in this signature. Fall back to default headers
+      getExportHeaders(entityColumns: string[], req: CrudRequest, data?: AttReport[]): IHeader[] {
+        const teacherTypeFilter = req?.parsed?.filter?.find((f: any) => f.field === 'teacher.teacherTypeReferenceId');
+        const teacherTypeKey = teacherTypeFilter?.value && data?.length
+          ? data[0]?.teacher?.teacherType?.key
+          : null;
+
+        const dynamicHeaders = buildHeadersForTeacherType(teacherTypeKey);
+
         return [
           { value: 'teacher.name', label: 'שם המורה' },
           { value: 'reportDate', label: 'תאריך דיווח' },
           { value: 'year', label: 'שנה' },
-          { value: 'howManyStudents', label: 'מספר תלמידים' },
-          { value: 'howManyLessons', label: 'מספר שיעורים' },
-          { value: 'price', label: 'מחיר' },
+          ...dynamicHeaders.map((header) => ({
+            value: header.value,
+            label: fieldTranslations[header.value] || header.value
+          })),
         ];
       },
     },
