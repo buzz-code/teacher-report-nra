@@ -5,8 +5,7 @@ import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { SalaryReport } from '../db/entities/SalaryReport.entity';
 import { Answer } from '../db/entities/Answer.entity';
 import { AttReport } from '../db/entities/AttReport.entity';
-import { PriceByUser } from '../db/view-entities/PriceByUser.entity';
-import { calculateAttendanceReportPrice } from '../utils/pricing.util';
+import { calculateReportPriceSafe, getPriceMapForUser } from '../utils/pricing.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -38,18 +37,7 @@ class SalaryReportService<T extends Entity | SalaryReport> extends BaseEntitySer
 
   private async handleTotalsPivot(data: SalaryReport[], auth: any): Promise<void> {
     const userId = getUserIdFromUser(auth);
-
-    // Get pricing data from PriceByUser view (includes system defaults + user overrides)
-    const priceByUserRepo = this.dataSource.getRepository(PriceByUser);
-    const prices = await priceByUserRepo.find({
-      where: { userId },
-    });
-
-    // Build a Map of semantic code to price value for efficient lookup
-    const priceMap = new Map<string, number>();
-    prices.forEach((price) => {
-      priceMap.set(price.code, price.price);
-    });
+    const priceMap = await getPriceMapForUser(userId, this.dataSource);
 
     // Get repositories
     const answerRepo = this.dataSource.getRepository(Answer);
@@ -90,13 +78,8 @@ class SalaryReportService<T extends Entity | SalaryReport> extends BaseEntitySer
               return sum;
             }
 
-            try {
-              const price = calculateAttendanceReportPrice(attReport, teacherTypeId, priceMap);
-              return sum + price;
-            } catch (error) {
-              console.error(`Failed to calculate price for att_report ${attReport.id}:`, error);
-              return sum;
-            }
+            const { price } = calculateReportPriceSafe(attReport, teacherTypeId, priceMap);
+            return sum + price;
           }, 0),
         );
 

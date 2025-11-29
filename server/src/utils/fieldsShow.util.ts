@@ -192,3 +192,15 @@ export function buildHeadersForTeacherType(teacherTypeId: number | null): ITable
     value: field,
   }));
 }
+
+/**
+ * Build export headers with translations for a specific teacher type
+ * Returns IHeader[] format suitable for Excel export
+ */
+export function buildExportHeadersForTeacherType(teacherTypeKey: number | null): { value: string; label: string }[] {
+  const dynamicHeaders = buildHeadersForTeacherType(teacherTypeKey);
+  return dynamicHeaders.map((header) => ({
+    value: header.value,
+    label: fieldTranslations[header.value] || header.value,
+  }));
+}

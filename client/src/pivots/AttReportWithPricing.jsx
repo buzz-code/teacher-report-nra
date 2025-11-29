@@ -7,17 +7,22 @@ import {
     SelectField,
     BooleanField,
     DateField,
+    TextInput,
     useDataProvider,
     useListContext,
     useRecordContext,
+    required,
 } from 'react-admin';
 import { get } from 'lodash';
+import AttachEmailIcon from '@mui/icons-material/AttachEmail';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { CommonReferenceInputFilter, filterByUserId, filterByUserIdAndYear } from '@shared/components/fields/CommonReferenceInputFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { adminUserFilter } from '@shared/components/fields/PermissionFilter';
+import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
+import { CommonRichTextInput } from '@shared/components/fields/CommonRichTextInput';
 import PriceExplanationField from '../entities/att-report/PriceExplanationField';
 import { shouldShowField, getTeacherTypeKeyByTeacherTypeId } from '../utils/attReportFields';
 
@@ -72,6 +77,13 @@ const filterDefaultValues = {
     ...defaultYearFilter,
 };
 
+const additionalBulkButtons = [
+    <BulkActionButton label='שליחת אקסל למורה' icon={<AttachEmailIcon />} name='teacherReportFile' >
+        <TextInput key="mailSubject" source="mailSubject" label="נושא המייל" validate={required()} />
+        <CommonRichTextInput key="mailBody" source="mailBody" label="תוכן המייל" validate={required()} />
+    </BulkActionButton>,
+];
+
 const Datagrid = ({ isAdmin, children, ...props }) => {
     const { filterValues } = useListContext();
     const selectedTeacherTypeId = get(filterValues, 'teacher.teacherTypeReferenceId');
@@ -88,7 +100,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
     }, [dataProvider, selectedTeacherTypeId]);
 
     return (
-        <CommonDatagrid {...props}>
+        <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
             {children}
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}

@@ -1,4 +1,6 @@
+import { DataSource } from 'typeorm';
 import { AttReport } from '../db/entities/AttReport.entity';
+import { PriceByUser } from '../db/view-entities/PriceByUser.entity';
 import { TeacherTypeId, isValidTeacherType } from './fieldsShow.util';
 
 /**
@@ -18,6 +20,49 @@ export function getStudentGroupRateMultiplier(studentCount: number): number {
  * Example codes: 'lesson.base', 'seminar.student_multiplier', 'manha.methodic_multiplier'
  */
 export type PriceMap = Map<string, number>;
+
+/**
+ * Load prices for a user and return as a Map for efficient lookup
+ * @param userId - The user ID to load prices for
+ * @param dataSource - TypeORM DataSource
+ * @returns Map of semantic price codes to values
+ */
+export async function getPriceMapForUser(userId: number, dataSource: DataSource): Promise<PriceMap> {
+  const priceByUserRepo = dataSource.getRepository(PriceByUser);
+  const prices = await priceByUserRepo.find({ where: { userId } });
+
+  const priceMap = new Map<string, number>();
+  prices.forEach((price) => priceMap.set(price.code, price.price));
+
+  return priceMap;
+}
+
+/**
+ * Calculate price for a single report with error handling
+ * Returns 0 if calculation fails or teacher type is missing
+ * @param report - The attendance report
+ * @param teacherTypeKey - The teacher type key (can be null/undefined)
+ * @param priceMap - Map of semantic price codes to values
+ * @param includeExplanation - Whether to include price explanation (default: false)
+ * @returns The calculated price (0 on error)
+ */
+export function calculateReportPriceSafe(
+  report: AttReport,
+  teacherTypeKey: number | null | undefined,
+  priceMap: PriceMap,
+  includeExplanation = false,
+): { price: number; explanation?: PriceExplanation } {
+  if (!teacherTypeKey) {
+    return { price: 0 };
+  }
+
+  try {
+    const result = calculateAttendanceReportPriceWithExplanation(report, teacherTypeKey, priceMap);
+    return includeExplanation ? { price: result.price, explanation: result.explanation } : { price: result.price };
+  } catch {
+    return { price: 0 };
+  }
+}
 
 /**
  * Interface for a single pricing component in the explanation
