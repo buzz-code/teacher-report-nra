@@ -416,22 +416,6 @@ export default {
                 wasPhoneDiscussing: 'האם היה דיון טלפוני',
             }
         },
-        // DEPRECATED: Use att_report_with_price entity instead
-        // Keeping translations for backwards compatibility
-        'salary_report/pivot?extra.pivot=SalaryReportWithTotals': {
-            name: 'דוחות שכר עם מחירים',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                date: 'תאריך',
-                'date:$gte': 'תאריך מ-',
-                'date:$lte': 'תאריך עד-',
-                answerCount: 'מספר תשובות',
-                answersTotal: 'סכום תשובות',
-                attReportCount: 'מספר דוחות נוכחות',
-                attReportsTotal: 'סכום דוחות נוכחות',
-                grandTotal: 'סה"כ כולל',
-            }
-        },
         'salary_report_by_teacher/pivot?extra.pivot=WithTotals': {
             name: 'דוחות שכר לפי מורה',
             fields: {

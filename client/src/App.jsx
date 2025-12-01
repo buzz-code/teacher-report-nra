@@ -56,7 +56,6 @@ import yemotCall from '@shared/components/common-entities/yemot-call';
 import Settings from 'src/settings/Settings';
 
 // Import pivot components
-import SalaryReportWithTotals from 'src/pivots/SalaryReportWithTotals';
 import SalaryReportPerTeacher from 'src/pivots/SalaryReportPerTeacher';
 
 import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
@@ -152,7 +151,6 @@ const App = () => (
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/pages-view" element={<PageList />} />
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
-              <Route path="/salary-report-totals" element={<SalaryReportWithTotals />} />
               <Route path="/salary-report-per-teacher" element={<SalaryReportPerTeacher />} />
             </CustomRoutes>
 

@@ -10,12 +10,8 @@ import { calculateAttendanceReportPrice } from '../utils/pricing.util';
 function getConfig(): BaseEntityModuleOptions {
   return {
     entity: SalaryReportByTeacher,
-    query: {
-      join: {
-        salaryReport: { eager: true },
-        teacher: { eager: true },
-      },
-    },
+    // Note: No eager joins - view entities don't work well with CRUD library joins
+    // The frontend uses ReferenceField components for related data
     service: SalaryReportByTeacherService,
   };
 }
