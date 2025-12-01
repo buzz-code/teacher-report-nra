@@ -35,6 +35,8 @@ import { Image } from '@shared/entities/Image.entity';
 
 // View entities
 import { PriceByUser } from './db/view-entities/PriceByUser.entity';
+import { UserPricePivot } from './db/view-entities/UserPricePivot.entity';
+import { AttReportWithPrice } from './db/view-entities/AttReportWithPrice.entity';
 
 @Module({
   imports: [
@@ -68,6 +70,8 @@ import { PriceByUser } from './db/view-entities/PriceByUser.entity';
     BaseEntityModule.register(pageConfig),
     BaseEntityModule.register({ entity: TextByUser }),
     BaseEntityModule.register({ entity: PriceByUser }),
+    BaseEntityModule.register({ entity: UserPricePivot }),
+    BaseEntityModule.register({ entity: AttReportWithPrice }),
     BaseEntityModule.register({ entity: Image }),
     BaseEntityModule.register(paymentTrackConfig),
   ],

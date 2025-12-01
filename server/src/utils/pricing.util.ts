@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { PriceByUser } from '../db/view-entities/PriceByUser.entity';
+import { AttReportWithPrice } from '../db/view-entities/AttReportWithPrice.entity';
 import { TeacherTypeId, isValidTeacherType } from './fieldsShow.util';
 
 /**
@@ -238,4 +239,91 @@ export function calculateAttendanceReportPriceWithExplanation(
       totalPrice: finalPrice,
     },
   };
+}
+
+/**
+ * Get report prices using the SQL view (efficient for bulk operations).
+ * Returns a map of report ID to calculated price.
+ *
+ * Use this for:
+ * - Salary report generation
+ * - Bulk price calculations
+ * - Report listing with prices
+ *
+ * @param reportIds - Array of report IDs to get prices for
+ * @param dataSource - TypeORM DataSource
+ * @returns Map of report ID to price
+ */
+export async function getReportPricesFromView(
+  reportIds: number[],
+  dataSource: DataSource,
+): Promise<Map<number, number>> {
+  if (reportIds.length === 0) {
+    return new Map();
+  }
+
+  const reportPriceRepo = dataSource.getRepository(AttReportWithPrice);
+  const results = await reportPriceRepo.createQueryBuilder('rp').whereInIds(reportIds).getMany();
+
+  return new Map(results.map((r) => [r.id, r.calculatedPrice]));
+}
+
+/**
+ * Get all report prices for a salary report (batch operation).
+ * @param salaryReportId - The salary report ID
+ * @param dataSource - TypeORM DataSource
+ * @returns Map of report ID to calculated price
+ */
+export async function getReportPricesForSalaryReport(
+  salaryReportId: number,
+  dataSource: DataSource,
+): Promise<Map<number, number>> {
+  const reportPriceRepo = dataSource.getRepository(AttReportWithPrice);
+  const results = await reportPriceRepo.find({
+    where: { salaryReportId },
+  });
+
+  return new Map(results.map((r) => [r.id, r.calculatedPrice]));
+}
+
+/**
+ * Get report prices by user and optional filters.
+ * Useful for generating reports with prices.
+ *
+ * @param userId - The user ID
+ * @param dataSource - TypeORM DataSource
+ * @param options - Optional filters (year, teacherReferenceId, etc.)
+ * @returns Array of AttReportWithPrice entities
+ */
+export async function getReportPricesByUser(
+  userId: number,
+  dataSource: DataSource,
+  options?: {
+    year?: number;
+    teacherReferenceId?: number;
+    salaryReportId?: number | null;
+  },
+): Promise<AttReportWithPrice[]> {
+  const reportPriceRepo = dataSource.getRepository(AttReportWithPrice);
+  const queryBuilder = reportPriceRepo.createQueryBuilder('rp').where('rp.userId = :userId', { userId });
+
+  if (options?.year !== undefined) {
+    queryBuilder.andWhere('rp.year = :year', { year: options.year });
+  }
+
+  if (options?.teacherReferenceId !== undefined) {
+    queryBuilder.andWhere('rp.teacherReferenceId = :teacherReferenceId', {
+      teacherReferenceId: options.teacherReferenceId,
+    });
+  }
+
+  if (options?.salaryReportId === null) {
+    queryBuilder.andWhere('rp.salaryReportId IS NULL');
+  } else if (options?.salaryReportId !== undefined) {
+    queryBuilder.andWhere('rp.salaryReportId = :salaryReportId', {
+      salaryReportId: options.salaryReportId,
+    });
+  }
+
+  return queryBuilder.getMany();
 }

@@ -377,6 +377,24 @@ export default {
                 }
             }
         },
+        att_report_with_price: {
+            name: 'דוח נוכחות עם מחיר |||| דוחות נוכחות עם מחירים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                teacherTz: 'ת.ז. מורה',
+                reportDate: 'תאריך דוח',
+                'reportDate:$gte': 'תאריך דוח מ-',
+                'reportDate:$lte': 'תאריך דוח עד-',
+                year: 'שנה',
+                salaryReportId: 'דוח שכר',
+                teacherTypeReferenceId: 'סוג מורה',
+                teacherTypeKey: 'מפתח סוג מורה',
+                basePrice: 'תעריף בסיס',
+                calculatedPrice: 'מחיר מחושב',
+                // Subtotal fields use att_report field translations via SUBTOTAL_FIELD_MAPPINGS
+            }
+        },
         'att_report/pivot?extra.pivot=AttReportWithPricing': {
             name: 'דוחות נוכחות עם תמחור',
             fields: {

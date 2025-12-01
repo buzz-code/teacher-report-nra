@@ -95,7 +95,10 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
     }
 
     // Group reports by teacher
-    const reportsByTeacher = groupDataByKeys(reports.filter((r) => r.teacherReferenceId), ['teacherReferenceId']);
+    const reportsByTeacher = groupDataByKeys(
+      reports.filter((r) => r.teacherReferenceId),
+      ['teacherReferenceId'],
+    );
 
     const responses: string[] = [];
     const fromAddress = await getUserMailAddressFrom(req.auth, this.dataSource);

@@ -29,6 +29,7 @@ import teacher from "src/entities/teacher";
 import teacherType from "src/entities/teacher-type";
 import teacherQuestion from "src/entities/teacher-question";
 import attReport from "src/entities/att-report";
+import attReportWithPrice from "src/entities/att-report-with-price";
 import attType from "src/entities/att-type";
 import price from "src/entities/price";
 import priceByUser from "src/entities/price-by-user";
@@ -116,6 +117,7 @@ const App = () => (
 
             {/* Configuration (reports) - Report configuration and types */}
             <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
+            <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
             <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
 
             {/* User customization (settings) - User-specific settings */}
