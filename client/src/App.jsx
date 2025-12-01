@@ -57,7 +57,6 @@ import Settings from 'src/settings/Settings';
 
 // Import pivot components
 import AttReportWithPricing from 'src/pivots/AttReportWithPricing';
-import AttReportByTeacherType from 'src/pivots/AttReportByTeacherType';
 import SalaryReportWithTotals from 'src/pivots/SalaryReportWithTotals';
 import SalaryReportPerTeacher from 'src/pivots/SalaryReportPerTeacher';
 
@@ -155,7 +154,6 @@ const App = () => (
               <Route path="/pages-view" element={<PageList />} />
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
               <Route path="/att-report-pricing" element={<AttReportWithPricing />} />
-              <Route path="/att-report-by-teacher-type" element={<AttReportByTeacherType />} />
               <Route path="/salary-report-totals" element={<SalaryReportWithTotals />} />
               <Route path="/salary-report-per-teacher" element={<SalaryReportPerTeacher />} />
             </CustomRoutes>

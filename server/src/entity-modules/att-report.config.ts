@@ -7,7 +7,7 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { getMailAddressForEntity } from '@shared/utils/mail/mail-address.util';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { calculateReportPriceSafe, getPriceMapForUser, PriceExplanation } from '../utils/pricing.util';
-import { buildHeadersForTeacherType, buildExportHeadersForTeacherType, ITableHeader } from '../utils/fieldsShow.util';
+import { buildExportHeadersForTeacherType } from '../utils/fieldsShow.util';
 import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { groupDataByKeys } from '../utils/reportData.util';
 import { sendExcelReportToTeacher } from '../utils/mailReport.util';
@@ -49,10 +49,6 @@ function getConfig(): BaseEntityModuleOptions {
 interface AttReportWithPricing extends AttReport {
   price?: number;
   priceExplanation?: PriceExplanation;
-}
-
-interface AttReportWithHeaders extends AttReport {
-  headers?: ITableHeader[];
 }
 
 class AttReportPricingService<T extends Entity | AttReport> extends BaseEntityService<T> {
@@ -164,12 +160,6 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
         await this.handlePricingPivot(data, auth);
         break;
       }
-
-      // TODO: Delete this pivot as not needed anymore
-      case 'AttReportByTeacherType': {
-        await this.handleTeacherTypePivot(data, extra, filter, auth);
-        break;
-      }
     }
   }
 
@@ -184,14 +174,6 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
       report.price = price;
       report.priceExplanation = explanation;
     });
-  }
-
-  private async handleTeacherTypePivot(data: AttReport[], extra: any, filter: any[], auth: any): Promise<void> {
-    const teacherTypeId = filter?.find((f) => f.field === 'teacher.teacherTypeReferenceId')?.value || null;
-    const headers = buildHeadersForTeacherType(teacherTypeId);
-    if (data.length > 0) {
-      (data[0] as any).headers = headers;
-    }
   }
 }
 
