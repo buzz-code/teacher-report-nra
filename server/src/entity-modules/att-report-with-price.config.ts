@@ -6,43 +6,31 @@ import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
 import { IHeader } from '@shared/utils/exporter/types';
 import { getMailAddressForEntity } from '@shared/utils/mail/mail-address.util';
 import { AttReport } from '../db/entities/AttReport.entity';
+import { AttReportWithPrice } from '../db/view-entities/AttReportWithPrice.entity';
 import { calculateReportPriceSafe, getPriceMapForUser } from '../utils/pricing.util';
 import { buildExportHeadersForTeacherType } from '../utils/fieldsShow.util';
-import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { groupDataByKeys } from '../utils/reportData.util';
 import { sendExcelReportToTeacher } from '../utils/mailReport.util';
-import { In, Repository } from 'typeorm';
+import { In } from 'typeorm';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
-    entity: AttReport,
-    query: {
-      join: {
-        teacher: { eager: true },
-        'teacher.teacherType': { eager: true },
-      },
-    },
+    entity: AttReportWithPrice,
     exporter: {
-      processReqForExport(req: CrudRequest, innerFunc) {
-        req.options.query.join = {
-          teacher: { eager: true },
-          'teacher.teacherType': { eager: true },
-        };
-        return innerFunc(req);
-      },
-      getExportHeaders(entityColumns: string[], req: CrudRequest, data?: AttReport[]): IHeader[] {
-        const teacherTypeFilter = req?.parsed?.filter?.find((f: any) => f.field === 'teacher.teacherTypeReferenceId');
-        const teacherTypeKey = teacherTypeFilter?.value && data?.length ? data[0]?.teacher?.teacherType?.key : null;
+      getExportHeaders(entityColumns: string[], req: CrudRequest, data?: AttReportWithPrice[]): IHeader[] {
+        const teacherTypeFilter = req?.parsed?.filter?.find((f: any) => f.field === 'teacherTypeReferenceId');
+        const teacherTypeKey = teacherTypeFilter?.value && data?.length ? data[0]?.teacherTypeKey : null;
 
         return [
           { value: 'teacher.name', label: 'שם המורה' },
           { value: 'reportDate', label: 'תאריך דיווח' },
           { value: 'year', label: 'שנה' },
           ...buildExportHeadersForTeacherType(teacherTypeKey),
+          { value: 'calculatedPrice', label: 'מחיר' },
         ];
       },
     },
-    service: AttReportPricingService,
+    service: AttReportWithPriceService,
   };
 }
 
@@ -50,16 +38,16 @@ interface AttReportWithPricing extends AttReport {
   price?: number;
 }
 
-class AttReportPricingService<T extends Entity | AttReport> extends BaseEntityService<T> {
+/**
+ * Service for AttReportWithPrice view entity.
+ * Handles bulk actions like sending Excel reports to teachers.
+ * Since this is a view, we need to fetch from the underlying AttReport table for actions.
+ */
+class AttReportWithPriceService<T extends Entity | AttReportWithPrice> extends BaseEntityService<T> {
   async doAction(req: CrudRequest, body: any): Promise<any> {
     const extra = req.parsed.extra as any;
 
     switch (extra?.action) {
-      case 'fixReferences': {
-        const ids = extra.ids.toString().split(',').map(Number);
-        return fixReferences(this.repo as Repository<AttReport>, ids, { teacherTz: 'teacherReferenceId' });
-      }
-
       case 'teacherReportFile': {
         return this.handleTeacherReportFile(req, extra);
       }
@@ -69,13 +57,18 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
     }
   }
 
+  /**
+   * Handle sending Excel report files to teachers via email.
+   * Fetches data from the underlying AttReport table since the view is read-only.
+   */
   private async handleTeacherReportFile(req: CrudRequest, extra: any): Promise<string> {
     const userId = getUserIdFromUser(req.auth);
     const ids = extra.ids.toString().split(',').map(Number);
     const { mailSubject, mailBody } = extra;
 
-    // Get all reports with teacher relations
-    const reports = await (this.repo as Repository<AttReport>).find({
+    // Get all reports from the underlying AttReport table with teacher relations
+    const attReportRepo = this.dataSource.getRepository(AttReport);
+    const reports = await attReportRepo.find({
       where: { id: In(ids) },
       relations: ['teacher', 'teacher.teacherType'],
     });

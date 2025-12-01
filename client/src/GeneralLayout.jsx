@@ -32,8 +32,6 @@ const menuGroups = [
         routes: [
             // <MenuItemLink key="salary-report-totals" to="/salary-report-totals" primaryText="דוחות שכר עם סיכומים" leftIcon={<AnalyticsIcon />} />,
             <MenuItemLink key="salary-report-per-teacher" to="/salary-report-per-teacher" primaryText="דוחות שכר לפי מורה" leftIcon={<AnalyticsIcon />} />,
-            <MenuItemLink key="att-report-pricing" to="/att-report-pricing" primaryText="דוח נוכחות עם תמחור" leftIcon={<MonetizationOnIcon />} />,
-            // <MenuItemLink key="att-report-by-teacher-type" to="/att-report-by-teacher-type" primaryText="דוחות לפי סוג מורה" leftIcon={<PercentIcon />} />,
         ]
     },
     { name: 'settings', icon: <SettingsIcon /> },

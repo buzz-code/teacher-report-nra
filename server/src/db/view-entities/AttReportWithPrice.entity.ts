@@ -212,7 +212,10 @@ export function generateAttReportWithPriceSQL(): string {
       r.teacherReferenceId,
       r.teacherTz,
       r.report_date AS reportDate,
+      r.update_date AS updateDate,
       r.salary_report_id AS salaryReportId,
+      r.salary_month AS salaryMonth,
+      r.comment,
       r.year,
       r.createdAt,
       r.updatedAt,
@@ -284,7 +287,16 @@ export class AttReportWithPrice implements IHasUserId {
   reportDate: Date;
 
   @ViewColumn()
+  updateDate: Date;
+
+  @ViewColumn()
   salaryReportId: number | null;
+
+  @ViewColumn()
+  salaryMonth: number;
+
+  @ViewColumn()
+  comment: string;
 
   @ViewColumn()
   year: number;

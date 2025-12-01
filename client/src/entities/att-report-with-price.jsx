@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TextField,
   DateField,
@@ -9,9 +9,15 @@ import {
   useGetList,
   useGetIdentity,
   SelectField,
+  useListContext,
+  useDataProvider,
+  TextInput,
+  required,
 } from 'react-admin';
+import { get } from 'lodash';
 import { Tooltip, IconButton, Box, Typography, Chip, CircularProgress } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import AttachEmailIcon from '@mui/icons-material/AttachEmail';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
@@ -19,6 +25,45 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import { calculatePriceExplanation, createPriceMap } from '../utils/priceCalculation';
+import { shouldShowField, getTeacherTypeKeyByTeacherTypeId } from '../utils/attReportFields';
+import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
+import { CommonRichTextInput } from '@shared/components/fields/CommonRichTextInput';
+
+const defaultMailSubject = "דיווחי נוכחות - {name}";
+const defaultMailBody = "<p>שלום {name},</p><p>מצורף קובץ דיווחי הנוכחות שלך.</p>";
+
+const additionalBulkButtons = [
+  <BulkActionButton label='שליחת אקסל למורה' icon={<AttachEmailIcon />} name='teacherReportFile'>
+    <TextInput key="mailSubject" source="mailSubject" label="נושא המייל" validate={required()} defaultValue={defaultMailSubject} />
+    <CommonRichTextInput key="mailBody" source="mailBody" label="תוכן המייל" validate={required()} defaultValue={defaultMailBody} />
+  </BulkActionButton>,
+];
+
+/**
+ * Component to display the price paid for a specific field from priceExplanation.
+ * Uses source prop for React Admin column header resolution.
+ */
+const FieldPriceField = ({ source, priceMap, isLoading }) => {
+  const translate = useTranslate();
+
+  return (
+    <FunctionField
+      source={source}
+      sortable={false}
+      render={(record) => {
+        if (!record || isLoading || !priceMap) return null;
+
+        const explanation = calculatePriceExplanation(record, record.teacherTypeKey, priceMap);
+        const component = explanation.components.find(c => c.fieldKey === source);
+
+        if (!component) return null;
+
+        const currency = translate('priceExplanation.currency', { _: '₪' });
+        return <span>{component.subtotal.toFixed(2)} {currency}</span>;
+      }}
+    />
+  );
+};
 
 const filters = [
   ...commonAdminFilters,
@@ -146,17 +191,71 @@ const PriceExplanationTooltip = ({ priceMap, isLoading }) => {
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
   const { priceMap, isLoading } = usePriceMap();
+  const { filterValues } = useListContext();
+  const selectedTeacherTypeId = get(filterValues, 'teacherTypeReferenceId');
+  const [selectedTeacherTypeKey, setSelectedTeacherTypeKey] = useState(null);
+  const dataProvider = useDataProvider();
+
+  useEffect(() => {
+    const fetchTeacherType = async () => {
+      const teacherTypeKey = await getTeacherTypeKeyByTeacherTypeId(dataProvider, selectedTeacherTypeId);
+      setSelectedTeacherTypeKey(teacherTypeKey);
+    };
+
+    fetchTeacherType();
+  }, [dataProvider, selectedTeacherTypeId]);
 
   return (
-    <CommonDatagrid {...props} readonly>
+    <CommonDatagrid {...props} additionalBulkButtons={additionalBulkButtons}>
       {children}
       {isAdmin && <TextField source="id" />}
       {isAdmin && <ReferenceField source="userId" reference="user" />}
       <ReferenceField source="teacherReferenceId" reference="teacher" />
       <DateField source="reportDate" />
+      <DateField showDate showTime source="updateDate" />
       <SelectField source="year" choices={yearChoices} />
       <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
       <ReferenceField source="salaryReportId" reference="salary_report" emptyText="-" />
+      <TextField source="salaryMonth" />
+      <TextField source="comment" />
+
+      {/* Field-specific prices based on teacher type */}
+      {/* SEMINAR_KITA, KINDERGARTEN */}
+      {shouldShowField('howManyStudents', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudents" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* SEMINAR_KITA, SPECIAL_EDUCATION */}
+      {shouldShowField('howManyLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyLessons" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* SEMINAR_KITA, PDS */}
+      {shouldShowField('howManyWatchOrIndividual', selectedTeacherTypeKey) && <FieldPriceField source="howManyWatchOrIndividual" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyTeachedOrInterfering', selectedTeacherTypeKey) && <FieldPriceField source="howManyTeachedOrInterfering" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* SEMINAR_KITA, MANHA, PDS */}
+      {shouldShowField('howManyDiscussingLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyDiscussingLessons" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* SEMINAR_KITA only */}
+      {shouldShowField('wasKamal', selectedTeacherTypeKey) && <FieldPriceField source="wasKamal" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyLessonsAbsence', selectedTeacherTypeKey) && <FieldPriceField source="howManyLessonsAbsence" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* MANHA only */}
+      {shouldShowField('howManyMethodic', selectedTeacherTypeKey) && <FieldPriceField source="howManyMethodic" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('isTaarifHulia', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('isTaarifHulia2', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia2" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('isTaarifHulia3', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia3" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyWatchedLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyWatchedLessons" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyYalkutLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyYalkutLessons" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyStudentsHelpTeached', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudentsHelpTeached" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* MANHA, SPECIAL_EDUCATION */}
+      {shouldShowField('howManyStudentsTeached', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudentsTeached" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* KINDERGARTEN only */}
+      {shouldShowField('wasCollectiveWatch', selectedTeacherTypeKey) && <FieldPriceField source="wasCollectiveWatch" priceMap={priceMap} isLoading={isLoading} />}
+
+      {/* SPECIAL_EDUCATION only */}
+      {shouldShowField('howManyStudentsWatched', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudentsWatched" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('wasPhoneDiscussing', selectedTeacherTypeKey) && <FieldPriceField source="wasPhoneDiscussing" priceMap={priceMap} isLoading={isLoading} />}
+
       <PriceExplanationTooltip priceMap={priceMap} isLoading={isLoading} />
       {isAdmin && <DateField showDate showTime source="createdAt" />}
       {isAdmin && <DateField showDate showTime source="updatedAt" />}
