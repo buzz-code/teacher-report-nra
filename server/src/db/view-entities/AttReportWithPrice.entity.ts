@@ -202,8 +202,7 @@ function generateTotalPriceByTeacherType(): string {
 
 /**
  * Generate the full SQL expression for AttReportWithPrice view.
- * Simplified: only calculatedPrice, no subtotal columns.
- * Price explanation is calculated on the frontend.
+ * Includes all report fields needed for frontend price explanation calculation.
  */
 export function generateAttReportWithPriceSQL(): string {
   return `
@@ -219,6 +218,26 @@ export function generateAttReportWithPriceSQL(): string {
       r.updatedAt,
       t.teacherTypeReferenceId,
       tt.\`key\` AS teacherTypeKey,
+      
+      -- Report fields needed for price explanation
+      r.how_many_students AS howManyStudents,
+      r.how_many_students_teached AS howManyStudentsTeached,
+      r.how_many_students_watched AS howManyStudentsWatched,
+      r.how_many_students_help_teached AS howManyStudentsHelpTeached,
+      r.how_many_lessons AS howManyLessons,
+      r.how_many_yalkut_lessons AS howManyYalkutLessons,
+      r.how_many_discussing_lessons AS howManyDiscussingLessons,
+      r.how_many_watched_lessons AS howManyWatchedLessons,
+      r.how_many_watch_or_individual AS howManyWatchOrIndividual,
+      r.how_many_teached_or_interfering AS howManyTeachedOrInterfering,
+      r.how_many_methodic AS howManyMethodic,
+      r.how_many_lessons_absence AS howManyLessonsAbsence,
+      r.was_phone_discussing AS wasPhoneDiscussing,
+      r.was_kamal AS wasKamal,
+      r.was_collective_watch AS wasCollectiveWatch,
+      r.is_taarif_hulia AS isTaarifHulia,
+      r.is_taarif_hulia2 AS isTaarifHulia2,
+      r.is_taarif_hulia3 AS isTaarifHulia3,
       
       -- Total calculated price (base + components, minimum 0)
       GREATEST(0,
@@ -281,6 +300,61 @@ export class AttReportWithPrice implements IHasUserId {
 
   @ViewColumn()
   teacherTypeKey: number;
+
+  // Report fields for price explanation
+  @ViewColumn()
+  howManyStudents: number;
+
+  @ViewColumn()
+  howManyStudentsTeached: number;
+
+  @ViewColumn()
+  howManyStudentsWatched: number;
+
+  @ViewColumn()
+  howManyStudentsHelpTeached: number;
+
+  @ViewColumn()
+  howManyLessons: number;
+
+  @ViewColumn()
+  howManyYalkutLessons: number;
+
+  @ViewColumn()
+  howManyDiscussingLessons: number;
+
+  @ViewColumn()
+  howManyWatchedLessons: number;
+
+  @ViewColumn()
+  howManyWatchOrIndividual: number;
+
+  @ViewColumn()
+  howManyTeachedOrInterfering: number;
+
+  @ViewColumn()
+  howManyMethodic: number;
+
+  @ViewColumn()
+  howManyLessonsAbsence: number;
+
+  @ViewColumn()
+  wasPhoneDiscussing: boolean;
+
+  @ViewColumn()
+  wasKamal: boolean;
+
+  @ViewColumn()
+  wasCollectiveWatch: boolean;
+
+  @ViewColumn()
+  isTaarifHulia: boolean;
+
+  @ViewColumn()
+  isTaarifHulia2: boolean;
+
+  @ViewColumn()
+  isTaarifHulia3: boolean;
 
   @ViewColumn()
   calculatedPrice: number;

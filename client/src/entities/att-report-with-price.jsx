@@ -151,6 +151,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
     <CommonDatagrid {...props} readonly>
       {children}
       {isAdmin && <TextField source="id" />}
+      {isAdmin && <ReferenceField source="userId" reference="user" />}
       <ReferenceField source="teacherReferenceId" reference="teacher" />
       <DateField source="reportDate" />
       <SelectField source="year" choices={yearChoices} />
