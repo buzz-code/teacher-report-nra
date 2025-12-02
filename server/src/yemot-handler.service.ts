@@ -861,7 +861,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Calculate estimated price for the report
     const estimatedPrice = await this.calculateEstimatedPrice();
-    params.price = estimatedPrice.toFixed(2);
+    params.price = estimatedPrice.toFixed(0);
 
     // Ask for confirmation using askConfirmation helper
     const isConfirmed = await this.askConfirmation(confirmationConfig.textKey, params);
