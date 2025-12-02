@@ -57,7 +57,6 @@ function generateAnswerWithPriceSQL(): string {
 })
 export class AnswerWithPrice implements IHasUserId {
   @PrimaryColumn()
-  @ViewColumn()
   id: number;
 
   @ViewColumn()

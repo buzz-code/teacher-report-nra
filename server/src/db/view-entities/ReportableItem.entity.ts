@@ -30,7 +30,6 @@ import { SalaryReport } from '../entities/SalaryReport.entity';
   `,
 })
 export class ReportableItem implements IHasUserId {
-  @ViewColumn()
   @PrimaryColumn()
   id: string; // 'report_123' or 'answer_456'
 

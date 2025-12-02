@@ -7,26 +7,89 @@ import { IHeader } from '@shared/utils/exporter/types';
 import { getMailAddressForEntity } from '@shared/utils/mail/mail-address.util';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { AttReportWithPrice } from '../db/view-entities/AttReportWithPrice.entity';
-import { calculateReportPriceSafe, getPriceMapForUser } from '../utils/pricing.util';
-import { buildExportHeadersForTeacherType } from '../utils/fieldsShow.util';
+import {
+  calculateReportPriceSafe,
+  getPriceMapForUser,
+  calculateAttendanceReportPriceWithExplanation,
+  PriceMap,
+} from '../utils/pricing.util';
+import { buildExportHeadersForTeacherType, fieldTranslations, getFieldsForTeacherType } from '../utils/fieldsShow.util';
 import { groupDataByKeys } from '../utils/reportData.util';
 import { sendExcelReportToTeacher } from '../utils/mailReport.util';
 import { In } from 'typeorm';
 
+/**
+ * Build price breakdown export headers for a specific teacher type.
+ * Returns headers for each field's calculated price (not the raw value).
+ */
+function buildPriceBreakdownHeaders(teacherTypeKey: number | null): IHeader[] {
+  if (!teacherTypeKey) return [];
+
+  const fields = getFieldsForTeacherType(teacherTypeKey);
+  return fields.map((field) => ({
+    value: `price_${field}`,
+    // label: `מחיר ${fieldTranslations[field] || field}`,
+    label: fieldTranslations[field] || field,
+  }));
+}
+
+/**
+ * Process data for export - calculate price breakdown for each field.
+ * Adds price_fieldName properties to each record.
+ */
+function addPriceBreakdownToData(
+  data: AttReportWithPrice[],
+  priceMap: PriceMap,
+): (AttReportWithPrice & { [key: string]: number | string | Date | boolean | null })[] {
+  return data.map((record) => {
+    const enhanced = { ...record } as AttReportWithPrice & { [key: string]: number | string | Date | boolean | null };
+
+    if (record.teacherTypeKey) {
+      const { explanation } = calculateAttendanceReportPriceWithExplanation(
+        record as unknown as AttReport,
+        record.teacherTypeKey,
+        priceMap,
+      );
+
+      // Add price breakdown for each component
+      explanation.components.forEach((component) => {
+        enhanced[`price_${component.fieldKey}`] = component.subtotal;
+      });
+    }
+
+    return enhanced;
+  });
+}
+
 function getConfig(): BaseEntityModuleOptions {
   return {
     entity: AttReportWithPrice,
+    query: {
+      join: {
+        teacher: { eager: false },
+        'teacher.teacherType': { eager: false },
+      },
+    },
     exporter: {
+      processReqForExport(req: CrudRequest, innerFunc) {
+        req.options.query.join = {
+          teacher: { eager: true },
+          'teacher.teacherType': { eager: true },
+        };
+        return innerFunc(req);
+      },
       getExportHeaders(entityColumns: string[], req: CrudRequest, data?: AttReportWithPrice[]): IHeader[] {
         const teacherTypeFilter = req?.parsed?.filter?.find((f: any) => f.field === 'teacherTypeReferenceId');
         const teacherTypeKey = teacherTypeFilter?.value && data?.length ? data[0]?.teacherTypeKey : null;
 
         return [
+          { value: 'teacher.tz', label: 'ת.ז. מורה' },
           { value: 'teacher.name', label: 'שם המורה' },
           { value: 'reportDate', label: 'תאריך דיווח' },
           { value: 'year', label: 'שנה' },
-          ...buildExportHeadersForTeacherType(teacherTypeKey),
-          { value: 'calculatedPrice', label: 'מחיר' },
+          // ...buildExportHeadersForTeacherType(teacherTypeKey),
+          ...buildPriceBreakdownHeaders(teacherTypeKey),
+          { value: 'calculatedPrice', label: 'סה"כ מחיר' },
         ];
       },
     },
@@ -44,6 +107,18 @@ interface AttReportWithPricing extends AttReport {
  * Since this is a view, we need to fetch from the underlying AttReport table for actions.
  */
 class AttReportWithPriceService<T extends Entity | AttReportWithPrice> extends BaseEntityService<T> {
+  /**
+   * Override getDataForExport to add price breakdown columns.
+   */
+  async getDataForExport(req: CrudRequest): Promise<any[]> {
+    const data = (await super.getDataForExport(req)) as AttReportWithPrice[];
+
+    const userId = getUserIdFromUser(req.auth);
+    const priceMap = await getPriceMapForUser(userId, this.dataSource);
+
+    return addPriceBreakdownToData(data, priceMap);
+  }
+
   async doAction(req: CrudRequest, body: any): Promise<any> {
     const extra = req.parsed.extra as any;
 

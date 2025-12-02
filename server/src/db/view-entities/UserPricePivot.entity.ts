@@ -85,7 +85,6 @@ export function generateUserPricePivotSQL(): string {
 })
 export class UserPricePivot implements IHasUserId {
   @PrimaryColumn()
-  @ViewColumn()
   userId: number;
 
   // Universal

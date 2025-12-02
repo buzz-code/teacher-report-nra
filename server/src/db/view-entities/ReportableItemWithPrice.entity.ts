@@ -59,7 +59,6 @@ function generateReportableItemWithPriceSQL(): string {
   expression: generateReportableItemWithPriceSQL(),
 })
 export class ReportableItemWithPrice implements IHasUserId {
-  @ViewColumn()
   @PrimaryColumn()
   id: string; // 'report_123' or 'answer_456'
 

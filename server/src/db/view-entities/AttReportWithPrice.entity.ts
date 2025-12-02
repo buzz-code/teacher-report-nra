@@ -271,7 +271,6 @@ export function generateAttReportWithPriceSQL(): string {
 })
 export class AttReportWithPrice implements IHasUserId {
   @PrimaryColumn()
-  @ViewColumn()
   id: number;
 
   @ViewColumn()

@@ -58,7 +58,6 @@ function generateSalaryReportByTeacherSQL(): string {
   expression: generateSalaryReportByTeacherSQL(),
 })
 export class SalaryReportByTeacher implements IHasUserId {
-  @ViewColumn()
   @PrimaryColumn()
   id: string; // '{salaryReportId}_{teacherReferenceId}'
 
