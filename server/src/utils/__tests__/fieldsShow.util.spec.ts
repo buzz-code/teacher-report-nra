@@ -78,16 +78,16 @@ describe('fieldsShow.util', () => {
 
       const expectedFields: AttReportField[] = [
         'howManyMethodic',
-        'fourLastDigitsOfTeacherPhone',
-        'isTaarifHulia',
-        'isTaarifHulia2',
-        'isTaarifHulia3',
-        'howManyWatchedLessons',
-        'howManyStudentsTeached',
-        'howManyYalkutLessons',
+        // 'fourLastDigitsOfTeacherPhone',
+        // 'isTaarifHulia',
+        // 'isTaarifHulia2',
+        // 'isTaarifHulia3',
+        // 'howManyWatchedLessons',
+        // 'howManyStudentsTeached',
+        // 'howManyYalkutLessons',
         'howManyDiscussingLessons',
-        'howManyStudentsHelpTeached',
-        'teacherToReportFor',
+        // 'howManyStudentsHelpTeached',
+        // 'teacherToReportFor',
       ];
 
       expectedFields.forEach((field) => {

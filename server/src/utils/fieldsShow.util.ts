@@ -78,17 +78,17 @@ const TEACHER_TYPE_FIELDS: Record<TeacherTypeId, AttReportField[]> = {
   [TeacherTypeId.MANHA]: [
     // Self-reporting mode
     'howManyMethodic',
-    // Reporting on others mode
-    'fourLastDigitsOfTeacherPhone',
-    'isTaarifHulia',
-    'isTaarifHulia2',
-    'isTaarifHulia3',
-    'howManyWatchedLessons',
-    'howManyStudentsTeached', // shared with SPECIAL_EDUCATION
-    'howManyYalkutLessons',
+    // // Reporting on others mode
+    // 'fourLastDigitsOfTeacherPhone',
+    // 'isTaarifHulia',
+    // 'isTaarifHulia2',
+    // 'isTaarifHulia3',
+    // 'howManyWatchedLessons',
+    // 'howManyStudentsTeached', // shared with SPECIAL_EDUCATION
+    // 'howManyYalkutLessons',
     'howManyDiscussingLessons', // shared with SEMINAR_KITA, PDS
-    'howManyStudentsHelpTeached',
-    'teacherToReportFor',
+    // 'howManyStudentsHelpTeached',
+    // 'teacherToReportFor',
   ],
   [TeacherTypeId.RESPONSIBLE]: [], // not in use
   [TeacherTypeId.PDS]: [

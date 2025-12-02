@@ -30,15 +30,15 @@ export const fieldVisibility = {
 
   // MANHA only
   howManyMethodic: [TeacherTypeId.MANHA],
-  fourLastDigitsOfTeacherPhone: [TeacherTypeId.MANHA],
-  isTaarifHulia: [TeacherTypeId.MANHA],
-  isTaarifHulia2: [TeacherTypeId.MANHA],
-  isTaarifHulia3: [TeacherTypeId.MANHA],
-  howManyWatchedLessons: [TeacherTypeId.MANHA],
-  teachedStudentTz: [TeacherTypeId.MANHA],
-  howManyYalkutLessons: [TeacherTypeId.MANHA],
-  howManyStudentsHelpTeached: [TeacherTypeId.MANHA],
-  teacherToReportFor: [TeacherTypeId.MANHA],
+  // fourLastDigitsOfTeacherPhone: [TeacherTypeId.MANHA],
+  // isTaarifHulia: [TeacherTypeId.MANHA],
+  // isTaarifHulia2: [TeacherTypeId.MANHA],
+  // isTaarifHulia3: [TeacherTypeId.MANHA],
+  // howManyWatchedLessons: [TeacherTypeId.MANHA],
+  // teachedStudentTz: [TeacherTypeId.MANHA],
+  // howManyYalkutLessons: [TeacherTypeId.MANHA],
+  // howManyStudentsHelpTeached: [TeacherTypeId.MANHA],
+  // teacherToReportFor: [TeacherTypeId.MANHA],
 
   // MANHA, SPECIAL_EDUCATION
   howManyStudentsTeached: [TeacherTypeId.MANHA, TeacherTypeId.SPECIAL_EDUCATION],

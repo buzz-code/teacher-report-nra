@@ -96,7 +96,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
             {/* MANHA specific */}
             {shouldShowField('howManyMethodic', selectedTeacherTypeKey) && <NumberField source="howManyMethodic" />}
-            {shouldShowField('fourLastDigitsOfTeacherPhone', selectedTeacherTypeKey) && <TextField source="fourLastDigitsOfTeacherPhone" />}
+            {/* {shouldShowField('fourLastDigitsOfTeacherPhone', selectedTeacherTypeKey) && <TextField source="fourLastDigitsOfTeacherPhone" />}
             {shouldShowField('isTaarifHulia', selectedTeacherTypeKey) && <BooleanField source="isTaarifHulia" />}
             {shouldShowField('isTaarifHulia2', selectedTeacherTypeKey) && <BooleanField source="isTaarifHulia2" />}
             {shouldShowField('isTaarifHulia3', selectedTeacherTypeKey) && <BooleanField source="isTaarifHulia3" />}
@@ -104,7 +104,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {shouldShowField('teacherToReportFor', selectedTeacherTypeKey) && <NumberField source="teacherToReportFor" />}
             {shouldShowField('teachedStudentTz', selectedTeacherTypeKey) && <TextField source="teachedStudentTz" />}
             {shouldShowField('howManyYalkutLessons', selectedTeacherTypeKey) && <NumberField source="howManyYalkutLessons" />}
-            {shouldShowField('howManyStudentsHelpTeached', selectedTeacherTypeKey) && <NumberField source="howManyStudentsHelpTeached" />}
+            {shouldShowField('howManyStudentsHelpTeached', selectedTeacherTypeKey) && <NumberField source="howManyStudentsHelpTeached" />} */}
 
             {/* KINDERGARTEN specific */}
             {shouldShowField('wasCollectiveWatch', selectedTeacherTypeKey) && <BooleanField source="wasCollectiveWatch" />}
