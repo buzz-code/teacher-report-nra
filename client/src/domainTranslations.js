@@ -365,7 +365,6 @@ export default {
                 salaryReportId: 'דוח שכר',
                 'salaryReportId:$isnull': 'סטטוס הקצאה',
                 type: 'סוג',
-                isAssigned: 'מוקצה',
                 existingSalaryReportId: 'דוח שכר קיים',
                 salaryReportName: 'שם דוח שכר',
                 salaryReportDate: 'תאריך דוח שכר',
@@ -434,6 +433,29 @@ export default {
                 questionTypeReferenceId: 'סוג שאלה',
                 questionTypeKey: 'מפתח סוג שאלה',
                 calculatedPrice: 'מחיר מחושב',
+            }
+        },
+        reportable_item_with_price: {
+            name: 'פריט שכר עם מחיר |||| פריטי שכר עם מחירים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                reportDate: 'תאריך דיווח',
+                'reportDate:$gte': 'תאריך דיווח מ-',
+                'reportDate:$lte': 'תאריך דיווח עד-',
+                salaryReportId: 'דוח שכר',
+                'salaryReportId:$isnull': 'סטטוס הקצאה',
+                type: 'סוג',
+                calculatedPrice: 'מחיר מחושב',
+                existingSalaryReportId: 'דוח שכר קיים',
+                salaryReportName: 'שם דוח שכר',
+                salaryReportDate: 'תאריך דוח שכר',
+            },
+            values: {
+                type: {
+                    answer: 'תשובה',
+                    attendance_report: 'דיווח נוכחות'
+                }
             }
         },
         salary_report_by_teacher: {

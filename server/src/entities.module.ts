@@ -38,7 +38,7 @@ import { PriceByUser } from './db/view-entities/PriceByUser.entity';
 import { UserPricePivot } from './db/view-entities/UserPricePivot.entity';
 import attReportWithPriceConfig from './entity-modules/att-report-with-price.config';
 import { AnswerWithPrice } from './db/view-entities/AnswerWithPrice.entity';
-import { ReportableItemWithPrice } from './db/view-entities/ReportableItemWithPrice.entity';
+import reportableItemWithPriceConfig from './entity-modules/reportable-item-with-price.config';
 
 @Module({
   imports: [
@@ -75,7 +75,7 @@ import { ReportableItemWithPrice } from './db/view-entities/ReportableItemWithPr
     BaseEntityModule.register({ entity: UserPricePivot }),
     BaseEntityModule.register(attReportWithPriceConfig),
     BaseEntityModule.register({ entity: AnswerWithPrice }),
-    BaseEntityModule.register({ entity: ReportableItemWithPrice }),
+    BaseEntityModule.register(reportableItemWithPriceConfig),
     BaseEntityModule.register({ entity: Image }),
     BaseEntityModule.register(paymentTrackConfig),
   ],

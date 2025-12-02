@@ -38,7 +38,7 @@ import questionType from "src/entities/question-type";
 import answer from "src/entities/answer";
 import workingDate from "src/entities/working-date";
 import salaryReport from "src/entities/salary-report";
-import reportableItem from "src/entities/reportable-item";
+import reportableItemWithPrice from "src/entities/reportable-item-with-price";
 import answerWithPrice from "src/entities/answer-with-price";
 import salaryReportByTeacher from "src/entities/salary-report-by-teacher";
 
@@ -112,7 +112,7 @@ const App = () => (
             <Resource name="answer" {...answer} options={{ menuGroup: 'data' }} icon={RateReviewIcon} />
 
             {/* Configuration (reports) - Report configuration and types */}
-            <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
+            <Resource name="reportable_item_with_price" {...reportableItemWithPrice} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
             <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
             <Resource name="answer_with_price" {...answerWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
             <Resource name="salary_report_by_teacher" {...salaryReportByTeacher} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />

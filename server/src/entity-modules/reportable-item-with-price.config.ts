@@ -2,7 +2,7 @@ import { CrudRequest } from '@dataui/crud';
 import { getUserIdFromUser } from '@shared/auth/auth.util';
 import { BaseEntityService } from '@shared/base-entity/base-entity.service';
 import { BaseEntityModuleOptions, Entity } from '@shared/base-entity/interface';
-import { ReportableItem } from '../db/view-entities/ReportableItem.entity';
+import { ReportableItemWithPrice } from '../db/view-entities/ReportableItemWithPrice.entity';
 import { AttReport } from '../db/entities/AttReport.entity';
 import { Answer } from '../db/entities/Answer.entity';
 import { SalaryReport } from '../db/entities/SalaryReport.entity';
@@ -11,12 +11,12 @@ import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
-    entity: ReportableItem,
-    service: ReportableItemService,
+    entity: ReportableItemWithPrice,
+    service: ReportableItemWithPriceService,
   };
 }
 
-class ReportableItemService<T extends Entity | ReportableItem> extends BaseEntityService<T> {
+class ReportableItemWithPriceService<T extends Entity | ReportableItemWithPrice> extends BaseEntityService<T> {
   async doAction(req: CrudRequest, body: any): Promise<any> {
     const extra = req.parsed.extra as any;
     const userId = getUserIdFromUser(req.auth);
