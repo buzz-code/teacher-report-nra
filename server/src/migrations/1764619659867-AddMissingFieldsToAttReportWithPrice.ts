@@ -1,19 +1,22 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddMissingFieldsToAttReportWithPrice1764619659867 implements MigrationInterface {
-    name = 'AddMissingFieldsToAttReportWithPrice1764619659867'
+  name = 'AddMissingFieldsToAttReportWithPrice1764619659867';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `
             DELETE FROM \`teacher_report_nra\`.\`typeorm_metadata\`
             WHERE \`type\` = ?
                 AND \`name\` = ?
                 AND \`schema\` = ?
-        `, ["VIEW","att_report_with_price","teacher_report_nra"]);
-        await queryRunner.query(`
+        `,
+      ['VIEW', 'att_report_with_price', 'teacher_report_nra'],
+    );
+    await queryRunner.query(`
             DROP VIEW \`att_report_with_price\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE VIEW \`att_report_with_price\` AS
             SELECT r.id,
                 r.user_id AS userId,
@@ -106,7 +109,8 @@ export class AddMissingFieldsToAttReportWithPrice1764619659867 implements Migrat
                 AND tt.user_id = r.user_id
                 INNER JOIN user_price_pivot up ON up.userId = r.user_id
         `);
-        await queryRunner.query(`
+    await queryRunner.query(
+      `
             INSERT INTO \`teacher_report_nra\`.\`typeorm_metadata\`(
                     \`database\`,
                     \`schema\`,
@@ -116,20 +120,30 @@ export class AddMissingFieldsToAttReportWithPrice1764619659867 implements Migrat
                     \`value\`
                 )
             VALUES (DEFAULT, ?, DEFAULT, ?, ?, ?)
-        `, ["teacher_report_nra","VIEW","att_report_with_price","SELECT\n      r.id,\n      r.user_id AS userId,\n      r.teacherReferenceId,\n      r.teacherTz,\n      r.report_date AS reportDate,\n      r.update_date AS updateDate,\n      r.salary_report_id AS salaryReportId,\n      r.salary_month AS salaryMonth,\n      r.comment,\n      r.year,\n      r.createdAt,\n      r.updatedAt,\n      t.teacherTypeReferenceId,\n      tt.`key` AS teacherTypeKey,\n      \n      -- Report fields needed for price explanation\n      r.how_many_students AS howManyStudents,\n      r.how_many_students_teached AS howManyStudentsTeached,\n      r.how_many_students_watched AS howManyStudentsWatched,\n      r.how_many_students_help_teached AS howManyStudentsHelpTeached,\n      r.how_many_lessons AS howManyLessons,\n      r.how_many_yalkut_lessons AS howManyYalkutLessons,\n      r.how_many_discussing_lessons AS howManyDiscussingLessons,\n      r.how_many_watched_lessons AS howManyWatchedLessons,\n      r.how_many_watch_or_individual AS howManyWatchOrIndividual,\n      r.how_many_teached_or_interfering AS howManyTeachedOrInterfering,\n      r.how_many_methodic AS howManyMethodic,\n      r.how_many_lessons_absence AS howManyLessonsAbsence,\n      r.was_phone_discussing AS wasPhoneDiscussing,\n      r.was_kamal AS wasKamal,\n      r.was_collective_watch AS wasCollectiveWatch,\n      r.is_taarif_hulia AS isTaarifHulia,\n      r.is_taarif_hulia2 AS isTaarifHulia2,\n      r.is_taarif_hulia3 AS isTaarifHulia3,\n      \n      -- Total calculated price (base + components, minimum 0)\n      GREATEST(0,\n        COALESCE(up.lesson_base, 0) +\n        CASE tt.`key`\n          WHEN 1 THEN -- SEMINAR_KITA\n            COALESCE(r.how_many_students * up.seminar_student, 0) +\n            COALESCE(r.how_many_lessons * up.seminar_lesson, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.seminar_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.seminar_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.seminar_interfere, 0) +\n            COALESCE(r.how_many_lessons_absence * up.seminar_lesson * -0.5, 0) +\n            COALESCE(r.was_kamal * up.seminar_kamal, 0)\n          WHEN 3 THEN -- MANHA\n            COALESCE(r.how_many_students_teached * up.manha_student, 0) +\n            COALESCE(r.how_many_students_help_teached * up.manha_help, 0) +\n            COALESCE(r.how_many_yalkut_lessons * up.manha_yalkut, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.manha_discuss, 0) +\n            COALESCE(r.how_many_watched_lessons * up.manha_watched, 0) +\n            COALESCE(r.how_many_methodic * up.manha_methodic, 0) +\n            COALESCE(r.is_taarif_hulia * up.manha_hulia1, 0) +\n            COALESCE(r.is_taarif_hulia2 * up.manha_hulia2, 0) +\n            COALESCE(r.is_taarif_hulia3 * up.manha_hulia3, 0)\n          WHEN 5 THEN -- PDS\n            COALESCE(r.how_many_discussing_lessons * up.pds_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.pds_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.pds_interfere, 0)\n          WHEN 6 THEN -- KINDERGARTEN\n            COALESCE(r.how_many_students * up.kinder_student, 0) +\n            COALESCE(r.was_collective_watch * up.kinder_collective, 0)\n          WHEN 7 THEN -- SPECIAL_EDUCATION\n            COALESCE(r.how_many_students_teached * up.special_student, 0) +\n            COALESCE(r.how_many_students_watched * up.special_student * 0.5, 0) +\n            COALESCE(r.how_many_lessons * up.special_lesson, 0) +\n            COALESCE(r.was_phone_discussing * up.special_phone, 0)\n          ELSE 0\n        END\n      ) AS calculatedPrice\n      \n    FROM att_reports r\n    INNER JOIN teachers t ON t.id = r.teacherReferenceId AND t.user_id = r.user_id\n    INNER JOIN teacher_types tt ON tt.id = t.teacherTypeReferenceId AND tt.user_id = r.user_id\n    INNER JOIN user_price_pivot up ON up.userId = r.user_id"]);
-    }
+        `,
+      [
+        'teacher_report_nra',
+        'VIEW',
+        'att_report_with_price',
+        'SELECT\n      r.id,\n      r.user_id AS userId,\n      r.teacherReferenceId,\n      r.teacherTz,\n      r.report_date AS reportDate,\n      r.update_date AS updateDate,\n      r.salary_report_id AS salaryReportId,\n      r.salary_month AS salaryMonth,\n      r.comment,\n      r.year,\n      r.createdAt,\n      r.updatedAt,\n      t.teacherTypeReferenceId,\n      tt.`key` AS teacherTypeKey,\n      \n      -- Report fields needed for price explanation\n      r.how_many_students AS howManyStudents,\n      r.how_many_students_teached AS howManyStudentsTeached,\n      r.how_many_students_watched AS howManyStudentsWatched,\n      r.how_many_students_help_teached AS howManyStudentsHelpTeached,\n      r.how_many_lessons AS howManyLessons,\n      r.how_many_yalkut_lessons AS howManyYalkutLessons,\n      r.how_many_discussing_lessons AS howManyDiscussingLessons,\n      r.how_many_watched_lessons AS howManyWatchedLessons,\n      r.how_many_watch_or_individual AS howManyWatchOrIndividual,\n      r.how_many_teached_or_interfering AS howManyTeachedOrInterfering,\n      r.how_many_methodic AS howManyMethodic,\n      r.how_many_lessons_absence AS howManyLessonsAbsence,\n      r.was_phone_discussing AS wasPhoneDiscussing,\n      r.was_kamal AS wasKamal,\n      r.was_collective_watch AS wasCollectiveWatch,\n      r.is_taarif_hulia AS isTaarifHulia,\n      r.is_taarif_hulia2 AS isTaarifHulia2,\n      r.is_taarif_hulia3 AS isTaarifHulia3,\n      \n      -- Total calculated price (base + components, minimum 0)\n      GREATEST(0,\n        COALESCE(up.lesson_base, 0) +\n        CASE tt.`key`\n          WHEN 1 THEN -- SEMINAR_KITA\n            COALESCE(r.how_many_students * up.seminar_student, 0) +\n            COALESCE(r.how_many_lessons * up.seminar_lesson, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.seminar_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.seminar_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.seminar_interfere, 0) +\n            COALESCE(r.how_many_lessons_absence * up.seminar_lesson * -0.5, 0) +\n            COALESCE(r.was_kamal * up.seminar_kamal, 0)\n          WHEN 3 THEN -- MANHA\n            COALESCE(r.how_many_students_teached * up.manha_student, 0) +\n            COALESCE(r.how_many_students_help_teached * up.manha_help, 0) +\n            COALESCE(r.how_many_yalkut_lessons * up.manha_yalkut, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.manha_discuss, 0) +\n            COALESCE(r.how_many_watched_lessons * up.manha_watched, 0) +\n            COALESCE(r.how_many_methodic * up.manha_methodic, 0) +\n            COALESCE(r.is_taarif_hulia * up.manha_hulia1, 0) +\n            COALESCE(r.is_taarif_hulia2 * up.manha_hulia2, 0) +\n            COALESCE(r.is_taarif_hulia3 * up.manha_hulia3, 0)\n          WHEN 5 THEN -- PDS\n            COALESCE(r.how_many_discussing_lessons * up.pds_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.pds_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.pds_interfere, 0)\n          WHEN 6 THEN -- KINDERGARTEN\n            COALESCE(r.how_many_students * up.kinder_student, 0) +\n            COALESCE(r.was_collective_watch * up.kinder_collective, 0)\n          WHEN 7 THEN -- SPECIAL_EDUCATION\n            COALESCE(r.how_many_students_teached * up.special_student, 0) +\n            COALESCE(r.how_many_students_watched * up.special_student * 0.5, 0) +\n            COALESCE(r.how_many_lessons * up.special_lesson, 0) +\n            COALESCE(r.was_phone_discussing * up.special_phone, 0)\n          ELSE 0\n        END\n      ) AS calculatedPrice\n      \n    FROM att_reports r\n    INNER JOIN teachers t ON t.id = r.teacherReferenceId AND t.user_id = r.user_id\n    INNER JOIN teacher_types tt ON tt.id = t.teacherTypeReferenceId AND tt.user_id = r.user_id\n    INNER JOIN user_price_pivot up ON up.userId = r.user_id',
+      ],
+    );
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `
             DELETE FROM \`teacher_report_nra\`.\`typeorm_metadata\`
             WHERE \`type\` = ?
                 AND \`name\` = ?
                 AND \`schema\` = ?
-        `, ["VIEW","att_report_with_price","teacher_report_nra"]);
-        await queryRunner.query(`
+        `,
+      ['VIEW', 'att_report_with_price', 'teacher_report_nra'],
+    );
+    await queryRunner.query(`
             DROP VIEW \`att_report_with_price\`
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE VIEW \`att_report_with_price\` AS
             SELECT r.id,
                 r.user_id AS userId,
@@ -219,7 +233,8 @@ export class AddMissingFieldsToAttReportWithPrice1764619659867 implements Migrat
                 AND tt.user_id = r.user_id
                 INNER JOIN user_price_pivot up ON up.userId = r.user_id
         `);
-        await queryRunner.query(`
+    await queryRunner.query(
+      `
             INSERT INTO \`teacher_report_nra\`.\`typeorm_metadata\`(
                     \`database\`,
                     \`schema\`,
@@ -229,7 +244,13 @@ export class AddMissingFieldsToAttReportWithPrice1764619659867 implements Migrat
                     \`value\`
                 )
             VALUES (DEFAULT, ?, DEFAULT, ?, ?, ?)
-        `, ["teacher_report_nra","VIEW","att_report_with_price","SELECT\n      r.id,\n      r.user_id AS userId,\n      r.teacherReferenceId,\n      r.teacherTz,\n      r.report_date AS reportDate,\n      r.salary_report_id AS salaryReportId,\n      r.year,\n      r.createdAt,\n      r.updatedAt,\n      t.teacherTypeReferenceId,\n      tt.`key` AS teacherTypeKey,\n      \n      -- Report fields needed for price explanation\n      r.how_many_students AS howManyStudents,\n      r.how_many_students_teached AS howManyStudentsTeached,\n      r.how_many_students_watched AS howManyStudentsWatched,\n      r.how_many_students_help_teached AS howManyStudentsHelpTeached,\n      r.how_many_lessons AS howManyLessons,\n      r.how_many_yalkut_lessons AS howManyYalkutLessons,\n      r.how_many_discussing_lessons AS howManyDiscussingLessons,\n      r.how_many_watched_lessons AS howManyWatchedLessons,\n      r.how_many_watch_or_individual AS howManyWatchOrIndividual,\n      r.how_many_teached_or_interfering AS howManyTeachedOrInterfering,\n      r.how_many_methodic AS howManyMethodic,\n      r.how_many_lessons_absence AS howManyLessonsAbsence,\n      r.was_phone_discussing AS wasPhoneDiscussing,\n      r.was_kamal AS wasKamal,\n      r.was_collective_watch AS wasCollectiveWatch,\n      r.is_taarif_hulia AS isTaarifHulia,\n      r.is_taarif_hulia2 AS isTaarifHulia2,\n      r.is_taarif_hulia3 AS isTaarifHulia3,\n      \n      -- Total calculated price (base + components, minimum 0)\n      GREATEST(0,\n        COALESCE(up.lesson_base, 0) +\n        CASE tt.`key`\n          WHEN 1 THEN -- SEMINAR_KITA\n            COALESCE(r.how_many_students * up.seminar_student, 0) +\n            COALESCE(r.how_many_lessons * up.seminar_lesson, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.seminar_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.seminar_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.seminar_interfere, 0) +\n            COALESCE(r.how_many_lessons_absence * up.seminar_lesson * -0.5, 0) +\n            COALESCE(r.was_kamal * up.seminar_kamal, 0)\n          WHEN 3 THEN -- MANHA\n            COALESCE(r.how_many_students_teached * up.manha_student, 0) +\n            COALESCE(r.how_many_students_help_teached * up.manha_help, 0) +\n            COALESCE(r.how_many_yalkut_lessons * up.manha_yalkut, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.manha_discuss, 0) +\n            COALESCE(r.how_many_watched_lessons * up.manha_watched, 0) +\n            COALESCE(r.how_many_methodic * up.manha_methodic, 0) +\n            COALESCE(r.is_taarif_hulia * up.manha_hulia1, 0) +\n            COALESCE(r.is_taarif_hulia2 * up.manha_hulia2, 0) +\n            COALESCE(r.is_taarif_hulia3 * up.manha_hulia3, 0)\n          WHEN 5 THEN -- PDS\n            COALESCE(r.how_many_discussing_lessons * up.pds_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.pds_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.pds_interfere, 0)\n          WHEN 6 THEN -- KINDERGARTEN\n            COALESCE(r.how_many_students * up.kinder_student, 0) +\n            COALESCE(r.was_collective_watch * up.kinder_collective, 0)\n          WHEN 7 THEN -- SPECIAL_EDUCATION\n            COALESCE(r.how_many_students_teached * up.special_student, 0) +\n            COALESCE(r.how_many_students_watched * up.special_student * 0.5, 0) +\n            COALESCE(r.how_many_lessons * up.special_lesson, 0) +\n            COALESCE(r.was_phone_discussing * up.special_phone, 0)\n          ELSE 0\n        END\n      ) AS calculatedPrice\n      \n    FROM att_reports r\n    INNER JOIN teachers t ON t.id = r.teacherReferenceId AND t.user_id = r.user_id\n    INNER JOIN teacher_types tt ON tt.id = t.teacherTypeReferenceId AND tt.user_id = r.user_id\n    INNER JOIN user_price_pivot up ON up.userId = r.user_id"]);
-    }
-
+        `,
+      [
+        'teacher_report_nra',
+        'VIEW',
+        'att_report_with_price',
+        'SELECT\n      r.id,\n      r.user_id AS userId,\n      r.teacherReferenceId,\n      r.teacherTz,\n      r.report_date AS reportDate,\n      r.salary_report_id AS salaryReportId,\n      r.year,\n      r.createdAt,\n      r.updatedAt,\n      t.teacherTypeReferenceId,\n      tt.`key` AS teacherTypeKey,\n      \n      -- Report fields needed for price explanation\n      r.how_many_students AS howManyStudents,\n      r.how_many_students_teached AS howManyStudentsTeached,\n      r.how_many_students_watched AS howManyStudentsWatched,\n      r.how_many_students_help_teached AS howManyStudentsHelpTeached,\n      r.how_many_lessons AS howManyLessons,\n      r.how_many_yalkut_lessons AS howManyYalkutLessons,\n      r.how_many_discussing_lessons AS howManyDiscussingLessons,\n      r.how_many_watched_lessons AS howManyWatchedLessons,\n      r.how_many_watch_or_individual AS howManyWatchOrIndividual,\n      r.how_many_teached_or_interfering AS howManyTeachedOrInterfering,\n      r.how_many_methodic AS howManyMethodic,\n      r.how_many_lessons_absence AS howManyLessonsAbsence,\n      r.was_phone_discussing AS wasPhoneDiscussing,\n      r.was_kamal AS wasKamal,\n      r.was_collective_watch AS wasCollectiveWatch,\n      r.is_taarif_hulia AS isTaarifHulia,\n      r.is_taarif_hulia2 AS isTaarifHulia2,\n      r.is_taarif_hulia3 AS isTaarifHulia3,\n      \n      -- Total calculated price (base + components, minimum 0)\n      GREATEST(0,\n        COALESCE(up.lesson_base, 0) +\n        CASE tt.`key`\n          WHEN 1 THEN -- SEMINAR_KITA\n            COALESCE(r.how_many_students * up.seminar_student, 0) +\n            COALESCE(r.how_many_lessons * up.seminar_lesson, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.seminar_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.seminar_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.seminar_interfere, 0) +\n            COALESCE(r.how_many_lessons_absence * up.seminar_lesson * -0.5, 0) +\n            COALESCE(r.was_kamal * up.seminar_kamal, 0)\n          WHEN 3 THEN -- MANHA\n            COALESCE(r.how_many_students_teached * up.manha_student, 0) +\n            COALESCE(r.how_many_students_help_teached * up.manha_help, 0) +\n            COALESCE(r.how_many_yalkut_lessons * up.manha_yalkut, 0) +\n            COALESCE(r.how_many_discussing_lessons * up.manha_discuss, 0) +\n            COALESCE(r.how_many_watched_lessons * up.manha_watched, 0) +\n            COALESCE(r.how_many_methodic * up.manha_methodic, 0) +\n            COALESCE(r.is_taarif_hulia * up.manha_hulia1, 0) +\n            COALESCE(r.is_taarif_hulia2 * up.manha_hulia2, 0) +\n            COALESCE(r.is_taarif_hulia3 * up.manha_hulia3, 0)\n          WHEN 5 THEN -- PDS\n            COALESCE(r.how_many_discussing_lessons * up.pds_discuss, 0) +\n            COALESCE(r.how_many_watch_or_individual * up.pds_watch, 0) +\n            COALESCE(r.how_many_teached_or_interfering * up.pds_interfere, 0)\n          WHEN 6 THEN -- KINDERGARTEN\n            COALESCE(r.how_many_students * up.kinder_student, 0) +\n            COALESCE(r.was_collective_watch * up.kinder_collective, 0)\n          WHEN 7 THEN -- SPECIAL_EDUCATION\n            COALESCE(r.how_many_students_teached * up.special_student, 0) +\n            COALESCE(r.how_many_students_watched * up.special_student * 0.5, 0) +\n            COALESCE(r.how_many_lessons * up.special_lesson, 0) +\n            COALESCE(r.was_phone_discussing * up.special_phone, 0)\n          ELSE 0\n        END\n      ) AS calculatedPrice\n      \n    FROM att_reports r\n    INNER JOIN teachers t ON t.id = r.teacherReferenceId AND t.user_id = r.user_id\n    INNER JOIN teacher_types tt ON tt.id = t.teacherTypeReferenceId AND tt.user_id = r.user_id\n    INNER JOIN user_price_pivot up ON up.userId = r.user_id',
+      ],
+    );
+  }
 }
