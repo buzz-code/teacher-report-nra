@@ -416,8 +416,28 @@ export default {
                 wasPhoneDiscussing: 'האם היה דיון טלפוני',
             }
         },
-        'salary_report_by_teacher/pivot?extra.pivot=WithTotals': {
-            name: 'דוחות שכר לפי מורה',
+        answer_with_price: {
+            name: 'תשובה עם מחיר |||| תשובות עם מחירים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                teacherReferenceId: 'מורה',
+                teacherTz: 'ת.ז. מורה',
+                questionReferenceId: 'שאלה',
+                questionId: 'מזהה שאלה',
+                salaryReportId: 'דוח שכר',
+                answer: 'תשובה',
+                reportDate: 'תאריך דיווח',
+                'reportDate:$gte': 'תאריך דיווח מ-',
+                'reportDate:$lte': 'תאריך דיווח עד-',
+                questionContent: 'תוכן השאלה',
+                questionTariff: 'תעריף',
+                questionTypeReferenceId: 'סוג שאלה',
+                questionTypeKey: 'מפתח סוג שאלה',
+                calculatedPrice: 'מחיר מחושב',
+            }
+        },
+        salary_report_by_teacher: {
+            name: 'דוח שכר לפי מורה |||| דוחות שכר לפי מורה',
             fields: {
                 ...generalResourceFieldsTranslation,
                 salaryReportId: 'דוח שכר',

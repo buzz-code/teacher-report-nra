@@ -1,19 +1,17 @@
 import {
   DateField,
-  DateInput,
   NumberField,
   ReferenceField,
   SelectField,
   TextField,
-  TextInput,
   useRecordContext,
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
+import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
-import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { ShowMatchingRecordsButton } from '@shared/components/fields/ShowMatchingRecordsButton';
 
 const currencyOptions = {
@@ -23,6 +21,9 @@ const currencyOptions = {
   maximumFractionDigits: 2,
 };
 
+/**
+ * Button to show related records (answers or att_reports) for this teacher + salary report.
+ */
 const ShowTeacherReportablesButton = ({ targetResource, label }) => {
   const record = useRecordContext();
   if (!record) return null;
@@ -41,8 +42,8 @@ const ShowTeacherReportablesButton = ({ targetResource, label }) => {
 
 const filters = [
   ...commonAdminFilters,
-  <CommonReferenceInput source="salaryReportId" reference="salary_report" />,
-  <CommonReferenceInput source="teacherReferenceId" reference="teacher" />,
+  <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
+  <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
   <CommonAutocompleteInput source="salaryReport.year" choices={yearChoices} alwaysOn />,
 ];
 
@@ -73,7 +74,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
       {/* Show matching records buttons */}
       <ShowTeacherReportablesButton targetResource="answer" label="תשובות" />
-      <ShowTeacherReportablesButton targetResource="att_report" label="דיווחים" />
+      <ShowTeacherReportablesButton targetResource="att_report_with_price" label="דיווחים" />
 
       {isAdmin && <DateField showDate showTime source="salaryReport.createdAt" label="נוצר" />}
       {isAdmin && <DateField showDate showTime source="salaryReport.updatedAt" label="עודכן" />}
@@ -82,10 +83,10 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 };
 
 const entity = {
-  resource: 'salary_report_by_teacher/pivot?extra.pivot=WithTotals',
   Datagrid,
   filters,
   filterDefaultValues,
+  sort: { field: 'salaryReportId', order: 'DESC' },
 };
 
-export default getResourceComponents(entity).list;
+export default getResourceComponents(entity);

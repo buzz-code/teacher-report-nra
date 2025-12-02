@@ -267,7 +267,6 @@ const entity = {
   Datagrid,
   filters,
   filterDefaultValues,
-  exporter: true,
   sort: { field: 'reportDate', order: 'DESC' },
 };
 

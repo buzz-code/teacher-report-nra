@@ -39,6 +39,8 @@ import answer from "src/entities/answer";
 import workingDate from "src/entities/working-date";
 import salaryReport from "src/entities/salary-report";
 import reportableItem from "src/entities/reportable-item";
+import answerWithPrice from "src/entities/answer-with-price";
+import salaryReportByTeacher from "src/entities/salary-report-by-teacher";
 
 // Common entities and utilities
 import text from "@shared/components/common-entities/text";
@@ -54,9 +56,6 @@ import paymentTrack from '@shared/components/common-entities/payment-track';
 import yemotCall from '@shared/components/common-entities/yemot-call';
 
 import Settings from 'src/settings/Settings';
-
-// Import pivot components
-import SalaryReportPerTeacher from 'src/pivots/SalaryReportPerTeacher';
 
 import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
 import YemotSimulator from "@shared/components/views/YemotSimulator";
@@ -115,6 +114,8 @@ const App = () => (
             {/* Configuration (reports) - Report configuration and types */}
             <Resource name="reportable_item" {...reportableItem} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
             <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+            <Resource name="answer_with_price" {...answerWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+            <Resource name="salary_report_by_teacher" {...salaryReportByTeacher} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
             <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
 
             {/* User customization (settings) - User-specific settings */}
@@ -151,7 +152,6 @@ const App = () => (
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/pages-view" element={<PageList />} />
               <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
-              <Route path="/salary-report-per-teacher" element={<SalaryReportPerTeacher />} />
             </CustomRoutes>
 
             <CustomRoutes noLayout>

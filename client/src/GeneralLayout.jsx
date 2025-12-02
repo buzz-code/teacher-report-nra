@@ -5,11 +5,8 @@ import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import CallIcon from '@mui/icons-material/Call';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DatasetIcon from '@mui/icons-material/Dataset';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MapIcon from '@mui/icons-material/Map';
-import PercentIcon from '@mui/icons-material/Percent';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 import BaseLayout from "@shared/components/layout/Layout";
 import BaseDashboard from '@shared/components/views/Dashboard';
@@ -26,14 +23,7 @@ const customMenuItems = [
 
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
-    { 
-        name: 'reports', 
-        icon: <SummarizeIcon />, 
-        routes: [
-            // <MenuItemLink key="salary-report-totals" to="/salary-report-totals" primaryText="דוחות שכר עם סיכומים" leftIcon={<AnalyticsIcon />} />,
-            <MenuItemLink key="salary-report-per-teacher" to="/salary-report-per-teacher" primaryText="דוחות שכר לפי מורה" leftIcon={<AnalyticsIcon />} />,
-        ]
-    },
+    { name: 'reports', icon: <SummarizeIcon /> },
     { name: 'settings', icon: <SettingsIcon /> },
     { name: 'admin', icon: <AdminPanelSettingsIcon /> },
 ];
