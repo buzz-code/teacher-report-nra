@@ -185,7 +185,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {shouldShowField('howManyMethodic', teacherTypeKey) && (
             <NumberInput source="howManyMethodic" />
         )}
-        {shouldShowField('fourLastDigitsOfTeacherPhone', teacherTypeKey) && (
+        {/* {shouldShowField('fourLastDigitsOfTeacherPhone', teacherTypeKey) && (
             <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
         )}
         {shouldShowField('isTaarifHulia', teacherTypeKey) && (
@@ -211,7 +211,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         )}
         {shouldShowField('teacherToReportFor', teacherTypeKey) && (
             <NumberInput source="teacherToReportFor" />
-        )}
+        )} */}
 
         {/* MANHA, SPECIAL_EDUCATION */}
         {shouldShowField('howManyStudentsTeached', teacherTypeKey) && (

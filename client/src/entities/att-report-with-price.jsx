@@ -239,12 +239,12 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
       {/* MANHA only */}
       {shouldShowField('howManyMethodic', selectedTeacherTypeKey) && <FieldPriceField source="howManyMethodic" priceMap={priceMap} isLoading={isLoading} />}
-      {shouldShowField('isTaarifHulia', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia" priceMap={priceMap} isLoading={isLoading} />}
+      {/* {shouldShowField('isTaarifHulia', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia" priceMap={priceMap} isLoading={isLoading} />}
       {shouldShowField('isTaarifHulia2', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia2" priceMap={priceMap} isLoading={isLoading} />}
       {shouldShowField('isTaarifHulia3', selectedTeacherTypeKey) && <FieldPriceField source="isTaarifHulia3" priceMap={priceMap} isLoading={isLoading} />}
       {shouldShowField('howManyWatchedLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyWatchedLessons" priceMap={priceMap} isLoading={isLoading} />}
       {shouldShowField('howManyYalkutLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyYalkutLessons" priceMap={priceMap} isLoading={isLoading} />}
-      {shouldShowField('howManyStudentsHelpTeached', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudentsHelpTeached" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyStudentsHelpTeached', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudentsHelpTeached" priceMap={priceMap} isLoading={isLoading} />} */}
 
       {/* MANHA, SPECIAL_EDUCATION */}
       {shouldShowField('howManyStudentsTeached', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudentsTeached" priceMap={priceMap} isLoading={isLoading} />}

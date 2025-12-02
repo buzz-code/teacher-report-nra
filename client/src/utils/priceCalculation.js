@@ -30,11 +30,11 @@ const PRICE_FIELDS = [
     priceCode: 'kindergarten.student_multiplier',
     teacherTypes: [TeacherTypeId.KINDERGARTEN],
   },
-  {
-    reportField: 'howManyStudentsTeached',
-    priceCode: 'manha.student_multiplier',
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
+  // {
+  //   reportField: 'howManyStudentsTeached',
+  //   priceCode: 'manha.student_multiplier',
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
   {
     reportField: 'howManyStudentsTeached',
     priceCode: 'special.student_multiplier',
@@ -46,11 +46,11 @@ const PRICE_FIELDS = [
     factor: 0.5,
     teacherTypes: [TeacherTypeId.SPECIAL_EDUCATION],
   },
-  {
-    reportField: 'howManyStudentsHelpTeached',
-    priceCode: 'manha.help_taught_multiplier',
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
+  // {
+  //   reportField: 'howManyStudentsHelpTeached',
+  //   priceCode: 'manha.help_taught_multiplier',
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
 
   // Lesson counts
   {
@@ -63,11 +63,11 @@ const PRICE_FIELDS = [
     priceCode: 'special.lesson_multiplier',
     teacherTypes: [TeacherTypeId.SPECIAL_EDUCATION],
   },
-  {
-    reportField: 'howManyYalkutLessons',
-    priceCode: 'manha.yalkut_lesson_multiplier',
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
+  // {
+  //   reportField: 'howManyYalkutLessons',
+  //   priceCode: 'manha.yalkut_lesson_multiplier',
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
   {
     reportField: 'howManyDiscussingLessons',
     priceCode: 'seminar.discussing_lesson_multiplier',
@@ -83,11 +83,11 @@ const PRICE_FIELDS = [
     priceCode: 'pds.discussing_lesson_multiplier',
     teacherTypes: [TeacherTypeId.PDS],
   },
-  {
-    reportField: 'howManyWatchedLessons',
-    priceCode: 'manha.watched_lesson_multiplier',
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
+  // {
+  //   reportField: 'howManyWatchedLessons',
+  //   priceCode: 'manha.watched_lesson_multiplier',
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
   {
     reportField: 'howManyWatchOrIndividual',
     priceCode: 'seminar.watch_individual_multiplier',
@@ -143,24 +143,24 @@ const PRICE_FIELDS = [
     isBonus: true,
     teacherTypes: [TeacherTypeId.KINDERGARTEN],
   },
-  {
-    reportField: 'isTaarifHulia',
-    priceCode: 'manha.taarif_hulia_bonus',
-    isBonus: true,
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
-  {
-    reportField: 'isTaarifHulia2',
-    priceCode: 'manha.taarif_hulia2_bonus',
-    isBonus: true,
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
-  {
-    reportField: 'isTaarifHulia3',
-    priceCode: 'manha.taarif_hulia3_bonus',
-    isBonus: true,
-    teacherTypes: [TeacherTypeId.MANHA],
-  },
+  // {
+  //   reportField: 'isTaarifHulia',
+  //   priceCode: 'manha.taarif_hulia_bonus',
+  //   isBonus: true,
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
+  // {
+  //   reportField: 'isTaarifHulia2',
+  //   priceCode: 'manha.taarif_hulia2_bonus',
+  //   isBonus: true,
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
+  // {
+  //   reportField: 'isTaarifHulia3',
+  //   priceCode: 'manha.taarif_hulia3_bonus',
+  //   isBonus: true,
+  //   teacherTypes: [TeacherTypeId.MANHA],
+  // },
 ];
 
 /**
