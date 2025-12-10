@@ -36,6 +36,7 @@ const filters = [
   <DateInput source="reportDate:$gte" alwaysOn />,
   <DateInput source="reportDate:$lte" alwaysOn />,
   <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} />,
+  <CommonReferenceInputFilter source="teacher.teacherTypeReferenceId" reference="teacher_type" label="סוג מורה" dynamicFilter={filterByUserId} />,
   <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
   <SelectInput
     source="type"
@@ -120,7 +121,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 const entity = {
   Datagrid,
   filters,
-  exporter: true,
   sort: { field: 'reportDate', order: 'DESC' },
 };
 
