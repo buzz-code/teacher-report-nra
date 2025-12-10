@@ -114,12 +114,14 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 }
 
 const Inputs = ({ isCreate, isAdmin }) => {
+    const record = useRecordContext();
+    const salaryReportId = record?.salaryReportId;
     return <>
         {!isCreate && isAdmin && <TextInput source="id" disabled />}
         {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
         <CommonReferenceInput source="teacherReferenceId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
         <CommonReferenceInput source="questionId" reference="question" validate={[required()]} dynamicFilter={filterByUserId} sort={questionSortBy} />
-        <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} disabled={!isAdmin && salaryReportId} />
         <NumberInput source="answer" validate={[required()]} />
         <DateInput source="reportDate" />
         {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}

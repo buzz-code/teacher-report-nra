@@ -127,6 +127,8 @@ const Inputs = ({ isCreate, isAdmin }) => {
     const teacherReferenceId = useWatch({ name: 'teacherReferenceId' });
     const dataProvider = useDataProvider();
     const [teacherTypeKey, setTeacherTypeKey] = useState(null);
+    const record = useRecordContext();
+    const salaryReportId = record?.salaryReportId;
 
     useEffect(() => {
         const fetchTeacherType = async () => {
@@ -146,7 +148,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
         {/* <BooleanInput source="isConfirmed" /> */}
 
         {/* Salary fields - Universal */}
-        <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />
+        <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} disabled={!isAdmin && salaryReportId} />
         <NumberInput source="salaryMonth" />
         <TextInput source="comment" multiline />
 
