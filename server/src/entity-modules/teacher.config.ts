@@ -54,14 +54,15 @@ class TeacherService<T extends Entity | Teacher> extends BaseEntityService<T> {
 
     switch (extra?.action) {
       case 'bulkAssignQuestion':
-        return this.bulkAssignQuestion(userId, extra, body.ids);
+        return this.bulkAssignQuestion(userId, extra);
       default:
         return super.doAction(req, body);
     }
   }
 
-  private async bulkAssignQuestion(userId: number, extra: any, ids: number[]): Promise<any> {
+  private async bulkAssignQuestion(userId: number, extra: any): Promise<any> {
     const { questionId } = extra;
+    const ids = extra.ids.toString().split(',').map(Number).filter(Boolean);
 
     if (!questionId) {
       throw new BadRequestException('questionId is required');
