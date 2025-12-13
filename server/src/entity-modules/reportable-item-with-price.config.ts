@@ -12,6 +12,12 @@ import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 function getConfig(): BaseEntityModuleOptions {
   return {
     entity: ReportableItemWithPrice,
+    query: {
+      join: {
+        teacher: { eager: false },
+        'teacher.teacherType': { eager: false },
+      },
+    },
     service: ReportableItemWithPriceService,
   };
 }
