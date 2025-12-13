@@ -349,8 +349,8 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     // Check for existing reports
-    if (this.teacher.teacherType?.key !== TeacherTypeId.MANHA) {
-      // Not for "מורה מנחה"
+    // Not for "מורה מנחה"
+    // if (this.teacher.teacherType?.key !== TeacherTypeId.MANHA) {
       const existingReports = await this.getReportsByTeacherIdAndDate(dateStr);
 
       const relevantFields = [
@@ -372,12 +372,12 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         }
         // if (this.existingReport.isConfirmed) {
         // all reports should be created as confirmed - so this block is redundant
-        this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
-        return this.getAndValidateReportDate();
+        // this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
+        // return this.getAndValidateReportDate();
         // }
-        // this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
+        this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
       }
-    }
+    // }
 
     // Hebrew date confirmation
     const hebrewDate = formatHebrewDateForIVR(reportDate);
