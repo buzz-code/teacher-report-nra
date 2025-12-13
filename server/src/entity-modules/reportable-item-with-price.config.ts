@@ -30,15 +30,15 @@ class ReportableItemWithPriceService<T extends Entity | ReportableItemWithPrice>
     switch (extra?.action) {
       case 'assignToSalaryReport': {
         const ids = String(extra.ids).split(',');
-        await this.assignItemsToSalaryReport(userId, ids, {
+        const count = await this.assignItemsToSalaryReport(userId, ids, {
           name: extra.salaryReportName,
           date: extra.salaryReportDate ? new Date(extra.salaryReportDate) : undefined,
           existingSalaryReportId: Number(extra.existingSalaryReportId),
         });
         if (extra.existingSalaryReportId && extra.existingSalaryReportId > 0) {
-          return `${ids.length} פריטים הוקצו בהצלחה לדוח שכר קיים.`;
+          return `${count} פריטים הוקצו בהצלחה לדוח שכר קיים.`;
         }
-        return `דוח שכר נוצר בהצלחה עם ${ids.length} פריטים.`;
+        return `דוח שכר נוצר בהצלחה עם ${count} פריטים.`;
       }
 
       default:
@@ -54,13 +54,14 @@ class ReportableItemWithPriceService<T extends Entity | ReportableItemWithPrice>
       date?: Date;
       existingSalaryReportId?: number;
     },
-  ): Promise<SalaryReport> {
+  ): Promise<number> {
     const dataSource = this.dataSource;
     const attReportRepo = dataSource.getRepository(AttReport);
     const answerRepo = dataSource.getRepository(Answer);
     const salaryReportRepo = dataSource.getRepository(SalaryReport);
 
     let salaryReport: SalaryReport;
+    let createdCount = 0;
 
     // 1. Create new SalaryReport or use existing one
     if (salaryReportData.existingSalaryReportId && salaryReportData.existingSalaryReportId > 0) {
@@ -78,26 +79,27 @@ class ReportableItemWithPriceService<T extends Entity | ReportableItemWithPrice>
 
     // 2. Parse and assign items
     const reportIds = itemIds.filter((id) => id.startsWith('report_')).map((id) => parseInt(id.replace('report_', '')));
-
     const answerIds = itemIds.filter((id) => id.startsWith('answer_')).map((id) => parseInt(id.replace('answer_', '')));
 
     // 3. Update AttReports
     if (reportIds.length > 0) {
-      await attReportRepo.update(
+      const updateResult = await attReportRepo.update(
         { id: In(reportIds), userId, salaryReportId: IsNull() },
         { salaryReportId: salaryReport.id },
       );
+      createdCount += updateResult.affected || 0;
     }
 
     // 4. Update Answers
     if (answerIds.length > 0) {
-      await answerRepo.update(
+      const updateResult = await answerRepo.update(
         { id: In(answerIds), userId, salaryReportId: IsNull() },
         { salaryReportId: salaryReport.id },
       );
+      createdCount += updateResult.affected || 0;
     }
 
-    return salaryReport;
+    return createdCount;
   }
 }
 
