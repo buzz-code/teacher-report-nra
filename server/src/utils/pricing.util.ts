@@ -201,8 +201,8 @@ export function calculateAttendanceReportPriceWithExplanation(
   };
 
   // Add pricing based on student counts
-  addNumericPrice(attReport.howManyStudents, 'howManyStudents', 'student_multiplier');
-  addNumericPrice(attReport.howManyStudentsTeached, 'howManyStudentsTeached', 'student_multiplier');
+  addNumericPrice(attReport.howManyStudents, 'howManyStudents', 'student_multiplier', 0.5);
+  addNumericPrice(attReport.howManyStudentsTeached, 'howManyStudentsTeached', 'student_multiplier', 0.5);
   addNumericPrice(attReport.howManyStudentsWatched, 'howManyStudentsWatched', 'student_multiplier', 0.5);
   addNumericPrice(attReport.howManyStudentsHelpTeached, 'howManyStudentsHelpTeached', 'help_taught_multiplier');
 
