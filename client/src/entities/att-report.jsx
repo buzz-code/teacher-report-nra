@@ -13,7 +13,8 @@ import {
     BooleanInput,
     useDataProvider,
     SelectField,
-    useListContext
+    useListContext,
+    useRecordContext
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
 import { useState, useEffect } from 'react';
