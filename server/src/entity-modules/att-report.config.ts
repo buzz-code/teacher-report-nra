@@ -12,6 +12,7 @@ import { fixReferences } from '@shared/utils/entity/fixReference.util';
 import { groupDataByKeys } from '../utils/reportData.util';
 import { sendExcelReportToTeacher } from '../utils/mailReport.util';
 import { In, Repository } from 'typeorm';
+import { updateStudentCountForReports } from '../utils/attReportActions.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -62,6 +63,10 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
 
       case 'teacherReportFile': {
         return this.handleTeacherReportFile(req, extra);
+      }
+
+      case 'updateStudentCount': {
+        return this.handleUpdateStudentCount(req, extra);
       }
 
       default:
@@ -149,6 +154,11 @@ class AttReportPricingService<T extends Entity | AttReport> extends BaseEntitySe
     }
 
     return 'סטטוס מיילים:\n' + responses.join('\n');
+  }
+
+  private async handleUpdateStudentCount(req: CrudRequest, extra: any): Promise<string> {
+    const ids = extra.ids.toString().split(',').map(Number);
+    return updateStudentCountForReports(this.dataSource, ids);
   }
 }
 

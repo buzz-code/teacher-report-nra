@@ -17,6 +17,7 @@ import { buildExportHeadersForTeacherType, fieldTranslations, getFieldsForTeache
 import { groupDataByKeys } from '../utils/reportData.util';
 import { sendExcelReportToTeacher } from '../utils/mailReport.util';
 import { In } from 'typeorm';
+import { updateStudentCountForReports } from '../utils/attReportActions.util';
 
 /**
  * Build price breakdown export headers for a specific teacher type.
@@ -127,9 +128,18 @@ class AttReportWithPriceService<T extends Entity | AttReportWithPrice> extends B
         return this.handleTeacherReportFile(req, extra);
       }
 
+      case 'updateStudentCount': {
+        return this.handleUpdateStudentCount(req, extra);
+      }
+
       default:
         return super.doAction(req, body);
     }
+  }
+
+  private async handleUpdateStudentCount(req: CrudRequest, extra: any): Promise<string> {
+    const ids = extra.ids.toString().split(',').map(Number);
+    return updateStudentCountForReports(this.dataSource, ids);
   }
 
   /**

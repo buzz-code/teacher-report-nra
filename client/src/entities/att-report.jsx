@@ -28,6 +28,7 @@ import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
+import { UpdateStudentCountButton } from './UpdateStudentCountButton';
 import { shouldShowField, getTeacherTypeKeyByTeacherTypeId, getTeacherTypeKeyByTeacherId } from '../utils/attReportFields';
 
 const filters = [
@@ -68,7 +69,8 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
     }, [dataProvider, setSelectedTeacherTypeKey, selectedTeacherTypeId]);
 
     const additionalBulkButtons = [
-        isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך מורה" />
+        isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך מורה" />,
+        isAdmin && <UpdateStudentCountButton key="updateStudentCount" />
     ];
 
     return (

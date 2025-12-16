@@ -28,6 +28,7 @@ import { calculatePriceExplanation, createPriceMap } from '../utils/priceCalcula
 import { shouldShowField, getTeacherTypeKeyByTeacherTypeId } from '../utils/attReportFields';
 import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
 import { CommonRichTextInput } from '@shared/components/fields/CommonRichTextInput';
+import { UpdateStudentCountButton } from './UpdateStudentCountButton';
 
 const defaultMailSubject = "דיווחי נוכחות - {name}";
 const defaultMailBody = "<p>שלום {name},</p><p>מצורף קובץ דיווחי הנוכחות שלך.</p>";
@@ -37,6 +38,7 @@ const additionalBulkButtons = [
     <TextInput key="mailSubject" source="mailSubject" label="נושא המייל" validate={required()} defaultValue={defaultMailSubject} />
     <CommonRichTextInput key="mailBody" source="mailBody" label="תוכן המייל" validate={required()} defaultValue={defaultMailBody} />
   </BulkActionButton>,
+  <UpdateStudentCountButton key="updateStudentCount" />,
 ];
 
 /**
