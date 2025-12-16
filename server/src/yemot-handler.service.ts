@@ -14,6 +14,7 @@ import { formatHebrewDateForIVR } from '@shared/utils/formatting/hebrew.util';
 import { TeacherTypeId } from 'src/utils/fieldsShow.util';
 import { calculateReportPriceSafe, getPriceMapForUser } from 'src/utils/pricing.util';
 import { isYes, parseIntOrNull } from 'src/utils/reportData.util';
+import { getStudentCountForTeacherDate } from 'src/utils/studentGroup.util';
 
 // Interfaces for generic confirmation
 interface ConfirmationField {
@@ -1102,17 +1103,6 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     }
 
     const today = new Date();
-    const studentGroupRepository = this.dataSource.getRepository(StudentGroup);
-
-    const result = await studentGroupRepository
-      .createQueryBuilder('group')
-      .select('SUM(group.studentCount)', 'total')
-      .where('group.userId = :userId', { userId: this.user.id })
-      .andWhere('group.teacherReferenceId = :teacherId', { teacherId: this.teacher.id })
-      .andWhere('(group.startDate IS NULL OR group.startDate <= :today)', { today })
-      .andWhere('(group.endDate IS NULL OR group.endDate >= :today)', { today })
-      .getRawOne();
-
-    return parseInt(result?.total) || 0;
+    return getStudentCountForTeacherDate(this.dataSource, this.user.id, this.teacher.id, today);
   }
 }

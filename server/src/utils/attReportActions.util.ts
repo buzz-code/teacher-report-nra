@@ -1,6 +1,6 @@
-import { DataSource, In, IsNull, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { AttReport } from '../db/entities/AttReport.entity';
-import { StudentGroup } from '../db/entities/StudentGroup.entity';
+import { getStudentCountForTeacherDate } from './studentGroup.util';
 
 /**
  * Updates the student count for attendance reports based on the student groups table.
@@ -11,7 +11,6 @@ import { StudentGroup } from '../db/entities/StudentGroup.entity';
  */
 export async function updateStudentCountForReports(dataSource: DataSource, ids: number[]): Promise<string> {
   const attReportRepo = dataSource.getRepository(AttReport);
-  const studentGroupRepo = dataSource.getRepository(StudentGroup);
 
   const reports = await attReportRepo.find({
     where: { id: In(ids) },
@@ -23,16 +22,12 @@ export async function updateStudentCountForReports(dataSource: DataSource, ids: 
   for (const report of reports) {
     if (!report.teacherReferenceId || !report.reportDate) continue;
 
-    const result = await studentGroupRepo
-      .createQueryBuilder('group')
-      .select('SUM(group.studentCount)', 'total')
-      .where('group.userId = :userId', { userId: report.userId })
-      .andWhere('group.teacherReferenceId = :teacherId', { teacherId: report.teacherReferenceId })
-      .andWhere('(group.startDate IS NULL OR group.startDate <= :reportDate)', { reportDate: report.reportDate })
-      .andWhere('(group.endDate IS NULL OR group.endDate >= :reportDate)', { reportDate: report.reportDate })
-      .getRawOne();
-
-    const count = parseInt(result?.total) || 0;
+    const count = await getStudentCountForTeacherDate(
+      dataSource,
+      report.userId,
+      report.teacherReferenceId,
+      report.reportDate
+    );
 
     if (count > 0) {
       report.howManyStudents = count;
