@@ -185,34 +185,59 @@ export function calculateAttendanceReportPriceWithExplanation(
   };
 
   // Helper function to add boolean field pricing with explanation
-  const addBooleanPrice = (condition: boolean | null | undefined, fieldKey: string, codeSuffix: string): void => {
+  const addBooleanPrice = (
+    condition: boolean | null | undefined,
+    fieldKey: string,
+    codeSuffix: string,
+    factor = 1,
+  ): void => {
     if (condition) {
       const code = prefix + codeSuffix;
       const bonus = getPrice(priceMap, code);
-      totalPrice += bonus;
+      const subtotal = bonus * factor;
+      totalPrice += subtotal;
 
       components.push({
         fieldKey,
         multiplier: bonus,
-        subtotal: Math.round(bonus * 100) / 100,
+        factor: factor !== 1 ? factor : undefined,
+        subtotal: Math.round(subtotal * 100) / 100,
         isBonus: true,
       });
     }
   };
 
+  // Calculate multiplier for seminar teachers (per student)
+  const seminarMultiplier = teacherTypeId === TeacherTypeId.SEMINAR_KITA ? attReport.howManyStudents || 0 : 1;
+
   // Add pricing based on student counts
-  addNumericPrice(attReport.howManyStudents, 'howManyStudents', 'student_multiplier', 0.5);
-  addNumericPrice(attReport.howManyStudentsTeached, 'howManyStudentsTeached', 'student_multiplier', 0.5);
-  addNumericPrice(attReport.howManyStudentsWatched, 'howManyStudentsWatched', 'student_multiplier', 0.5);
+  addNumericPrice(attReport.howManyStudents, 'howManyStudents', 'student_multiplier');
+  addNumericPrice(attReport.howManyStudentsTeached, 'howManyStudentsTeached', 'student_multiplier');
+  addNumericPrice(attReport.howManyStudentsWatched, 'howManyStudentsWatched', 'student_multiplier');
   addNumericPrice(attReport.howManyStudentsHelpTeached, 'howManyStudentsHelpTeached', 'help_taught_multiplier');
 
   // Add pricing based on lesson counts
   addNumericPrice(attReport.howManyLessons, 'howManyLessons', 'lesson_multiplier');
   addNumericPrice(attReport.howManyYalkutLessons, 'howManyYalkutLessons', 'yalkut_lesson_multiplier');
-  addNumericPrice(attReport.howManyDiscussingLessons, 'howManyDiscussingLessons', 'discussing_lesson_multiplier');
+  addNumericPrice(
+    attReport.howManyDiscussingLessons,
+    'howManyDiscussingLessons',
+    'discussing_lesson_multiplier',
+    seminarMultiplier,
+  );
   addNumericPrice(attReport.howManyWatchedLessons, 'howManyWatchedLessons', 'watched_lesson_multiplier');
-  addNumericPrice(attReport.howManyWatchOrIndividual, 'howManyWatchOrIndividual', 'watch_individual_multiplier');
-  addNumericPrice(attReport.howManyTeachedOrInterfering, 'howManyTeachedOrInterfering', 'interfere_teach_multiplier');
+  addNumericPrice(
+    attReport.howManyWatchOrIndividual,
+    'howManyWatchOrIndividual',
+    'watch_individual_multiplier',
+    seminarMultiplier,
+  );
+  addNumericPrice(
+    attReport.howManyTeachedOrInterfering,
+    'howManyTeachedOrInterfering',
+    'interfere_teach_multiplier',
+    seminarMultiplier,
+  );
 
   // Add pricing based on methodical work
   addNumericPrice(attReport.howManyMethodic, 'howManyMethodic', 'methodic_multiplier');
@@ -222,7 +247,7 @@ export function calculateAttendanceReportPriceWithExplanation(
 
   // Add bonuses for special activities
   addBooleanPrice(attReport.wasPhoneDiscussing, 'wasPhoneDiscussing', 'phone_discussion_bonus');
-  addBooleanPrice(attReport.wasKamal, 'wasKamal', 'kamal_bonus');
+  addBooleanPrice(attReport.wasKamal, 'wasKamal', 'kamal_bonus', seminarMultiplier);
   addBooleanPrice(attReport.wasCollectiveWatch, 'wasCollectiveWatch', 'collective_watch_bonus');
   addBooleanPrice(attReport.isTaarifHulia, 'isTaarifHulia', 'taarif_hulia_bonus');
   addBooleanPrice(attReport.isTaarifHulia2, 'isTaarifHulia2', 'taarif_hulia2_bonus');

@@ -13,6 +13,7 @@ export interface PriceFieldConfig {
   priceColumn: string; // Column name in user_price_pivot
   factor?: number; // Multiplier factor (default 1, use -0.5 for absences, 0.5 for watched)
   isBonus?: boolean; // True for boolean fields (no quantity multiplication)
+  multiplyByStudents?: boolean; // Multiply by how_many_students
   teacherTypes: TeacherTypeId[]; // Which teacher types use this field
 }
 
@@ -73,6 +74,7 @@ export const PRICE_FIELDS: PriceFieldConfig[] = [
   {
     reportColumn: 'how_many_discussing_lessons',
     priceColumn: 'seminar_discuss',
+    multiplyByStudents: true,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
   },
   {
@@ -93,6 +95,7 @@ export const PRICE_FIELDS: PriceFieldConfig[] = [
   {
     reportColumn: 'how_many_watch_or_individual',
     priceColumn: 'seminar_watch',
+    multiplyByStudents: true,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
   },
   {
@@ -103,6 +106,7 @@ export const PRICE_FIELDS: PriceFieldConfig[] = [
   {
     reportColumn: 'how_many_teached_or_interfering',
     priceColumn: 'seminar_interfere',
+    multiplyByStudents: true,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
   },
   {
@@ -137,6 +141,7 @@ export const PRICE_FIELDS: PriceFieldConfig[] = [
     reportColumn: 'was_kamal',
     priceColumn: 'seminar_kamal',
     isBonus: true,
+    multiplyByStudents: true,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
   },
   {
@@ -187,7 +192,10 @@ function generateTotalPriceByTeacherType(): string {
     const components = applicableFields.map((f) => {
       const factor = f.factor ?? 1;
       const priceExpr = factor !== 1 ? `up.${f.priceColumn} * ${factor}` : `up.${f.priceColumn}`;
-      return `COALESCE(r.${f.reportColumn} * ${priceExpr}, 0)`;
+      const quantityExpr = f.multiplyByStudents
+        ? `r.${f.reportColumn} * r.how_many_students`
+        : `r.${f.reportColumn}`;
+      return `COALESCE(${quantityExpr} * ${priceExpr}, 0)`;
     });
 
     return `WHEN ${tt} THEN -- ${TeacherTypeId[tt]}

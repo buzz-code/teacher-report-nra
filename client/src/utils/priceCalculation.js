@@ -72,6 +72,7 @@ const PRICE_FIELDS = [
     reportField: 'howManyDiscussingLessons',
     priceCode: 'seminar.discussing_lesson_multiplier',
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
+    multiplyByStudents: true,
   },
   {
     reportField: 'howManyDiscussingLessons',
@@ -92,6 +93,7 @@ const PRICE_FIELDS = [
     reportField: 'howManyWatchOrIndividual',
     priceCode: 'seminar.watch_individual_multiplier',
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
+    multiplyByStudents: true,
   },
   {
     reportField: 'howManyWatchOrIndividual',
@@ -102,6 +104,7 @@ const PRICE_FIELDS = [
     reportField: 'howManyTeachedOrInterfering',
     priceCode: 'seminar.interfere_teach_multiplier',
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
+    multiplyByStudents: true,
   },
   {
     reportField: 'howManyTeachedOrInterfering',
@@ -136,6 +139,7 @@ const PRICE_FIELDS = [
     priceCode: 'seminar.kamal_bonus',
     isBonus: true,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
+    multiplyByStudents: true,
   },
   {
     reportField: 'wasCollectiveWatch',
@@ -197,16 +201,21 @@ export function calculatePriceExplanation(report, teacherTypeKey, priceMap) {
   for (const field of applicableFields) {
     const value = report[field.reportField];
     const multiplier = priceMap.get(field.priceCode) ?? 0;
-    const factor = field.factor ?? 1;
+    let factor = field.factor ?? 1;
+
+    if (field.multiplyByStudents) {
+      factor *= report.howManyStudents || 0;
+    }
 
     if (field.isBonus) {
       // Boolean bonus - add if truthy
       if (value) {
-        const subtotal = multiplier;
+        const subtotal = multiplier * factor;
         totalPrice += subtotal;
         components.push({
           fieldKey: field.reportField,
           multiplier,
+          factor: factor !== 1 ? factor : undefined,
           subtotal: Math.round(subtotal * 100) / 100,
           isBonus: true,
         });
