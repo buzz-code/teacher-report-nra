@@ -5,6 +5,7 @@ import {
   ReferenceField,
   DateInput,
   FunctionField,
+  NumberField,
   useTranslate,
   useGetList,
   useGetIdentity,
@@ -223,7 +224,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
       {/* Field-specific prices based on teacher type */}
       {/* SEMINAR_KITA, KINDERGARTEN */}
-      {shouldShowField('howManyStudents', selectedTeacherTypeKey) && <FieldPriceField source="howManyStudents" priceMap={priceMap} isLoading={isLoading} />}
+      {shouldShowField('howManyStudents', selectedTeacherTypeKey) && <NumberField source="howManyStudents" />}
 
       {/* SEMINAR_KITA, SPECIAL_EDUCATION */}
       {shouldShowField('howManyLessons', selectedTeacherTypeKey) && <FieldPriceField source="howManyLessons" priceMap={priceMap} isLoading={isLoading} />}
