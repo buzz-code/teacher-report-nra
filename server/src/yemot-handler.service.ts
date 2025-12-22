@@ -409,6 +409,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         teacherReferenceId: this.teacher.id,
         reportDate: new Date(date),
       },
+      relations: ['salaryReport'],
     });
   }
 
