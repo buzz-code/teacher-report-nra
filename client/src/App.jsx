@@ -41,6 +41,7 @@ import salaryReport from "src/entities/salary-report";
 import reportableItemWithPrice from "src/entities/reportable-item-with-price";
 import answerWithPrice from "src/entities/answer-with-price";
 import salaryReportByTeacher from "src/entities/salary-report-by-teacher";
+import TeacherValidationPivot from "src/pivots/TeacherValidationPivot";
 
 // Common entities and utilities
 import text from "@shared/components/common-entities/text";
@@ -148,6 +149,7 @@ const App = () => (
             </>}
 
             <CustomRoutes>
+              <Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />
               <Route path="/yemot-simulator" element={<YemotSimulator />} />
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/pages-view" element={<PageList />} />

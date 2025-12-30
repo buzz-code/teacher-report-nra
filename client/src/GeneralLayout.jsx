@@ -23,7 +23,11 @@ const customMenuItems = [
 
 const menuGroups = [
     { name: 'data', icon: <DatasetIcon /> },
-    { name: 'reports', icon: <SummarizeIcon /> },
+    {
+        name: 'reports', icon: <SummarizeIcon />, routes: [
+            <MenuItemLink key="teacher_validation_pivot" to="/teacher-validation-pivot" primaryText="דוח פיבוט תאריכים" leftIcon={<SummarizeIcon />} />
+        ]
+    },
     { name: 'settings', icon: <SettingsIcon /> },
     { name: 'admin', icon: <AdminPanelSettingsIcon /> },
 ];

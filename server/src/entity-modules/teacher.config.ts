@@ -8,6 +8,10 @@ import { Teacher } from 'src/db/entities/Teacher.entity';
 import { TeacherQuestion } from '../db/entities/TeacherQuestion.entity';
 import { Question } from '../db/entities/Question.entity';
 import { BadRequestException } from '@nestjs/common';
+import { AttReport } from 'src/db/entities/AttReport.entity';
+import { Between, In } from 'typeorm';
+import { groupDataByKeys, getUniqueValues } from 'src/utils/reportData.util';
+import { formatDate } from '@shared/utils/formatting/formatter.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -100,6 +104,56 @@ class TeacherService<T extends Entity | Teacher> extends BaseEntityService<T> {
       message: `Successfully assigned question to ${result.length} teacher(s)`,
       count: result.length,
     };
+  }
+
+  protected async populatePivotData(pivotName: string, list: T[], extra: any, filter: any) {
+    switch (pivotName) {
+      case 'TeacherValidation':
+        return this.populateTeacherValidationPivot(list as Teacher[], extra);
+    }
+  }
+
+  private async populateTeacherValidationPivot(list: Teacher[], extra: any) {
+    const startDate = extra.startDate;
+    const endDate = extra.endDate;
+
+    if (!startDate || !endDate) return;
+
+    const teacherIds = list.map(t => t.id);
+    const reports = await this.dataSource.getRepository(AttReport).find({
+      where: {
+        teacherReferenceId: In(teacherIds),
+        reportDate: Between(startDate, endDate)
+      }
+    });
+
+    const reportsMap = groupDataByKeys(reports, ['teacherReferenceId']);
+
+    // Generate headers only for dates with reports
+    const uniqueDates = getUniqueValues(reports, r => 
+      typeof r.reportDate === 'string' ? r.reportDate : r.reportDate.toISOString().split('T')[0]
+    );
+
+    const sortedDates = uniqueDates.sort();
+    const dateHeaders = sortedDates.map(dateKey => ({
+      value: dateKey,
+      label: formatDate(new Date(dateKey))
+    }));
+
+    list.forEach(teacher => {
+      const teacherReports = reportsMap[teacher.id] || [];
+      const teacherDateMap = new Set(teacherReports.map(r => 
+        typeof r.reportDate === 'string' ? r.reportDate : r.reportDate.toISOString().split('T')[0]
+      ));
+
+      dateHeaders.forEach(h => {
+        (teacher as any)[h.value] = teacherDateMap.has(h.value) ? 'V' : 'X';
+      });
+    });
+
+    if (list.length > 0) {
+      (list[0] as any).headers = dateHeaders;
+    }
   }
 }
 

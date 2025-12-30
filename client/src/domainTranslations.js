@@ -101,6 +101,14 @@ export default {
                 priceExplanation: 'פירוט מחיר',
             }
         },
+        'teacher/pivot?extra.pivot=TeacherValidation': {
+            name: 'דוח פיבוט תאריכים',
+            fields: {
+                ...generalResourceFieldsTranslation,
+                name: 'שם המורה',
+                teacherTypeReferenceId: 'סוג מורה',
+            }
+        },
         att_type: {
             name: 'סוג פעילות |||| סוגי פעילויות',
             fields: {
