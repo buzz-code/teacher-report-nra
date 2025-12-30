@@ -3,11 +3,9 @@
 // import { Lesson } from 'src/db/entities/Lesson.entity';
 // import { In } from 'typeorm';
 // import * as path from 'path';
-// import { Student } from 'src/db/entities/Student.entity';
 // import { groupDataByKeys, groupDataByKeysAndCalc } from 'src/utils/reportData.util';
 // import { getCurrentHebrewYear } from '@shared/utils/entity/year.util';
 // import { AttReportAndGrade } from 'src/db/view-entities/AttReportAndGrade.entity';
-// import { calcReportsData, getDisplayGrade, getGradeEffect, getUnknownAbsCount } from 'src/utils/studentReportData.util';
 // import { KnownAbsence } from 'src/db/entities/KnownAbsence.entity';
 // import { AttGradeEffect } from 'src/db/entities/AttGradeEffect';
 // import { BadRequestException } from '@nestjs/common';

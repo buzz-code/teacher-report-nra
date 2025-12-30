@@ -83,9 +83,6 @@ export interface DatabaseSetup {
   /** Existing reports (for testing overwrite scenarios) */
   existingReports?: any[];
 
-  /** Students (for student count and TZ lookup) */
-  students?: any[];
-
   /** Questions (for dynamic questions) */
   questions?: any[];
 

@@ -24,7 +24,6 @@ import { Question } from '../../db/entities/Question.entity';
 import { Answer } from '../../db/entities/Answer.entity';
 import { WorkingDate } from '../../db/entities/WorkingDate.entity';
 import { TeacherQuestion } from '../../db/entities/TeacherQuestion.entity';
-import { Student } from '../../db/entities/Student.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 
 /**
@@ -150,28 +149,6 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<TestScenario,
             );
           }
           return Promise.resolve(null);
-        }),
-      }),
-
-      student: builder.custom(Student, {
-        findOne: jest.fn((options) => {
-          const setup = getCurrentSetup();
-          if (setup.students && options?.where?.tz) {
-            return Promise.resolve(setup.students.find((s) => s.tz === options.where.tz) || null);
-          }
-          return Promise.resolve(null);
-        }),
-        count: jest.fn().mockImplementation(() => {
-          const setup = getCurrentSetup();
-          return Promise.resolve(setup.students?.length || 0);
-        }),
-        createQueryBuilder: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnThis(),
-          andWhere: jest.fn().mockReturnThis(),
-          getCount: jest.fn().mockImplementation(() => {
-            const setup = getCurrentSetup();
-            return Promise.resolve(setup.students?.length || 0);
-          }),
         }),
       }),
 

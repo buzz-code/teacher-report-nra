@@ -65,17 +65,7 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
    * Add students
    */
   withStudents(count: number, customStudents?: any[]): this {
-    if (customStudents) {
-      this.setupData.students = customStudents;
-    } else {
-      this.setupData.students = Array(count)
-        .fill(null)
-        .map((_, i) => ({
-          id: i + 1,
-          name: `תלמידה ${i + 1}`,
-          tz: String((i + 1) * 111111111).padStart(9, '0'),
-        }));
-    }
+    // Students functionality removed
     return this;
   }
 

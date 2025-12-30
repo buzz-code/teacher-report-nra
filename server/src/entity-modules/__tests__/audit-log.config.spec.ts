@@ -1,6 +1,5 @@
 import config from '../audit-log.config';
 import { AuditLog } from '@shared/entities/AuditLog.entity';
-import { Student } from 'src/db/entities/Student.entity';
 import { Teacher } from 'src/db/entities/Teacher.entity';
 import { Connection, DataSource, Repository } from 'typeorm';
 import { getJsonFormatter } from '@shared/utils/formatting/formatter.util';
@@ -49,7 +48,7 @@ describe('audit-log.config', () => {
   describe('AuditLogService', () => {
     let service;
     let mockRepo: any;
-    let mockStudentRepo: any;
+    let mockTeacherRepo: any;
     let mockDataSource: any;
     let mockMailService: any;
 
@@ -75,12 +74,12 @@ describe('audit-log.config', () => {
         },
       } as unknown as Repository<AuditLog>;
 
-      mockStudentRepo = {
+      mockTeacherRepo = {
         insert: jest.fn(),
       };
 
       mockDataSource = {
-        getRepository: jest.fn().mockReturnValue(mockStudentRepo),
+        getRepository: jest.fn().mockReturnValue(mockTeacherRepo),
       };
 
       mockMailService = {
@@ -98,16 +97,16 @@ describe('audit-log.config', () => {
           {
             id: 1,
             entityId: 100,
-            entityName: 'student',
+            entityName: 'teacher',
             operation: 'DELETE',
-            entityData: { name: 'Test Student' },
+            entityData: { name: 'Test Teacher' },
             isReverted: false,
           },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
         mockRepo.update.mockResolvedValue({ affected: 1 });
-        mockStudentRepo.insert.mockResolvedValue({});
+        mockTeacherRepo.insert.mockResolvedValue({});
 
         const req = {
           parsed: {
@@ -124,8 +123,8 @@ describe('audit-log.config', () => {
         expect(mockRepo.findBy).toHaveBeenCalledWith({
           id: expect.any(Object),
         });
-        expect(mockStudentRepo.insert).toHaveBeenCalledWith({
-          name: 'Test Student',
+        expect(mockTeacherRepo.insert).toHaveBeenCalledWith({
+          name: 'Test Teacher',
           id: 100,
         });
         expect(mockRepo.update).toHaveBeenCalledWith({ id: 1 }, { isReverted: true });
@@ -136,9 +135,9 @@ describe('audit-log.config', () => {
           {
             id: 1,
             entityId: 100,
-            entityName: 'student',
+            entityName: 'teacher',
             operation: 'UNKNOWN',
-            entityData: { name: 'Test Student' },
+            entityData: { name: 'Test Teacher' },
             isReverted: false,
           },
         ];
