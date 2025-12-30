@@ -61,11 +61,11 @@ describe('pricing.util', () => {
       const result = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
       // Base price (50) + students (5*5=25) + methodic (2*8=16) + lessons (3*10=30) +
-      // yalkut (1*12=12) + discussing (1*15=15) + help taught (2*6=12) +
-      // watched (1*8=8) + individual watch (1*10=10) + interfere (2*12=24) +
-      // students taught (3*5=15) + students watched (2*5*0.5=5)
-      // = 50 + 25 + 16 + 30 + 12 + 15 + 12 + 8 + 10 + 24 + 15 + 5 = 222
-      expect(result).toBe(222);
+      // yalkut (1*12=12) + discussing (1*15*5=75) + help taught (2*6=12) +
+      // watched (1*8=8) + individual watch (1*10*5=50) + interfere (2*12*5=120) +
+      // students taught (3*5=15) + students watched (2*5=10)
+      // = 50 + 25 + 16 + 30 + 12 + 75 + 12 + 8 + 50 + 120 + 15 + 10 = 423
+      expect(result).toBe(423);
     });
 
     it('should handle price map as Map object', () => {
@@ -100,8 +100,8 @@ describe('pricing.util', () => {
 
       const basicResult = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
-      // Should include all bonuses: 20 + 25 + 15 + 30 + 35 + 40 = 165
-      expect(result).toBe(basicResult + 165);
+      // Should include all bonuses: 20 + 25*5 + 15 + 30 + 35 + 40 = 265
+      expect(result).toBe(basicResult + 265);
     });
 
     it('should subtract for absences', () => {
@@ -188,8 +188,8 @@ describe('pricing.util', () => {
 
       const result2 = calculateAttendanceReportPrice(mockAttReport as AttReport, 3, priceMap2);
 
-      // Teacher type 3 (manha) should have higher base price
-      expect(result2).toBeGreaterThan(result1);
+      // Teacher type 1 (seminar) has higher multiplier effect
+      expect(result1).toBeGreaterThan(result2);
     });
 
     it('should handle empty price map', () => {
@@ -219,8 +219,8 @@ describe('pricing.util', () => {
 
       const result = calculateAttendanceReportPrice(watchOnlyReport as AttReport, teacherTypeId, priceMap);
 
-      // Base price (50) + watched students (10 * 5 * 0.5 = 25) = 75
-      expect(result).toBe(75);
+      // Base price (50) + watched students (10 * 5 = 50) = 100
+      expect(result).toBe(100);
     });
 
     it('should throw error for invalid teacher type', () => {

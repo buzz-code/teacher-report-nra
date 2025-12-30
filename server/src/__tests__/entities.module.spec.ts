@@ -38,7 +38,6 @@ import paymentTrackConfig from '../entity-modules/payment-track.config';
 import textConfig from '../entity-modules/text.config';
 import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 // Shared entities used by teacher report system
-import studentConfig from '../entity-modules/student.config';
 import teacherConfig from '../entity-modules/teacher.config';
 import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
@@ -82,7 +81,6 @@ describe('EntitiesModule', () => {
                 pageConfig.entity,
                 paymentTrackConfig.entity,
                 textConfig.entity,
-                studentConfig.entity,
                 teacherConfig.entity,
                 YemotCall,
                 TextByUser,
@@ -123,7 +121,6 @@ describe('EntitiesModule', () => {
       { name: 'paymentTrackConfig', config: paymentTrackConfig },
       { name: 'textConfig', config: textConfig },
       { name: 'mailAddressConfig', config: mailAddressConfig },
-      { name: 'studentConfig', config: studentConfig },
       { name: 'teacherConfig', config: teacherConfig },
     ];
 

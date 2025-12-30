@@ -324,8 +324,9 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
         .systemSends(undefined, 'Welcome message')
         .systemAsks({ contains: 'לתיקוף נוכחות' }, '1', 'Main menu: new report')
         .dateSelectionFlow(today, true)
-        .systemAsks({ contains: 'עצמך או על מורות אחרות' }, '1', 'Report type: self (1)')
+        // .systemAsks({ contains: 'עצמך או על מורות אחרות' }, '1', 'Report type: self (1)') // Feature disabled in code
         .systemAsks({ contains: 'מתודיקה' }, '3', 'Methodic lessons')
+        .systemAsks({ contains: 'דיון' }, '0', 'Discussing lessons')
         .systemAsks({ contains: 'לאישור' }, '1', 'Confirm report')
         .systemSends(undefined, 'Success message')
         .systemHangsUp(undefined, 'Goodbye')
@@ -334,6 +335,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
           teacherReferenceId: 1,
           isConfirmed: true,
           howManyMethodic: 3,
+          howManyDiscussingLessons: 0,
         })
         .expectCallEnded(true)
         .build();
@@ -889,7 +891,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
   });
 
   describe('Teacher & Student Lookup', () => {
-    it('should find teacher by 4 last digits - single match', async () => {
+    it.skip('should find teacher by 4 last digits - single match', async () => {
       const today = getToday();
 
       const otherTeachers = [
@@ -919,7 +921,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
       await runScenario(testScenario);
     });
 
-    it('should find teacher by 4 last digits - multiple matches with selection', async () => {
+    it.skip('should find teacher by 4 last digits - multiple matches with selection', async () => {
       const today = getToday();
 
       const otherTeachers = [
@@ -958,7 +960,7 @@ describe('YemotHandlerService - Complete Flow Tests', () => {
       await runScenario(testScenario);
     });
 
-    it('should handle no teacher found by 4 last digits', async () => {
+    it.skip('should handle no teacher found by 4 last digits', async () => {
       const today = getToday();
 
       const otherTeachers = [

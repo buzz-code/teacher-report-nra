@@ -100,6 +100,9 @@ export interface DatabaseSetup {
   /** Other teachers (for MANHA lookup) */
   otherTeachers?: any[];
 
+  /** Student groups (for student count) */
+  studentGroups?: any[];
+
   /** Saved reports tracking (populated during test) - convention: saved + PascalCase + s */
   savedAttReports?: any[];
 

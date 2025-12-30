@@ -184,7 +184,7 @@ describe('audit-log.config', () => {
 
         const result = await service.doAction(req, {});
         expect(result).toBe('reverted 1 items');
-        expect(mockStudentRepo.insert).not.toHaveBeenCalled();
+        expect(mockTeacherRepo.insert).not.toHaveBeenCalled();
       });
 
       it('should skip unknown entity names', async () => {
@@ -212,7 +212,7 @@ describe('audit-log.config', () => {
 
         const result = await service.doAction(req, {});
         expect(result).toBe('reverted 1 items');
-        expect(mockStudentRepo.insert).not.toHaveBeenCalled();
+        expect(mockTeacherRepo.insert).not.toHaveBeenCalled();
       });
 
       it('should handle multiple audit logs', async () => {
@@ -220,24 +220,24 @@ describe('audit-log.config', () => {
           {
             id: 1,
             entityId: 100,
-            entityName: 'student',
+            entityName: 'teacher',
             operation: 'DELETE',
-            entityData: { name: 'Student 1' },
+            entityData: { name: 'Teacher 1' },
             isReverted: false,
           },
           {
             id: 2,
             entityId: 101,
-            entityName: 'student',
+            entityName: 'teacher',
             operation: 'DELETE',
-            entityData: { name: 'Student 2' },
+            entityData: { name: 'Teacher 2' },
             isReverted: false,
           },
         ];
 
         mockRepo.findBy.mockResolvedValue(auditLogs);
         mockRepo.update.mockResolvedValue({ affected: 1 });
-        mockStudentRepo.insert.mockResolvedValue({});
+        mockTeacherRepo.insert.mockResolvedValue({});
 
         const req = {
           parsed: {
@@ -250,7 +250,7 @@ describe('audit-log.config', () => {
 
         const result = await service.doAction(req, {});
         expect(result).toBe('reverted 2 items');
-        expect(mockStudentRepo.insert).toHaveBeenCalledTimes(2);
+        expect(mockTeacherRepo.insert).toHaveBeenCalledTimes(2);
         expect(mockRepo.update).toHaveBeenCalledTimes(2);
       });
     });

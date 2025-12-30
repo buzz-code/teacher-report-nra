@@ -29,17 +29,13 @@ describe('Reference Field Normalization Unit Tests', () => {
     });
 
     describe('Question Entity', () => {
-      it('should have dual fields for teacherType and questionType references', () => {
+      it('should have dual fields for questionType references', () => {
         const question = new Question();
 
         // Test that properties can be set (property exists)
-        question.teacherTypeKey = 5;
-        question.teacherTypeReferenceId = 10;
         question.questionTypeKey = 15;
         question.questionTypeReferenceId = 20;
 
-        expect(question.teacherTypeKey).toBe(5);
-        expect(question.teacherTypeReferenceId).toBe(10);
         expect(question.questionTypeKey).toBe(15);
         expect(question.questionTypeReferenceId).toBe(20);
 
@@ -158,14 +154,12 @@ describe('Reference Field Normalization Unit Tests', () => {
     it('should follow consistent naming patterns for key fields', () => {
       // Key fields should end with 'Key' (for numeric keys) or be named 'tz' (for TZ strings)
       const question = new Question();
-      question.teacherTypeKey = 1;
       question.questionTypeKey = 2;
 
       const attReport = new AttReport();
       attReport.teacherTz = '123456789';
       attReport.activityTypeKey = 3;
 
-      expect(question.teacherTypeKey).toBe(1);
       expect(question.questionTypeKey).toBe(2);
       expect(attReport.teacherTz).toBe('123456789');
       expect(attReport.activityTypeKey).toBe(3);
@@ -174,14 +168,12 @@ describe('Reference Field Normalization Unit Tests', () => {
     it('should follow consistent naming patterns for reference ID fields', () => {
       // Reference ID fields should end with 'ReferenceId'
       const question = new Question();
-      question.teacherTypeReferenceId = 10;
       question.questionTypeReferenceId = 20;
 
       const answer = new Answer();
       answer.teacherReferenceId = 30;
       answer.questionReferenceId = 40;
 
-      expect(question.teacherTypeReferenceId).toBe(10);
       expect(question.questionTypeReferenceId).toBe(20);
       expect(answer.teacherReferenceId).toBe(30);
       expect(answer.questionReferenceId).toBe(40);

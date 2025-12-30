@@ -25,6 +25,8 @@ import { Answer } from '../../db/entities/Answer.entity';
 import { WorkingDate } from '../../db/entities/WorkingDate.entity';
 import { TeacherQuestion } from '../../db/entities/TeacherQuestion.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
+import { PriceByUser } from '../../db/view-entities/PriceByUser.entity';
+import { StudentGroup } from '../../db/entities/StudentGroup.entity';
 
 /**
  * Main test scenario runner (extends generic with project-specific logic)
@@ -162,6 +164,20 @@ export class YemotTestScenarioRunner extends GenericScenarioRunner<TestScenario,
           }
           // Return key as default
           return Promise.resolve({ value: textKey, filepath: null });
+        }),
+      }),
+
+      priceByUser: builder.standard(PriceByUser),
+      studentGroup: builder.custom(StudentGroup, {
+        createQueryBuilder: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getRawOne: jest.fn().mockImplementation(() => {
+            const setup = getCurrentSetup();
+            const total = setup.studentGroups?.reduce((sum, group) => sum + (group.studentCount || 0), 0) || 0;
+            return Promise.resolve({ total });
+          }),
         }),
       }),
     };

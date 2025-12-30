@@ -62,10 +62,16 @@ export class ScenarioBuilder extends GenericScenarioBuilder<TestScenario, Databa
   }
 
   /**
-   * Add students
+   * Add students (via StudentGroup)
    */
-  withStudents(count: number, customStudents?: any[]): this {
-    // Students functionality removed
+  withStudents(count: number): this {
+    this.setupData.studentGroups = [
+      {
+        userId: this.setupData.user?.id || 1,
+        teacherReferenceId: this.setupData.teacher?.id || 1,
+        studentCount: count,
+      },
+    ];
     return this;
   }
 
