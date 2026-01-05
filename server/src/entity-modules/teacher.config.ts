@@ -11,7 +11,7 @@ import { BadRequestException } from '@nestjs/common';
 import { AttReport } from 'src/db/entities/AttReport.entity';
 import { Between, In } from 'typeorm';
 import { groupDataByKeys, getUniqueValues } from 'src/utils/reportData.util';
-import { formatDate } from '@shared/utils/formatting/formatter.util';
+import { formatHebrewDate } from '@shared/utils/formatting/formatter.util';
 
 function getConfig(): BaseEntityModuleOptions {
   return {
@@ -137,7 +137,7 @@ class TeacherService<T extends Entity | Teacher> extends BaseEntityService<T> {
     const sortedDates = uniqueDates.sort();
     const dateHeaders = sortedDates.map(dateKey => ({
       value: dateKey,
-      label: formatDate(new Date(dateKey))
+      label: formatHebrewDate(new Date(dateKey))
     }));
 
     list.forEach(teacher => {
