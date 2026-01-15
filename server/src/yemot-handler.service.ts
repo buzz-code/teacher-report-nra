@@ -1103,7 +1103,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       return 0;
     }
 
-    const today = new Date();
-    return getStudentCountForTeacherDate(this.dataSource, this.user.id, this.teacher.id, today);
+    const reportDate = this.reportDate ? new Date(this.reportDate) : new Date();
+    return getStudentCountForTeacherDate(this.dataSource, this.user.id, this.teacher.id, reportDate);
   }
 }

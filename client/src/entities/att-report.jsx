@@ -70,7 +70,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
     const additionalBulkButtons = [
         isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך מורה" />,
-        isAdmin && <UpdateStudentCountButton key="updateStudentCount" />
+        <UpdateStudentCountButton key="updateStudentCount" />
     ];
 
     return (
