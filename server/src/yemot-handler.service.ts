@@ -223,9 +223,9 @@ export class YemotHandlerService extends BaseYemotHandlerService {
           // Validate numeric answer is within range
           const numericAnswer = parseInt(answer);
           if (
-            teacherQuestion.question.upperLimit !== null &&
-            teacherQuestion.question.lowerLimit !== null &&
-            (numericAnswer < teacherQuestion.question.lowerLimit || numericAnswer > teacherQuestion.question.upperLimit)
+            (teacherQuestion.question.upperLimit != null && numericAnswer > teacherQuestion.question.upperLimit) ||
+            (teacherQuestion.question.lowerLimit != null && numericAnswer < teacherQuestion.question.lowerLimit) ||
+            isNaN(numericAnswer)
           ) {
             await this.sendMessage(await this.getTextByUserId('VALIDATION.OUT_OF_RANGE'));
             // Loop continues to re-ask
