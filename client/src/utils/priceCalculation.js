@@ -119,11 +119,10 @@ const PRICE_FIELDS = [
     teacherTypes: [TeacherTypeId.MANHA],
   },
 
-  // Absences (negative factor)
+  // Absences
   {
     reportField: 'howManyLessonsAbsence',
-    priceCode: 'seminar.lesson_multiplier',
-    factor: -0.5,
+    priceCode: 'seminar.absence_multiplier',
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
   },
 

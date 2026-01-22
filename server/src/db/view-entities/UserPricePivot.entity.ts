@@ -24,6 +24,7 @@ export const PRICE_CODES: PriceCodeConfig[] = [
   { code: 'seminar.watch_individual_multiplier', columnName: 'seminar_watch' },
   { code: 'seminar.interfere_teach_multiplier', columnName: 'seminar_interfere' },
   { code: 'seminar.discussing_lesson_multiplier', columnName: 'seminar_discuss' },
+  { code: 'seminar.absence_multiplier', columnName: 'seminar_absence' },
   { code: 'seminar.kamal_bonus', columnName: 'seminar_kamal' },
 
   // Manha (type 3)
@@ -36,20 +37,24 @@ export const PRICE_CODES: PriceCodeConfig[] = [
   { code: 'manha.discussing_lesson_multiplier', columnName: 'manha_discuss' },
   { code: 'manha.yalkut_lesson_multiplier', columnName: 'manha_yalkut' },
   { code: 'manha.help_taught_multiplier', columnName: 'manha_help' },
+  { code: 'manha.absence_multiplier', columnName: 'manha_absence' },
 
   // PDS (type 5)
   { code: 'pds.watch_individual_multiplier', columnName: 'pds_watch' },
   { code: 'pds.interfere_teach_multiplier', columnName: 'pds_interfere' },
   { code: 'pds.discussing_lesson_multiplier', columnName: 'pds_discuss' },
+  { code: 'pds.absence_multiplier', columnName: 'pds_absence' },
 
   // Kindergarten (type 6)
   { code: 'kindergarten.student_multiplier', columnName: 'kinder_student' },
   { code: 'kindergarten.collective_watch_bonus', columnName: 'kinder_collective' },
+  { code: 'kindergarten.absence_multiplier', columnName: 'kinder_absence' },
 
   // Special Education (type 7)
   { code: 'special.student_multiplier', columnName: 'special_student' },
   { code: 'special.lesson_multiplier', columnName: 'special_lesson' },
   { code: 'special.phone_discussion_bonus', columnName: 'special_phone' },
+  { code: 'special.absence_multiplier', columnName: 'special_absence' },
 ];
 
 /**
@@ -108,6 +113,9 @@ export class UserPricePivot implements IHasUserId {
   seminar_discuss: number;
 
   @ViewColumn()
+  seminar_absence: number;
+
+  @ViewColumn()
   seminar_kamal: number;
 
   // Manha
@@ -138,6 +146,9 @@ export class UserPricePivot implements IHasUserId {
   @ViewColumn()
   manha_help: number;
 
+  @ViewColumn()
+  manha_absence: number;
+
   // PDS
   @ViewColumn()
   pds_watch: number;
@@ -148,12 +159,18 @@ export class UserPricePivot implements IHasUserId {
   @ViewColumn()
   pds_discuss: number;
 
+  @ViewColumn()
+  pds_absence: number;
+
   // Kindergarten
   @ViewColumn()
   kinder_student: number;
 
   @ViewColumn()
   kinder_collective: number;
+
+  @ViewColumn()
+  kinder_absence: number;
 
   // Special Education
   @ViewColumn()
@@ -164,4 +181,7 @@ export class UserPricePivot implements IHasUserId {
 
   @ViewColumn()
   special_phone: number;
+
+  @ViewColumn()
+  special_absence: number;
 }

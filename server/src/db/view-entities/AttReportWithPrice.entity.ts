@@ -122,12 +122,31 @@ export const PRICE_FIELDS: PriceFieldConfig[] = [
     teacherTypes: [TeacherTypeId.MANHA],
   },
 
-  // Absences (negative factor)
+  // Absences
   {
     reportColumn: 'how_many_lessons_absence',
-    priceColumn: 'seminar_lesson',
-    factor: -0.5,
+    priceColumn: 'seminar_absence',
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
+  },
+  {
+    reportColumn: 'how_many_lessons_absence',
+    priceColumn: 'manha_absence',
+    teacherTypes: [TeacherTypeId.MANHA],
+  },
+  {
+    reportColumn: 'how_many_lessons_absence',
+    priceColumn: 'pds_absence',
+    teacherTypes: [TeacherTypeId.PDS],
+  },
+  {
+    reportColumn: 'how_many_lessons_absence',
+    priceColumn: 'kinder_absence',
+    teacherTypes: [TeacherTypeId.KINDERGARTEN],
+  },
+  {
+    reportColumn: 'how_many_lessons_absence',
+    priceColumn: 'special_absence',
+    teacherTypes: [TeacherTypeId.SPECIAL_EDUCATION],
   },
 
   // Boolean bonuses
@@ -248,8 +267,8 @@ export function generateAttReportWithPriceSQL(): string {
       r.is_taarif_hulia2 AS isTaarifHulia2,
       r.is_taarif_hulia3 AS isTaarifHulia3,
       
-      -- Total calculated price (base + components, minimum 0)
-      GREATEST(0,
+      -- Total calculated price (base + components)
+      (
         COALESCE(up.lesson_base, 0) +
         ${generateTotalPriceByTeacherType()}
       ) AS calculatedPrice

@@ -23,6 +23,7 @@ describe('pricing.util', () => {
         'seminar.taarif_hulia_bonus': 30,
         'seminar.taarif_hulia2_bonus': 35,
         'seminar.taarif_hulia3_bonus': 40,
+        'seminar.absence_multiplier': 50,
       };
       return new Map(Object.entries({ ...defaults, ...overrides }));
     };
@@ -104,7 +105,7 @@ describe('pricing.util', () => {
       expect(result).toBe(basicResult + 265);
     });
 
-    it('should subtract for absences', () => {
+    it('should add for absences', () => {
       const reportWithAbsences: Partial<AttReport> = {
         ...mockAttReport,
         howManyLessonsAbsence: 2,
@@ -117,8 +118,8 @@ describe('pricing.util', () => {
 
       const basicResult = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
-      // Should subtract 2 * 10 * 0.5 = 10 for absences
-      expect(result).toBe(basicResult - 10);
+      // Should add 2 * 50 = 100 for absences (as per new requirements)
+      expect(result).toBe(basicResult + 100);
     });
 
     it('should handle null/undefined values gracefully', () => {

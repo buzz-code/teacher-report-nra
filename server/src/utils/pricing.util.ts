@@ -242,8 +242,8 @@ export function calculateAttendanceReportPriceWithExplanation(
   // Add pricing based on methodical work
   addNumericPrice(attReport.howManyMethodic, 'howManyMethodic', 'methodic_multiplier');
 
-  // Subtract for absences (negative impact on payment)
-  addNumericPrice(attReport.howManyLessonsAbsence, 'howManyLessonsAbsence', 'lesson_multiplier', -0.5);
+  // Add for absences (positive impact on payment as per request)
+  addNumericPrice(attReport.howManyLessonsAbsence, 'howManyLessonsAbsence', 'absence_multiplier');
 
   // Add bonuses for special activities
   addBooleanPrice(attReport.wasPhoneDiscussing, 'wasPhoneDiscussing', 'phone_discussion_bonus');
@@ -253,8 +253,8 @@ export function calculateAttendanceReportPriceWithExplanation(
   addBooleanPrice(attReport.isTaarifHulia2, 'isTaarifHulia2', 'taarif_hulia2_bonus');
   addBooleanPrice(attReport.isTaarifHulia3, 'isTaarifHulia3', 'taarif_hulia3_bonus');
 
-  // Ensure the price doesn't go below zero
-  const finalPrice = Math.max(0, Math.round(totalPrice * 100) / 100);
+  // Ensure the price is rounded correctly
+  const finalPrice = Math.round(totalPrice * 100) / 100;
 
   return {
     price: finalPrice,
