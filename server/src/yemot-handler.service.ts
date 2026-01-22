@@ -352,32 +352,32 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     // Check for existing reports
     // Not for "מורה מנחה"
     // if (this.teacher.teacherType?.key !== TeacherTypeId.MANHA) {
-      const existingReports = await this.getReportsByTeacherIdAndDate(dateStr);
+    const existingReports = await this.getReportsByTeacherIdAndDate(dateStr);
 
-      const relevantFields = [
-        'howManyStudents',
-        'howManyMethodic',
-        'isTaarifHulia',
-        'howManyWatchOrIndividual',
-        'wasCollectiveWatch',
-        'howManyLessons',
-      ];
-      this.existingReport = existingReports.find((report) =>
-        relevantFields.some((field) => report[field] !== null && report[field] !== undefined),
-      );
+    const relevantFields = [
+      'howManyStudents',
+      'howManyMethodic',
+      'isTaarifHulia',
+      'howManyWatchOrIndividual',
+      'wasCollectiveWatch',
+      'howManyLessons',
+    ];
+    this.existingReport = existingReports.find((report) =>
+      relevantFields.some((field) => report[field] !== null && report[field] !== undefined),
+    );
 
-      if (this.existingReport) {
-        if (this.existingReport.salaryReport) {
-          this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
-          return this.getAndValidateReportDate();
-        }
-        // if (this.existingReport.isConfirmed) {
-        // all reports should be created as confirmed - so this block is redundant
-        // this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
-        // return this.getAndValidateReportDate();
-        // }
-        this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
+    if (this.existingReport) {
+      if (this.existingReport.salaryReport) {
+        this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
+        return this.getAndValidateReportDate();
       }
+      // if (this.existingReport.isConfirmed) {
+      // all reports should be created as confirmed - so this block is redundant
+      // this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
+      // return this.getAndValidateReportDate();
+      // }
+      this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
+    }
     // }
 
     // Hebrew date confirmation

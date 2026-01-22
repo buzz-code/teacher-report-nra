@@ -4,7 +4,7 @@ import { StudentGroup } from '../db/entities/StudentGroup.entity';
 /**
  * Calculates the total student count for a teacher on a specific date.
  * Sums up student counts from all active groups for that teacher on that date.
- * 
+ *
  * @param dataSource TypeORM DataSource
  * @param userId The user ID (organization)
  * @param teacherId The teacher's ID
@@ -15,7 +15,7 @@ export async function getStudentCountForTeacherDate(
   dataSource: DataSource,
   userId: number,
   teacherId: number,
-  date: Date
+  date: Date,
 ): Promise<number> {
   const studentGroupRepository = dataSource.getRepository(StudentGroup);
 

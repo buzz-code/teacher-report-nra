@@ -192,9 +192,7 @@ function generateTotalPriceByTeacherType(): string {
     const components = applicableFields.map((f) => {
       const factor = f.factor ?? 1;
       const priceExpr = factor !== 1 ? `up.${f.priceColumn} * ${factor}` : `up.${f.priceColumn}`;
-      const quantityExpr = f.multiplyByStudents
-        ? `r.${f.reportColumn} * r.how_many_students`
-        : `r.${f.reportColumn}`;
+      const quantityExpr = f.multiplyByStudents ? `r.${f.reportColumn} * r.how_many_students` : `r.${f.reportColumn}`;
       return `COALESCE(${quantityExpr} * ${priceExpr}, 0)`;
     });
 

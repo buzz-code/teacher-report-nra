@@ -4,7 +4,7 @@ import { getStudentCountForTeacherDate } from './studentGroup.util';
 
 /**
  * Updates the student count for attendance reports based on the student groups table.
- * 
+ *
  * @param dataSource TypeORM DataSource
  * @param ids Array of AttReport IDs to update
  * @returns A string summarizing the update result
@@ -26,7 +26,7 @@ export async function updateStudentCountForReports(dataSource: DataSource, ids: 
       dataSource,
       report.userId,
       report.teacherReferenceId,
-      report.reportDate
+      report.reportDate,
     );
 
     if (count > 0) {

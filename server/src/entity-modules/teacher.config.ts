@@ -119,34 +119,36 @@ class TeacherService<T extends Entity | Teacher> extends BaseEntityService<T> {
 
     if (!startDate || !endDate) return;
 
-    const teacherIds = list.map(t => t.id);
+    const teacherIds = list.map((t) => t.id);
     const reports = await this.dataSource.getRepository(AttReport).find({
       where: {
         teacherReferenceId: In(teacherIds),
-        reportDate: Between(startDate, endDate)
-      }
+        reportDate: Between(startDate, endDate),
+      },
     });
 
     const reportsMap = groupDataByKeys(reports, ['teacherReferenceId']);
 
     // Generate headers only for dates with reports
-    const uniqueDates = getUniqueValues(reports, r => 
-      typeof r.reportDate === 'string' ? r.reportDate : r.reportDate.toISOString().split('T')[0]
+    const uniqueDates = getUniqueValues(reports, (r) =>
+      typeof r.reportDate === 'string' ? r.reportDate : r.reportDate.toISOString().split('T')[0],
     );
 
     const sortedDates = uniqueDates.sort();
-    const dateHeaders = sortedDates.map(dateKey => ({
+    const dateHeaders = sortedDates.map((dateKey) => ({
       value: dateKey,
-      label: formatHebrewDate(new Date(dateKey))
+      label: formatHebrewDate(new Date(dateKey)),
     }));
 
-    list.forEach(teacher => {
+    list.forEach((teacher) => {
       const teacherReports = reportsMap[teacher.id] || [];
-      const teacherDateMap = new Set(teacherReports.map(r => 
-        typeof r.reportDate === 'string' ? r.reportDate : r.reportDate.toISOString().split('T')[0]
-      ));
+      const teacherDateMap = new Set(
+        teacherReports.map((r) =>
+          typeof r.reportDate === 'string' ? r.reportDate : r.reportDate.toISOString().split('T')[0],
+        ),
+      );
 
-      dateHeaders.forEach(h => {
+      dateHeaders.forEach((h) => {
         (teacher as any)[h.value] = teacherDateMap.has(h.value) ? 'V' : 'X';
       });
     });

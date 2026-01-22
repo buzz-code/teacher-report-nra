@@ -12,12 +12,7 @@ import {
 describe('fieldsShow.util', () => {
   describe('shouldShowField', () => {
     describe('Universal fields', () => {
-      const universalFields: AttReportField[] = [
-        'reportDate',
-        'updateDate',
-        'year',
-        'comment',
-      ];
+      const universalFields: AttReportField[] = ['reportDate', 'updateDate', 'year', 'comment'];
 
       universalFields.forEach((field) => {
         it(`should show universal field "${field}" for all teacher types`, () => {
