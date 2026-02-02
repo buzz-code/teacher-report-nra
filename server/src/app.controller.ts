@@ -7,6 +7,7 @@ import { Response } from 'express';
 import { LocalRegisterAuthGuard } from '@shared/auth/local-register-auth.guard';
 import { getUserIdFromUser } from '@shared/auth/auth.util';
 import { AuthenticatedRequest } from '@shared/auth/auth.types';
+import { SkipMaintenance } from '@shared/decorators/skip-maintenance.decorator';
 
 @Controller()
 export class AppController {
@@ -78,5 +79,12 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @SkipMaintenance()
+  @Get('health')
+  @HttpCode(200)
+  healthCheck() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
   }
 }
