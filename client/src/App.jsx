@@ -10,6 +10,7 @@ import { createTheme } from "@shared/providers/themeProvider";
 import RTLStyle from "@shared/components/layout/RTLStyle";
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import roadmapFeatures from 'src/roadmapFeatures';
+import { MaintenancePage } from '@shared/components/layout/MaintenancePage';
 
 const appTheme = createTheme({
   primary: blue[700],    // Educational, professional blue
@@ -158,6 +159,7 @@ const App = () => (
 
             <CustomRoutes noLayout>
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/maintenance" element={<MaintenancePage />} />
             </CustomRoutes>
 
             {!isAdmin(permissions) && <CustomRoutes>
