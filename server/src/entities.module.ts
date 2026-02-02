@@ -2,11 +2,8 @@ import { Module } from '@nestjs/common';
 import { BaseEntityModule } from '@shared/base-entity/base-entity.module';
 
 import userConfig from './entity-modules/user.config';
-import auditLogConfig from './entity-modules/audit-log.config';
-import importFileConfig from './entity-modules/import-file.config';
 import pageConfig from './entity-modules/page.config';
 import paymentTrackConfig from './entity-modules/payment-track.config';
-import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 import textConfig from './entity-modules/text.config';
 
 // Shared entities used by teacher report system
@@ -15,6 +12,8 @@ import teacherConfig from './entity-modules/teacher.config';
 import teacherQuestionConfig from './entity-modules/teacher-question.config';
 
 // Teacher Report System entities
+import { Teacher } from './db/entities/Teacher.entity';
+import { StudentGroup } from './db/entities/StudentGroup.entity';
 import { TeacherType } from './db/entities/TeacherType.entity';
 import attReportConfig from './entity-modules/att-report.config';
 import priceConfig from './entity-modules/price.config';
@@ -39,6 +38,9 @@ import { UserPricePivot } from './db/view-entities/UserPricePivot.entity';
 import attReportWithPriceConfig from './entity-modules/att-report-with-price.config';
 import { AnswerWithPrice } from './db/view-entities/AnswerWithPrice.entity';
 import reportableItemWithPriceConfig from './entity-modules/reportable-item-with-price.config';
+import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
+import importFileConfig from '@shared/entities/configs/import-file.config';
+import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 
 @Module({
   imports: [
@@ -64,7 +66,10 @@ import reportableItemWithPriceConfig from './entity-modules/reportable-item-with
 
     // Common entities and utilities
     BaseEntityModule.register(textConfig),
-    BaseEntityModule.register(auditLogConfig),
+    BaseEntityModule.register(createAuditLogConfig({
+      teacher: Teacher,
+      student_group: StudentGroup,
+    })),
     BaseEntityModule.register(importFileConfig),
     BaseEntityModule.register({ entity: YemotCall }),
     BaseEntityModule.register(mailAddressConfig),
