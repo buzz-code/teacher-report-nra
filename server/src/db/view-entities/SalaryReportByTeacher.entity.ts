@@ -20,29 +20,39 @@ import { SalaryReport } from '../entities/SalaryReport.entity';
 function generateSalaryReportByTeacherSQL(): string {
   return `
     SELECT
-      CONCAT(rip.salaryReportId, '_', rip.teacherReferenceId, '_', YEAR(rip.reportDate), '_', MONTH(rip.reportDate)) AS id,
-      rip.userId,
-      rip.salaryReportId,
-      rip.teacherReferenceId,
-      YEAR(rip.reportDate) AS reportYear,
-      MONTH(rip.reportDate) AS reportMonth,
+      CONCAT(t.salaryReportId, '_', t.teacherReferenceId, '_', t.reportYear, '_', t.reportMonth) AS id,
+      t.userId,
+      t.salaryReportId,
+      t.teacherReferenceId,
+      t.reportYear,
+      t.reportMonth,
       
       -- Counts by type
-      SUM(CASE WHEN rip.type = 'answer' THEN 1 ELSE 0 END) AS answerCount,
-      SUM(CASE WHEN rip.type = 'report' THEN 1 ELSE 0 END) AS attReportCount,
+      SUM(CASE WHEN t.type = 'answer' THEN 1 ELSE 0 END) AS answerCount,
+      SUM(CASE WHEN t.type = 'report' THEN 1 ELSE 0 END) AS attReportCount,
       
       -- Totals by type
-      SUM(CASE WHEN rip.type = 'answer' THEN rip.calculatedPrice ELSE 0 END) AS answersTotal,
-      SUM(CASE WHEN rip.type = 'report' THEN rip.calculatedPrice ELSE 0 END) AS attReportsTotal,
+      SUM(CASE WHEN t.type = 'answer' THEN t.calculatedPrice ELSE 0 END) AS answersTotal,
+      SUM(CASE WHEN t.type = 'report' THEN t.calculatedPrice ELSE 0 END) AS attReportsTotal,
       
       -- Grand total
-      SUM(rip.calculatedPrice) AS grandTotal
+      SUM(t.calculatedPrice) AS grandTotal
       
-    FROM reportable_item_with_price rip
-    WHERE rip.salaryReportId IS NOT NULL
-      AND rip.teacherReferenceId IS NOT NULL
-      AND rip.reportDate IS NOT NULL
-    GROUP BY rip.userId, rip.salaryReportId, rip.teacherReferenceId, YEAR(rip.reportDate), MONTH(rip.reportDate)
+    FROM (
+      SELECT
+        userId,
+        salaryReportId,
+        teacherReferenceId,
+        YEAR(reportDate) AS reportYear,
+        MONTH(reportDate) AS reportMonth,
+        type,
+        calculatedPrice
+      FROM reportable_item_with_price
+      WHERE salaryReportId IS NOT NULL
+        AND teacherReferenceId IS NOT NULL
+        AND reportDate IS NOT NULL
+    ) t
+    GROUP BY t.userId, t.salaryReportId, t.teacherReferenceId, t.reportYear, t.reportMonth
   `;
 }
 
