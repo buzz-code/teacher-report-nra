@@ -477,6 +477,8 @@ export default {
                 'salaryReport.year': 'שנה',
                 'salaryReport.createdAt': 'נוצר',
                 'salaryReport.updatedAt': 'עודכן',
+                reportYear: 'שנה לועזית',
+                reportMonth: 'חודש לועזי',
                 answerCount: 'מספר תשובות',
                 answersTotal: 'סכום תשובות',
                 attReportCount: 'מספר דוחות נוכחות',

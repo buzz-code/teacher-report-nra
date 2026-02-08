@@ -20,10 +20,12 @@ import { SalaryReport } from '../entities/SalaryReport.entity';
 function generateSalaryReportByTeacherSQL(): string {
   return `
     SELECT
-      CONCAT(rip.salaryReportId, '_', rip.teacherReferenceId) AS id,
+      CONCAT(rip.salaryReportId, '_', rip.teacherReferenceId, '_', YEAR(rip.reportDate), '_', MONTH(rip.reportDate)) AS id,
       rip.userId,
       rip.salaryReportId,
       rip.teacherReferenceId,
+      YEAR(rip.reportDate) AS reportYear,
+      MONTH(rip.reportDate) AS reportMonth,
       
       -- Counts by type
       SUM(CASE WHEN rip.type = 'answer' THEN 1 ELSE 0 END) AS answerCount,
@@ -39,7 +41,8 @@ function generateSalaryReportByTeacherSQL(): string {
     FROM reportable_item_with_price rip
     WHERE rip.salaryReportId IS NOT NULL
       AND rip.teacherReferenceId IS NOT NULL
-    GROUP BY rip.userId, rip.salaryReportId, rip.teacherReferenceId
+      AND rip.reportDate IS NOT NULL
+    GROUP BY rip.userId, rip.salaryReportId, rip.teacherReferenceId, YEAR(rip.reportDate), MONTH(rip.reportDate)
   `;
 }
 
@@ -59,7 +62,7 @@ function generateSalaryReportByTeacherSQL(): string {
 })
 export class SalaryReportByTeacher implements IHasUserId {
   @PrimaryColumn()
-  id: string; // '{salaryReportId}_{teacherReferenceId}'
+  id: string; // '{salaryReportId}_{teacherReferenceId}_{year}_{month}'
 
   @ViewColumn()
   userId: number;
@@ -69,6 +72,12 @@ export class SalaryReportByTeacher implements IHasUserId {
 
   @ViewColumn()
   teacherReferenceId: number;
+
+  @ViewColumn()
+  reportYear: number;
+
+  @ViewColumn()
+  reportMonth: number;
 
   // Aggregated counts
   @ViewColumn()

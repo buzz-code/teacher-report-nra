@@ -27,6 +27,8 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'teacher.tz', label: 'ת.ז. מורה' },
           { value: 'teacher.name', label: 'שם המורה' },
           { value: 'salaryReport.name', label: 'דוח שכר' },
+          { value: 'reportYear', label: 'שנה' },
+          { value: 'reportMonth', label: 'חודש' },
           { value: 'answerCount', label: 'מספר תשובות' },
           { value: 'attReportCount', label: 'מספר דיווחי נוכחות' },
           { value: 'answersTotal', label: 'סה"כ תשובות' },
