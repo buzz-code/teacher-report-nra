@@ -50,7 +50,6 @@ export const fieldVisibility = {
   // SPECIAL_EDUCATION only
   howManyStudentsWatched: [TeacherTypeId.SPECIAL_EDUCATION],
   wasPhoneDiscussing: [TeacherTypeId.SPECIAL_EDUCATION],
-  whoIsYourTrainingTeacher: [TeacherTypeId.SPECIAL_EDUCATION],
   whatIsYourSpeciality: [TeacherTypeId.SPECIAL_EDUCATION],
 };
 

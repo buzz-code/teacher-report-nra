@@ -186,18 +186,25 @@ export function getTeacherTypesForField(fieldName: AttReportField): number[] {
  * Build headers for dynamic table rendering based on teacher type
  */
 export function buildHeadersForTeacherType(teacherTypeId: number | null): ITableHeader[] {
-  const fields = teacherTypeId ? getFieldsForTeacherType(teacherTypeId) : UNIVERSAL_FIELDS;
+  const fields = teacherTypeId ? getFieldsForTeacherType(teacherTypeId) : getAllTeacherTypeFields();
 
   return fields.map((field) => ({
     value: field,
   }));
 }
 
+function getAllTeacherTypeFields(): AttReportField[] {
+  const typeFields = Object.values(TEACHER_TYPE_FIELDS).flat();
+  return Array.from(new Set(typeFields));
+}
+
 /**
  * Build export headers with translations for a specific teacher type
  * Returns IHeader[] format suitable for Excel export
  */
-export function buildExportHeadersForTeacherType(teacherTypeKey: number | null): { value: string; label: string }[] {
+export function buildExportHeadersForTeacherType(
+  teacherTypeKey: number | null,
+): { value: string; label: string }[] {
   const dynamicHeaders = buildHeadersForTeacherType(teacherTypeKey);
   return dynamicHeaders.map((header) => ({
     value: header.value,

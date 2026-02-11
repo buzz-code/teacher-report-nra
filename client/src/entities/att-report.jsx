@@ -117,7 +117,6 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {shouldShowField('howManyStudentsTeached', selectedTeacherTypeKey) && <NumberField source="howManyStudentsTeached" />}
             {shouldShowField('howManyStudentsWatched', selectedTeacherTypeKey) && <NumberField source="howManyStudentsWatched" />}
             {shouldShowField('wasPhoneDiscussing', selectedTeacherTypeKey) && <BooleanField source="wasPhoneDiscussing" />}
-            {shouldShowField('whoIsYourTrainingTeacher', selectedTeacherTypeKey) && <NumberField source="whoIsYourTrainingTeacher" />}
             {shouldShowField('whatIsYourSpeciality', selectedTeacherTypeKey) && <TextField source="whatIsYourSpeciality" />}
 
             {isAdmin && <DateField showDate showTime source="createdAt" />}
@@ -237,9 +236,6 @@ const Inputs = ({ isCreate, isAdmin }) => {
         )}
         {shouldShowField('wasPhoneDiscussing', teacherTypeKey) && (
             <BooleanInput source="wasPhoneDiscussing" />
-        )}
-        {shouldShowField('whoIsYourTrainingTeacher', teacherTypeKey) && (
-            <NumberInput source="whoIsYourTrainingTeacher" />
         )}
         {shouldShowField('whatIsYourSpeciality', teacherTypeKey) && (
             <TextInput source="whatIsYourSpeciality" />

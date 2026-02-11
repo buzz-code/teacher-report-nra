@@ -69,6 +69,7 @@ function getConfig(): BaseEntityModuleOptions {
       join: {
         teacher: { eager: false },
         'teacher.teacherType': { eager: false },
+        salaryReport: { eager: false },
       },
     },
     exporter: {
@@ -76,6 +77,7 @@ function getConfig(): BaseEntityModuleOptions {
         req.options.query.join = {
           teacher: { eager: true },
           'teacher.teacherType': { eager: true },
+          salaryReport: { eager: true },
         };
         return innerFunc(req);
       },
@@ -88,6 +90,8 @@ function getConfig(): BaseEntityModuleOptions {
           { value: 'teacher.name', label: 'שם המורה' },
           { value: 'reportDate', label: 'תאריך דיווח' },
           { value: 'year', label: 'שנה' },
+          { value: 'salaryReport.name', label: 'דוח שכר' },
+          { value: 'salaryMonth', label: 'חודש שכר' },
           // ...buildExportHeadersForTeacherType(teacherTypeKey),
           ...buildPriceBreakdownHeaders(teacherTypeKey),
           { value: 'calculatedPrice', label: 'סה"כ מחיר' },

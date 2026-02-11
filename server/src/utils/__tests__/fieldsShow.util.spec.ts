@@ -387,18 +387,16 @@ describe('fieldsShow.util', () => {
       expect(headers.find((h) => h.value === 'wasKamal')).toBeUndefined();
     });
 
-    it('should build headers for null teacher type (universal fields only)', () => {
+    it('should build headers for null teacher type (all teacher type fields only)', () => {
       const headers = buildHeadersForTeacherType(null);
 
-      // Should only include universal fields
-      // expect(headers.find((h) => h.value === 'id')).toBeDefined();
-      // expect(headers.find((h) => h.value === 'teacherTz')).toBeDefined();
-      expect(headers.find((h) => h.value === 'comment')).toBeDefined();
+      // Should include teacher-specific fields
+      expect(headers.find((h) => h.value === 'howManyStudents')).toBeDefined();
+      expect(headers.find((h) => h.value === 'howManyMethodic')).toBeDefined();
+      expect(headers.find((h) => h.value === 'wasCollectiveWatch')).toBeDefined();
 
-      // Should not include any teacher-specific fields
-      expect(headers.find((h) => h.value === 'howManyStudents')).toBeUndefined();
-      expect(headers.find((h) => h.value === 'howManyMethodic')).toBeUndefined();
-      expect(headers.find((h) => h.value === 'wasCollectiveWatch')).toBeUndefined();
+      // Should not include universal fields
+      expect(headers.find((h) => h.value === 'comment')).toBeUndefined();
     });
 
     it('should create simple headers with just value field', () => {
