@@ -160,6 +160,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 teacherReferenceId: 'מורה',
                 questionId: 'שאלה',
+                questionReferenceId: 'שאלה',
                 salaryReportId: 'דוח שכר',
                 answer: 'תשובה',
                 calculatedPayment: 'תשלום מחושב',
