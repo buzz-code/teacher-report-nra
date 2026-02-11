@@ -95,7 +95,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <TextField source="id" />}
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <ReferenceField source="teacherReferenceId" reference="teacher" />
-            <ReferenceField source="questionId" reference="question">
+            <ReferenceField source="questionReferenceId" reference="question">
               <TextField source="content" />
             </ReferenceField>
             <ReferenceField source="salaryReportId" reference="salary_report" />
