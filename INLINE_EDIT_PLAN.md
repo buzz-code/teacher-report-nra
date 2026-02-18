@@ -1,4 +1,13 @@
-# Inline Edit Button with Popup Modal - Enhanced Implementation Plan
+# Inline Edit Button with Popup Modal - Implementation Plan (Draft)
+
+> ⚠️ **Note**: This is the original draft plan. An enhanced version with improvements is available.
+> 
+> **Recommended Reading Order**:
+> 1. `INLINE_EDIT_SUMMARY.md` - Executive summary and overview
+> 2. `INLINE_EDIT_QUICKSTART.md` - Quick start guide for developers
+> 3. `INLINE_EDIT_PLAN_ENHANCED.md` - Complete enhanced implementation plan
+> 4. `INLINE_EDIT_COMPARISON.md` - Comparison between plans
+> 5. This document (historical reference)
 
 ## Overview
 Create a reusable inline edit solution that seamlessly integrates with the existing `CommonDatagrid` and `CommonEntity` architecture. This implementation provides popup-based editing while maintaining full compatibility with existing routing-based functionality.
