@@ -31,8 +31,8 @@ const MockBaseEntityModule = global.MockBaseEntityModule;
 
 // Import all configs and entities
 import userConfig from '../entity-modules/user.config';
-import auditLogConfig from '../entity-modules/audit-log.config';
-import importFileConfig from '../entity-modules/import-file.config';
+import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
+import importFileConfig from '@shared/entities/configs/import-file.config';
 import pageConfig from '../entity-modules/page.config';
 import paymentTrackConfig from '../entity-modules/payment-track.config';
 import textConfig from '../entity-modules/text.config';
@@ -43,6 +43,8 @@ import { YemotCall } from '@shared/entities/YemotCall.entity';
 import { TextByUser } from '@shared/view-entities/TextByUser.entity';
 import { RecievedMail } from '@shared/entities/RecievedMail.entity';
 import { Image } from '@shared/entities/Image.entity';
+
+const auditLogConfig = createAuditLogConfig();
 
 describe('EntitiesModule', () => {
   let module: TestingModule;
