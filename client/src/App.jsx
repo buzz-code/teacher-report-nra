@@ -1,22 +1,13 @@
-import { Admin, Resource, CustomRoutes } from 'react-admin';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { Resource } from 'react-admin';
+import { Route } from 'react-router-dom';
 import { blue, green } from '@mui/material/colors';
 
 import domainTranslations from 'src/domainTranslations';
-import dataProvider from "@shared/providers/dataProvider";
-import { getI18nProvider } from "@shared/providers/i18nProvider";
-import authProvider from "@shared/providers/authProvider";
-import { createTheme } from "@shared/providers/themeProvider";
-import RTLStyle from "@shared/components/layout/RTLStyle";
-import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import roadmapFeatures from 'src/roadmapFeatures';
-import { MaintenancePage } from '@shared/components/layout/MaintenancePage';
-
-const appTheme = createTheme({
-  primary: blue[700],    // Educational, professional blue
-  secondary: green[600], // Supporting green instead of orange
-  isRtl: true
-});
+import AdminAppShell from '@shared/components/app/AdminAppShell';
+import CommonRoutes from '@shared/components/app/CommonRoutes';
+import CommonAdminResources from '@shared/components/app/CommonAdminResources';
+import CommonSettingsResources from '@shared/components/app/CommonSettingsResources';
 
 import { Dashboard, Layout } from 'src/GeneralLayout';
 
@@ -44,45 +35,15 @@ import answerWithPrice from "src/entities/answer-with-price";
 import salaryReportByTeacher from "src/entities/salary-report-by-teacher";
 import TeacherValidationPivot from "src/pivots/TeacherValidationPivot";
 
-// Common entities and utilities
-import text from "@shared/components/common-entities/text";
-import textByUser from "@shared/components/common-entities/text-by-user";
-import user from "@shared/components/common-entities/user";
-import auditLog from '@shared/components/common-entities/audit-log';
-import importFile from '@shared/components/common-entities/import-file';
-import mailAddress from '@shared/components/common-entities/mail-address';
-import recievedMail from '@shared/components/common-entities/recieved-mail';
-import page from '@shared/components/common-entities/page';
-import image from '@shared/components/common-entities/image';
-import paymentTrack from '@shared/components/common-entities/payment-track';
-import yemotCall from '@shared/components/common-entities/yemot-call';
-
 import Settings from 'src/settings/Settings';
-
-import { isShowUsersData, isEditPagesData, isEditPaymentTracksData, isAdmin } from "@shared/utils/permissionsUtil";
-import YemotSimulator from "@shared/components/views/YemotSimulator";
-import { RegisterPage } from '@shared/components/layout/RegisterPage';
-import { LoginPage } from '@shared/components/layout/LoginPage';
-import Tutorial from '@shared/components/views/Tutorial';
-import PageList from '@shared/components/views/PageList';
-import Roadmap from '@shared/components/views/Roadmap';
+import { isAdmin } from "@shared/utils/permissionsUtil";
 
 // Icons
 import BadgeIcon from '@mui/icons-material/Badge';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import CategoryIcon from '@mui/icons-material/Category';
-import ClassIcon from '@mui/icons-material/Class';
 import RateReviewIcon from '@mui/icons-material/RateReview';
-import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
-import ImageIcon from '@mui/icons-material/Image';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import SettingsPhoneIcon from '@mui/icons-material/SettingsPhone';
-import EmailIcon from '@mui/icons-material/Email';
-import LogoDevIcon from '@mui/icons-material/LogoDev';
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
@@ -91,85 +52,56 @@ import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 
-const i18nProvider = getI18nProvider(domainTranslations);
+const themeOptions = { primary: blue[700], secondary: green[600] };
 
 const App = () => (
-  <BrowserRouter>
-    <RTLStyle>
-      <Admin dataProvider={dataProvider} i18nProvider={i18nProvider} authProvider={authProvider}
-        theme={appTheme} title='ניהול דוחות מורים'
-        dashboard={Dashboard} layout={Layout} loginPage={LoginPage}
-        requireAuth>
-        {permissions => (
-          <>
-            {/* Shared entities (data) - Core master data */}
-            <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'data' }} icon={PersonIcon} />
-            <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-            <Resource name="student_group" {...studentGroup} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-            <Resource name="question_type" {...questionType} options={{ menuGroup: 'data' }} icon={CategoryIcon} />
-            <Resource name="question" {...question} options={{ menuGroup: 'data' }} icon={QuestionAnswerIcon} />
-            <Resource name="teacher_question" {...teacherQuestion} options={{ menuGroup: 'data' }} icon={AssignmentTurnedInIcon} />
-            <Resource name="working_date" {...workingDate} options={{ menuGroup: 'data' }} icon={CalendarTodayIcon} />
-            <Resource name="att_report" {...attReport} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
-            <Resource name="answer" {...answer} options={{ menuGroup: 'data' }} icon={RateReviewIcon} />
+  <AdminAppShell
+    title='ניהול דוחות מורים'
+    themeOptions={themeOptions}
+    domainTranslations={domainTranslations}
+    dashboard={Dashboard}
+    layout={Layout}
+  >
+    {permissions => (
+      <>
+        {/* Core master data */}
+        <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'data' }} icon={PersonIcon} />
+        <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
+        <Resource name="student_group" {...studentGroup} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
+        <Resource name="question_type" {...questionType} options={{ menuGroup: 'data' }} icon={CategoryIcon} />
+        <Resource name="question" {...question} options={{ menuGroup: 'data' }} icon={QuestionAnswerIcon} />
+        <Resource name="teacher_question" {...teacherQuestion} options={{ menuGroup: 'data' }} icon={AssignmentTurnedInIcon} />
+        <Resource name="working_date" {...workingDate} options={{ menuGroup: 'data' }} icon={CalendarTodayIcon} />
+        <Resource name="att_report" {...attReport} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
+        <Resource name="answer" {...answer} options={{ menuGroup: 'data' }} icon={RateReviewIcon} />
 
-            {/* Configuration (reports) - Report configuration and types */}
-            <Resource name="reportable_item_with_price" {...reportableItemWithPrice} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
-            <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-            <Resource name="answer_with_price" {...answerWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-            <Resource name="salary_report_by_teacher" {...salaryReportByTeacher} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-            <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+        {/* Reports */}
+        <Resource name="reportable_item_with_price" {...reportableItemWithPrice} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
+        <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+        <Resource name="answer_with_price" {...answerWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+        <Resource name="salary_report_by_teacher" {...salaryReportByTeacher} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
+        <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
 
-            {/* User customization (settings) - User-specific settings */}
-            <Resource name="text_by_user" {...textByUser} options={{ menuGroup: 'settings' }} icon={RateReviewIcon} />
-            <Resource name="price_by_user" {...priceByUser} options={{ menuGroup: 'settings' }} icon={MonetizationOnIcon} />
-            <Resource name="mail_address" {...mailAddress} options={{ menuGroup: 'settings' }} icon={AlternateEmailIcon} />
-            <Resource name="image" {...image} options={{ menuGroup: 'settings' }} icon={ImageIcon} />
-            <Resource name="import_file" {...importFile} options={{ menuGroup: 'settings' }} icon={UploadFileIcon} />
+        {/* User customization (settings) */}
+        <Resource name="price_by_user" {...priceByUser} options={{ menuGroup: 'settings' }} icon={MonetizationOnIcon} />
+        <CommonSettingsResources />
 
-            {isAdmin(permissions) && <>
-              {/* Admin resources (admin) - System-wide configuration */}
-              <Resource name="text" {...text} options={{ menuGroup: 'admin' }} />
-              <Resource name="price" {...price} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />
-              <Resource name="yemot_call" {...yemotCall} options={{ menuGroup: 'admin' }} icon={SettingsPhoneIcon} />
-              <Resource name="recieved_mail" {...recievedMail} options={{ menuGroup: 'admin' }} icon={EmailIcon} />
-              <Resource name="audit_log" {...auditLog} options={{ menuGroup: 'admin' }} icon={LogoDevIcon} />
-              <Resource name="att_type" {...attType} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />
-            </>}
+        {/* Extra admin resources for this project */}
+        {isAdmin(permissions) && <>
+          <Resource name="price" {...price} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />
+          <Resource name="att_type" {...attType} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />
+        </>}
+        <CommonAdminResources permissions={permissions} />
 
-            {isShowUsersData(permissions) && <>
-              <Resource name="user" {...user} create={isAdmin(permissions) && user.create} options={{ menuGroup: 'admin' }} icon={AccountBoxIcon} />
-            </>}
-
-            {isEditPagesData(permissions) && <>
-              <Resource name="page" {...page} options={{ menuGroup: 'admin' }} icon={AutoStoriesIcon} />
-            </>}
-
-            {(isEditPaymentTracksData(permissions) || isShowUsersData(permissions)) && <>
-              <Resource name="payment_track" {...paymentTrack} list={isEditPaymentTracksData(permissions) ? paymentTrack.list : null} options={{ menuGroup: 'admin' }} icon={MonetizationOnIcon} />
-            </>}
-
-            <CustomRoutes>
-              <Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />
-              <Route path="/yemot-simulator" element={<YemotSimulator />} />
-              <Route path="/tutorial" element={<Tutorial />} />
-              <Route path="/pages-view" element={<PageList />} />
-              <Route path="/roadmap" element={<Roadmap features={roadmapFeatures} />} />
-            </CustomRoutes>
-
-            <CustomRoutes noLayout>
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/maintenance" element={<MaintenancePage />} />
-            </CustomRoutes>
-
-            {!isAdmin(permissions) && <CustomRoutes>
-              <Route path="/settings" element={<Settings />} />
-            </CustomRoutes>}
-          </>
-        )}
-      </Admin>
-    </RTLStyle>
-  </BrowserRouter>
+        <CommonRoutes
+          permissions={permissions}
+          roadmapFeatures={roadmapFeatures}
+          settingsPage={<Settings />}
+          extraRoutes={<Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />}
+        />
+      </>
+    )}
+  </AdminAppShell>
 );
 
 export default App;
