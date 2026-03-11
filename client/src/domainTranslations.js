@@ -209,15 +209,6 @@ export default {
                 maintainanceMessage: 'הודעה לסגירת המערכת הטלפונית',
             }
         },
-        price: {
-            name: 'מחיר |||| מחירים - טבלת אדמין',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                code: 'מזהה',
-                description: 'תיאור',
-                price: 'מחיר',
-            }
-        },
         price_by_user: {
             name: 'מחיר פעיל |||| מחירים פעילים',
             fields: {
@@ -225,18 +216,6 @@ export default {
                 code: 'מזהה',
                 description: 'תיאור',
                 price: 'מחיר נוכחי',
-            }
-        },
-
-        salary_report: {
-            name: 'דוח שכר |||| דוחות שכר',
-            fields: {
-                ...generalResourceFieldsTranslation,
-                name: 'שם הדוח',
-                'name:$cont': 'חיפוש בשם',
-                date: 'תאריך',
-                'date:$gte': 'תאריך מ-',
-                'date:$lte': 'תאריך עד-',
             }
         },
         reportable_item: {
