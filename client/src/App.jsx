@@ -64,6 +64,7 @@ const App = () => (
   >
     {permissions => (
       <>
+        trigger client tests
         {/* Core master data */}
         <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'data' }} icon={PersonIcon} />
         <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />

@@ -11,7 +11,7 @@ async function bootstrap() {
     swaggerDescription: 'Demo website description',
     swaggerTag: 'demo',
   });
-
+  console.log("trigger server tests")
   setupYemotRouter(app);
 
   await app.listen(3000);
