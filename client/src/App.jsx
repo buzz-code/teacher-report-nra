@@ -1,4 +1,4 @@
-import { Resource } from 'react-admin';
+import { Resource, CustomRoutes } from 'react-admin';
 import { Route } from 'react-router-dom';
 import { blue, green } from '@mui/material/colors';
 
@@ -93,11 +93,13 @@ const App = () => (
         </>}
         <CommonAdminResources permissions={permissions} />
 
+        <CustomRoutes>
+          <Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />
+        </CustomRoutes>
         <CommonRoutes
           permissions={permissions}
           roadmapFeatures={roadmapFeatures}
           settingsPage={<Settings />}
-          extraRoutes={<Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />}
         />
       </>
     )}
