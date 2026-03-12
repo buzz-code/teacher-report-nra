@@ -84,23 +84,19 @@ const App = () => (
 
         {/* User customization (settings) */}
         <Resource name="price_by_user" {...priceByUser} options={{ menuGroup: 'settings' }} icon={MonetizationOnIcon} />
-        <CommonSettingsResources />
+        {CommonSettingsResources()}
 
         {/* Extra admin resources for this project */}
         {isAdmin(permissions) && <>
           <Resource name="price" {...price} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />
           <Resource name="att_type" {...attType} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />
         </>}
-        <CommonAdminResources permissions={permissions} />
+        {CommonAdminResources({ permissions })}
 
         <CustomRoutes>
           <Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />
         </CustomRoutes>
-        <CommonRoutes
-          permissions={permissions}
-          roadmapFeatures={roadmapFeatures}
-          settingsPage={<Settings />}
-        />
+        {CommonRoutes({ permissions, roadmapFeatures, settingsPage: <Settings /> })}
       </>
     )}
   </AdminAppShell>
