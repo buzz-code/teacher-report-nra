@@ -138,7 +138,7 @@ const PRICE_FIELDS = [
     priceCode: 'seminar.kamal_bonus',
     isBonus: true,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
-    multiplyByStudents: true,
+    multiplyByStudents: false,
   },
   {
     reportField: 'wasCollectiveWatch',
