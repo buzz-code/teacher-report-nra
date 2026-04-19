@@ -14,7 +14,7 @@ import {
   PriceMap,
 } from '../utils/pricing.util';
 import { buildExportHeadersForTeacherType, fieldTranslations, getFieldsForTeacherType } from '../utils/fieldsShow.util';
-import { groupDataByKeys } from '../utils/reportData.util';
+import { groupDataByKeys, getUniqueValues } from '../utils/reportData.util';
 import { sendExcelReportToTeacher } from '../utils/mailReport.util';
 import { In } from 'typeorm';
 import { updateStudentCountForReports } from '../utils/attReportActions.util';
@@ -122,6 +122,17 @@ class AttReportWithPriceService<T extends Entity | AttReportWithPrice> extends B
     const priceMap = await getPriceMapForUser(userId, this.dataSource);
 
     return addPriceBreakdownToData(data, priceMap);
+  }
+
+  getExportName(req?: CrudRequest, data?: any[]): string {
+    if (data?.length > 0) {
+      const teacherName = data[0].teacher?.name;
+      const ids = getUniqueValues(data, (item) => item.teacherReferenceId);
+      if (teacherName && ids.length === 1) {
+        return `דיווחי נוכחות - ${teacherName}`;
+      }
+    }
+    return super.getExportName(req, data);
   }
 
   async doAction(req: CrudRequest, body: any): Promise<any> {
