@@ -101,8 +101,8 @@ describe('pricing.util', () => {
 
       const basicResult = calculateAttendanceReportPrice(mockAttReport as AttReport, teacherTypeId, priceMap);
 
-      // Should include all bonuses: 20 + 25*5 + 15 + 30 + 35 + 40 = 265
-      expect(result).toBe(basicResult + 265);
+      // Should include all bonuses: 20 + 25 + 15 + 30 + 35 + 40 = 165
+      expect(result).toBe(basicResult + 165);
     });
 
     it('should add for absences', () => {

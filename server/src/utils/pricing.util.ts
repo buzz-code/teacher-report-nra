@@ -247,7 +247,7 @@ export function calculateAttendanceReportPriceWithExplanation(
 
   // Add bonuses for special activities
   addBooleanPrice(attReport.wasPhoneDiscussing, 'wasPhoneDiscussing', 'phone_discussion_bonus');
-  addBooleanPrice(attReport.wasKamal, 'wasKamal', 'kamal_bonus', seminarMultiplier);
+  addBooleanPrice(attReport.wasKamal, 'wasKamal', 'kamal_bonus');
   addBooleanPrice(attReport.wasCollectiveWatch, 'wasCollectiveWatch', 'collective_watch_bonus');
   addBooleanPrice(attReport.isTaarifHulia, 'isTaarifHulia', 'taarif_hulia_bonus');
   addBooleanPrice(attReport.isTaarifHulia2, 'isTaarifHulia2', 'taarif_hulia2_bonus');
