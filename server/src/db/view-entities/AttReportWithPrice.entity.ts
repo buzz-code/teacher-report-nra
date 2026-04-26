@@ -160,7 +160,7 @@ export const PRICE_FIELDS: PriceFieldConfig[] = [
     reportColumn: 'was_kamal',
     priceColumn: 'seminar_kamal',
     isBonus: true,
-    multiplyByStudents: true,
+    multiplyByStudents: false,
     teacherTypes: [TeacherTypeId.SEMINAR_KITA],
   },
   {
