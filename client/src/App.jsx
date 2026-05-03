@@ -67,10 +67,10 @@ const resources = [
   { name: 'att_report_with_price', config: attReportWithPrice, icon: ReceiptIcon, menuGroup: 'reports' },
   { name: 'answer_with_price', config: answerWithPrice, icon: ReceiptIcon, menuGroup: 'reports' },
   { name: 'salary_report_by_teacher', config: salaryReportByTeacher, icon: ReceiptIcon, menuGroup: 'reports' },
-  { name: 'salary_report', config: salaryReport, icon: ReceiptIcon, menuGroup: 'reports', condition: isAdmin },
+  p => isAdmin(p) && { name: 'salary_report', config: salaryReport, icon: ReceiptIcon, menuGroup: 'reports' },
   { name: 'price_by_user', config: priceByUser, icon: MonetizationOnIcon, menuGroup: 'settings' },
-  { name: 'price', config: price, icon: PaymentIcon, menuGroup: 'admin', condition: isAdmin },
-  { name: 'att_type', config: attType, icon: CategoryIcon, menuGroup: 'admin', condition: isAdmin },
+  p => isAdmin(p) && { name: 'price', config: price, icon: PaymentIcon, menuGroup: 'admin' },
+  p => isAdmin(p) && { name: 'att_type', config: attType, icon: CategoryIcon, menuGroup: 'admin' },
 ];
 
 const App = () => (
