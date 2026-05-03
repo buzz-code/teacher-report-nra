@@ -1,4 +1,4 @@
-import { Resource, CustomRoutes } from 'react-admin';
+import { CustomRoutes } from 'react-admin';
 import { Route } from 'react-router-dom';
 import { blue, green } from '@mui/material/colors';
 
@@ -8,10 +8,9 @@ import AdminAppShell from '@shared/components/app/AdminAppShell';
 import CommonRoutes from '@shared/components/app/CommonRoutes';
 import CommonAdminResources from '@shared/components/app/CommonAdminResources';
 import CommonSettingsResources from '@shared/components/app/CommonSettingsResources';
+import { buildResources } from '@shared/components/app/buildResources';
 
 import { Dashboard, Layout } from 'src/GeneralLayout';
-
-import { resourceEntityGuesser } from '@shared/components/crudContainers/EntityGuesser';
 
 // Shared entities (used by teacher reporting system)
 import studentGroup from "src/entities/student-group";
@@ -54,6 +53,26 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const themeOptions = { primary: blue[700], secondary: green[600] };
 
+const resources = [
+  { name: 'teacher_type',               config: teacherType,             icon: PersonIcon,             menuGroup: 'data' },
+  { name: 'teacher',                    config: teacher,                 icon: BadgeIcon,              menuGroup: 'data' },
+  { name: 'student_group',              config: studentGroup,            icon: PortraitIcon,           menuGroup: 'data' },
+  { name: 'question_type',              config: questionType,            icon: CategoryIcon,           menuGroup: 'data' },
+  { name: 'question',                   config: question,                icon: QuestionAnswerIcon,     menuGroup: 'data' },
+  { name: 'teacher_question',           config: teacherQuestion,         icon: AssignmentTurnedInIcon, menuGroup: 'data' },
+  { name: 'working_date',               config: workingDate,             icon: CalendarTodayIcon,      menuGroup: 'data' },
+  { name: 'att_report',                 config: attReport,               icon: AssignmentIcon,         menuGroup: 'data' },
+  { name: 'answer',                     config: answer,                  icon: RateReviewIcon,         menuGroup: 'data' },
+  { name: 'reportable_item_with_price', config: reportableItemWithPrice, icon: MonetizationOnIcon,     menuGroup: 'reports' },
+  { name: 'att_report_with_price',      config: attReportWithPrice,      icon: ReceiptIcon,            menuGroup: 'reports' },
+  { name: 'answer_with_price',          config: answerWithPrice,         icon: ReceiptIcon,            menuGroup: 'reports' },
+  { name: 'salary_report_by_teacher',   config: salaryReportByTeacher,   icon: ReceiptIcon,            menuGroup: 'reports' },
+  { name: 'salary_report',              config: salaryReport,            icon: ReceiptIcon,            menuGroup: 'reports', condition: isAdmin },
+  { name: 'price_by_user',              config: priceByUser,             icon: MonetizationOnIcon,     menuGroup: 'settings' },
+  { name: 'price',                      config: price,                   icon: PaymentIcon,            menuGroup: 'admin',   condition: isAdmin },
+  { name: 'att_type',                   config: attType,                 icon: CategoryIcon,           menuGroup: 'admin',   condition: isAdmin },
+];
+
 const App = () => (
   <AdminAppShell
     title='ניהול דוחות מורים'
@@ -64,35 +83,9 @@ const App = () => (
   >
     {permissions => (
       <>
-        {/* Core master data */}
-        <Resource name="teacher_type" {...teacherType} options={{ menuGroup: 'data' }} icon={PersonIcon} />
-        <Resource name="teacher" {...teacher} options={{ menuGroup: 'data' }} icon={BadgeIcon} />
-        <Resource name="student_group" {...studentGroup} options={{ menuGroup: 'data' }} icon={PortraitIcon} />
-        <Resource name="question_type" {...questionType} options={{ menuGroup: 'data' }} icon={CategoryIcon} />
-        <Resource name="question" {...question} options={{ menuGroup: 'data' }} icon={QuestionAnswerIcon} />
-        <Resource name="teacher_question" {...teacherQuestion} options={{ menuGroup: 'data' }} icon={AssignmentTurnedInIcon} />
-        <Resource name="working_date" {...workingDate} options={{ menuGroup: 'data' }} icon={CalendarTodayIcon} />
-        <Resource name="att_report" {...attReport} options={{ menuGroup: 'data' }} icon={AssignmentIcon} />
-        <Resource name="answer" {...answer} options={{ menuGroup: 'data' }} icon={RateReviewIcon} />
-
-        {/* Reports */}
-        <Resource name="reportable_item_with_price" {...reportableItemWithPrice} options={{ menuGroup: 'reports' }} icon={MonetizationOnIcon} />
-        <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-        <Resource name="answer_with_price" {...answerWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-        <Resource name="salary_report_by_teacher" {...salaryReportByTeacher} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-        <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-
-        {/* User customization (settings) */}
-        <Resource name="price_by_user" {...priceByUser} options={{ menuGroup: 'settings' }} icon={MonetizationOnIcon} />
+        {buildResources(resources, permissions)}
         {CommonSettingsResources()}
-
-        {/* Extra admin resources for this project */}
-        {isAdmin(permissions) && <>
-          <Resource name="price" {...price} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />
-          <Resource name="att_type" {...attType} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />
-        </>}
         {CommonAdminResources({ permissions })}
-
         <CustomRoutes>
           <Route path="/teacher-validation-pivot" element={<TeacherValidationPivot />} />
         </CustomRoutes>
