@@ -14,15 +14,15 @@ export class AddMetadataAndFilepathFields1760994853872 implements MigrationInter
       ['VIEW', 'text_by_user', 'teacher_report_nra'],
     );
     await queryRunner.query(`
-            DROP VIEW \`text_by_user\`
+            DROP VIEW IF EXISTS \`text_by_user\`
         `);
     await queryRunner.query(`
             ALTER TABLE \`import_file\`
-            ADD \`metadata\` json NULL
+            ADD IF NOT EXISTS \`metadata\` json NULL
         `);
     await queryRunner.query(`
             ALTER TABLE \`texts\`
-            ADD \`filepath\` varchar(255) NULL
+            ADD IF NOT EXISTS \`filepath\` varchar(255) NULL
         `);
     await queryRunner.query(`
             CREATE VIEW \`text_by_user\` AS
