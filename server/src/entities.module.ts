@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { BaseEntityModule } from '@shared/base-entity/base-entity.module';
+import { createSharedEntitiesImports } from '@shared/entities/createSharedEntitiesImports';
 
 import userConfig from './entity-modules/user.config';
-import pageConfig from './entity-modules/page.config';
-import paymentTrackConfig from './entity-modules/payment-track.config';
-import textConfig from './entity-modules/text.config';
 
 // Shared entities used by teacher report system
 import studentGroupConfig from './entity-modules/student-group.config';
@@ -26,12 +24,6 @@ import { WorkingDate } from './db/entities/WorkingDate.entity';
 import reportableItemConfig from './entity-modules/reportable-item.config';
 import salaryReportByTeacherConfig from './entity-modules/salary-report-by-teacher.config';
 
-// Shared entities
-import { YemotCall } from '@shared/entities/YemotCall.entity';
-import { TextByUser } from '@shared/view-entities/TextByUser.entity';
-import { RecievedMail } from '@shared/entities/RecievedMail.entity';
-import { Image } from '@shared/entities/Image.entity';
-
 // View entities
 import { PriceByUser } from './db/view-entities/PriceByUser.entity';
 import { UserPricePivot } from './db/view-entities/UserPricePivot.entity';
@@ -39,12 +31,10 @@ import attReportWithPriceConfig from './entity-modules/att-report-with-price.con
 import { AnswerWithPrice } from './db/view-entities/AnswerWithPrice.entity';
 import reportableItemWithPriceConfig from './entity-modules/reportable-item-with-price.config';
 import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
-import importFileConfig from '@shared/entities/configs/import-file.config';
-import mailAddressConfig from '@shared/utils/mail/mail-address.config';
 
 @Module({
   imports: [
-    BaseEntityModule.register(userConfig),
+    ...createSharedEntitiesImports(userConfig),
 
     // Shared entities used by teacher report system
     BaseEntityModule.register(studentGroupConfig),
@@ -64,25 +54,16 @@ import mailAddressConfig from '@shared/utils/mail/mail-address.config';
     BaseEntityModule.register(reportableItemConfig),
     BaseEntityModule.register(salaryReportByTeacherConfig),
 
-    // Common entities and utilities
-    BaseEntityModule.register(textConfig),
+    // View entities
     BaseEntityModule.register(createAuditLogConfig({
       teacher: Teacher,
       student_group: StudentGroup,
     })),
-    BaseEntityModule.register(importFileConfig),
-    BaseEntityModule.register({ entity: YemotCall }),
-    BaseEntityModule.register(mailAddressConfig),
-    BaseEntityModule.register({ entity: RecievedMail }),
-    BaseEntityModule.register(pageConfig),
-    BaseEntityModule.register({ entity: TextByUser }),
     BaseEntityModule.register({ entity: PriceByUser }),
     BaseEntityModule.register({ entity: UserPricePivot }),
     BaseEntityModule.register(attReportWithPriceConfig),
     BaseEntityModule.register({ entity: AnswerWithPrice }),
     BaseEntityModule.register(reportableItemWithPriceConfig),
-    BaseEntityModule.register({ entity: Image }),
-    BaseEntityModule.register(paymentTrackConfig),
   ],
 })
 export class EntitiesModule {}
