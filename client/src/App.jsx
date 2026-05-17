@@ -75,10 +75,10 @@ const App = () => (
         <Resource name="att_report_with_price" {...attReportWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
         <Resource name="answer_with_price" {...answerWithPrice} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
         <Resource name="salary_report_by_teacher" {...salaryReportByTeacher} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
-        {isAdmin(permissions) && <Resource name="salary_report" {...salaryReport} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />}
+        <Resource name="salary_report" {...(isAdmin(permissions) ? salaryReport : {})} options={{ menuGroup: 'reports' }} icon={ReceiptIcon} />
         <Resource name="price_by_user" {...priceByUser} options={{ menuGroup: 'settings' }} icon={MonetizationOnIcon} />
-        {isAdmin(permissions) && <Resource name="price" {...price} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />}
-        {isAdmin(permissions) && <Resource name="att_type" {...attType} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />}
+        <Resource name="price" {...(isAdmin(permissions) ? price : {})} options={{ menuGroup: 'admin' }} icon={PaymentIcon} />
+        <Resource name="att_type" {...(isAdmin(permissions) ? attType : {})} options={{ menuGroup: 'admin' }} icon={CategoryIcon} />
         {CommonSettingsResources()}
         {CommonAdminResources({ permissions })}
         <CustomRoutes>
