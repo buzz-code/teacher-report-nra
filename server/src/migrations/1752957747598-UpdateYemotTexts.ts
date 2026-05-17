@@ -1,13 +1,18 @@
 import { Text } from '@shared/entities/Text.entity';
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 export class UpdateYemotTexts1752957747598 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Ensure filepath column exists before seeding (may be absent on fresh DBs
-    // because AddMetadataAndFilepathFields runs later in migration history)
-    await queryRunner.query(`
-      ALTER TABLE \`texts\` ADD COLUMN IF NOT EXISTS \`filepath\` varchar(255) NULL
-    `);
+    // Ensure filepath column exists before seeding (absent on fresh DBs since
+    // AddMetadataAndFilepathFields runs later in migration history)
+    if (!(await queryRunner.hasColumn('texts', 'filepath'))) {
+      await queryRunner.addColumn('texts', new TableColumn({
+        name: 'filepath',
+        type: 'varchar',
+        length: '255',
+        isNullable: true,
+      }));
+    }
 
     await queryRunner.query(`
             DELETE FROM \`texts\` WHERE 1 = 1;
