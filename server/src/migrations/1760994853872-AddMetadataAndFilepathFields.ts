@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 export class AddMetadataAndFilepathFields1760994853872 implements MigrationInterface {
   name = 'AddMetadataAndFilepathFields1760994853872';
@@ -14,16 +14,23 @@ export class AddMetadataAndFilepathFields1760994853872 implements MigrationInter
       ['VIEW', 'text_by_user', 'teacher_report_nra'],
     );
     await queryRunner.query(`
-            DROP VIEW \`text_by_user\`
+            DROP VIEW IF EXISTS \`text_by_user\`
         `);
-    await queryRunner.query(`
-            ALTER TABLE \`import_file\`
-            ADD \`metadata\` json NULL
-        `);
-    await queryRunner.query(`
-            ALTER TABLE \`texts\`
-            ADD \`filepath\` varchar(255) NULL
-        `);
+    if (!(await queryRunner.hasColumn('import_file', 'metadata'))) {
+      await queryRunner.addColumn('import_file', new TableColumn({
+        name: 'metadata',
+        type: 'json',
+        isNullable: true,
+      }));
+    }
+    if (!(await queryRunner.hasColumn('texts', 'filepath'))) {
+      await queryRunner.addColumn('texts', new TableColumn({
+        name: 'filepath',
+        type: 'varchar',
+        length: '255',
+        isNullable: true,
+      }));
+    }
     await queryRunner.query(`
             CREATE VIEW \`text_by_user\` AS
             SELECT \`t_base\`.\`name\` AS \`name\`,
