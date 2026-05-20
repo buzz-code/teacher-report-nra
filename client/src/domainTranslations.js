@@ -1,5 +1,5 @@
-import { generalResourceFieldsTranslation } from "@shared/providers/i18nProvider"
-import { sharedEntityTranslations } from "@shared/entities/shared-entity.translations"
+import { generalResourceFieldsTranslation } from '@shared/providers/i18nProvider';
+import { sharedEntityTranslations } from '@shared/entities/shared-entity.translations';
 
 export default {
     menu_groups: {
@@ -20,7 +20,7 @@ export default {
                 endDate: 'עד תאריך',
                 studentCount: 'מספר תלמידות',
                 trainingTeacher: 'מורה מכשירה',
-            }
+            },
         },
         teacher: {
             name: 'מורה |||| מורות',
@@ -35,9 +35,9 @@ export default {
                 teacherTypeReferenceId: 'סוג מורה',
                 trainingTeacher: 'מורה מכשירה - ישן',
                 studentCount: 'מספר תלמידות - ישן',
-            }
+            },
         },
-        
+
         // Teacher Report System Entities
         teacher_type: {
             name: 'סוג מורה |||| סוגי מורות',
@@ -46,7 +46,7 @@ export default {
                 key: 'מזהה',
                 name: 'שם',
                 'name:$cont': 'חיפוש בשם',
-            }
+            },
         },
         teacher_question: {
             name: 'שיוך שאלה למורה |||| שיוכי שאלות למורים',
@@ -55,7 +55,7 @@ export default {
                 teacherReferenceId: 'מורה',
                 questionReferenceId: 'שאלה',
                 answerReferenceId: 'תשובה',
-            }
+            },
         },
         att_report: {
             name: 'תיקוף נוכחות |||| תיקופי נוכחות',
@@ -100,7 +100,7 @@ export default {
                 whatIsYourSpeciality: 'מה ההתמחות שלך',
                 price: 'מחיר',
                 priceExplanation: 'פירוט מחיר',
-            }
+            },
         },
         'teacher/pivot?extra.pivot=TeacherValidation': {
             name: 'דוח פיבוט תאריכים',
@@ -108,7 +108,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 name: 'שם המורה',
                 teacherTypeReferenceId: 'סוג מורה',
-            }
+            },
         },
         att_type: {
             name: 'סוג פעילות |||| סוגי פעילויות',
@@ -116,7 +116,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 name: 'שם',
                 'name:$cont': 'חיפוש בשם',
-            }
+            },
         },
         price: {
             name: 'מחיר |||| מחירים',
@@ -124,7 +124,7 @@ export default {
                 ...generalResourceFieldsTranslation,
                 key: 'מזהה',
                 price: 'מחיר',
-            }
+            },
         },
         question: {
             name: 'שאלה |||| שאלות',
@@ -145,7 +145,7 @@ export default {
                 endDate: 'תאריך סיום',
                 'endDate:$lte': 'תאריך סיום עד-',
                 effectiveDate: 'תאריך אפקטיבי לדיווח',
-            }
+            },
         },
         question_type: {
             name: 'סוג שאלה |||| סוגי שאלות',
@@ -154,7 +154,7 @@ export default {
                 key: 'מזהה',
                 name: 'שם',
                 'name:$cont': 'חיפוש בשם',
-            }
+            },
         },
         answer: {
             name: 'תשובה |||| תשובות',
@@ -169,7 +169,7 @@ export default {
                 reportDate: 'תאריך דיווח',
                 'reportDate:$gte': 'תאריך דיווח מ-',
                 'reportDate:$lte': 'תאריך דיווח עד-',
-            }
+            },
         },
         working_date: {
             name: 'תאריך עבודה |||| תאריכי עבודה',
@@ -180,7 +180,7 @@ export default {
                 workingDate: 'תאריך עבודה',
                 'workingDate:$gte': 'תאריך עבודה מ-',
                 'workingDate:$lte': 'תאריך עבודה עד-',
-            }
+            },
         },
         salary_report: {
             name: 'דוח שכר |||| דוחות שכר',
@@ -192,9 +192,9 @@ export default {
                 'date:$lte': 'תאריך עד-',
                 name: 'שם',
                 'name:$cont': 'חיפוש בשם',
-            }
+            },
         },
-        
+
         // Common Settings and Utilities - to keep as requested
         settings: {
             name: 'הגדרות',
@@ -207,7 +207,7 @@ export default {
                 'dashboardItems.filter': 'פילטר נוסף בפורמט JSON (אופציונלי, ללא שנה)',
                 'dashboardItems.title': 'כותרת',
                 maintainanceMessage: 'הודעה לסגירת המערכת הטלפונית',
-            }
+            },
         },
         price_by_user: {
             name: 'מחיר פעיל |||| מחירים פעילים',
@@ -216,7 +216,7 @@ export default {
                 code: 'מזהה',
                 description: 'תיאור',
                 price: 'מחיר נוכחי',
-            }
+            },
         },
         reportable_item: {
             name: 'פריט שכר |||| פריטי שכר',
@@ -236,9 +236,9 @@ export default {
             values: {
                 type: {
                     answer: 'תשובה',
-                    attendance_report: 'דיווח נוכחות'
-                }
-            }
+                    attendance_report: 'דיווח נוכחות',
+                },
+            },
         },
         att_report_with_price: {
             name: 'דוח נוכחות עם מחיר |||| דוחות נוכחות עם מחירים',
@@ -277,7 +277,7 @@ export default {
                 wasCollectiveWatch: 'היתה צפייה קבוצתית',
                 howManyStudentsWatched: 'מספר תלמידים שנצפו',
                 wasPhoneDiscussing: 'האם היה דיון טלפוני',
-            }
+            },
         },
         answer_with_price: {
             name: 'תשובה עם מחיר |||| תשובות עם מחירים',
@@ -297,7 +297,7 @@ export default {
                 questionTypeReferenceId: 'סוג שאלה',
                 questionTypeKey: 'מפתח סוג שאלה',
                 calculatedPrice: 'מחיר מחושב',
-            }
+            },
         },
         reportable_item_with_price: {
             name: 'פריט שכר עם מחיר |||| פריטי שכר עם מחירים',
@@ -318,9 +318,9 @@ export default {
             values: {
                 type: {
                     answer: 'תשובה',
-                    attendance_report: 'דיווח נוכחות'
-                }
-            }
+                    attendance_report: 'דיווח נוכחות',
+                },
+            },
         },
         salary_report_by_teacher: {
             name: 'דוח שכר לפי מורה |||| דוחות שכר לפי מורה',
@@ -340,8 +340,8 @@ export default {
                 attReportCount: 'מספר דוחות נוכחות',
                 attReportsTotal: 'סכום דוחות נוכחות',
                 grandTotal: 'סה"כ כולל',
-            }
-        }
+            },
+        },
     },
     priceExplanation: {
         basePrice: 'תעריף בסיס',
@@ -349,5 +349,5 @@ export default {
         currency: '₪',
         multiplier: '×',
         equals: '=',
-    }
+    },
 };

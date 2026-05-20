@@ -202,9 +202,7 @@ function getAllTeacherTypeFields(): AttReportField[] {
  * Build export headers with translations for a specific teacher type
  * Returns IHeader[] format suitable for Excel export
  */
-export function buildExportHeadersForTeacherType(
-  teacherTypeKey: number | null,
-): { value: string; label: string }[] {
+export function buildExportHeadersForTeacherType(teacherTypeKey: number | null): { value: string; label: string }[] {
   const dynamicHeaders = buildHeadersForTeacherType(teacherTypeKey);
   return dynamicHeaders.map((header) => ({
     value: header.value,

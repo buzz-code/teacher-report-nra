@@ -5,10 +5,7 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
 
-const filters = [
-    ...commonAdminFilters,
-    <TextInput source="name:$cont" alwaysOn />,
-];
+const filters = [...commonAdminFilters, <TextInput source="name:$cont" alwaysOn />];
 
 const Datagrid = ({ isAdmin, children, ...props }) => {
     return (
@@ -21,23 +18,25 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
-}
+};
 
 const Inputs = ({ isCreate, isAdmin }) => {
-    return <>
-        {!isCreate && isAdmin && <TextInput source="id" disabled />}
-        {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <TextInput source="name" validate={[required(), maxLength(255)]} />
-        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
-    </>
-}
+    return (
+        <>
+            {!isCreate && isAdmin && <TextInput source="id" disabled />}
+            {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
+            <TextInput source="name" validate={[required(), maxLength(255)]} />
+            {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+            {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
+        </>
+    );
+};
 
 const Representation = CommonRepresentation;
 
 const importer = {
     fields: ['name'],
-}
+};
 
 const entity = {
     Datagrid,

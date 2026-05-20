@@ -1,4 +1,19 @@
-import { Button, Form, NumberInput, ReferenceField, required, SaveButton, TextField, TextInput, useCreate, useNotify, useRecordContext, useRefresh, useTranslate, useUpdate } from 'react-admin';
+import {
+    Button,
+    Form,
+    NumberInput,
+    ReferenceField,
+    required,
+    SaveButton,
+    TextField,
+    TextInput,
+    useCreate,
+    useNotify,
+    useRecordContext,
+    useRefresh,
+    useTranslate,
+    useUpdate,
+} from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { useState, useCallback } from 'react';
@@ -22,14 +37,14 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <CommonDatagrid {...props}>
             {children}
             {isAdmin && <TextField source="id" />}
-            {isAdmin && <ReferenceField source="userId" reference="user" emptyText='system' />}
+            {isAdmin && <ReferenceField source="userId" reference="user" emptyText="system" />}
             <TextField source="code" />
             <TextField source="description" />
             <TextField source="price" />
-            <EditPriceButton label='עריכה' icon={<EditIcon />} loader={<CircularProgress size={16} />} />
+            <EditPriceButton label="עריכה" icon={<EditIcon />} loader={<CircularProgress size={16} />} />
         </CommonDatagrid>
     );
-}
+};
 
 const resource = 'price';
 const EditPriceButton = ({ label, icon, loader }) => {
@@ -61,7 +76,7 @@ const EditPriceButton = ({ label, icon, loader }) => {
                 data: {
                     price: data.price,
                 },
-                previousData: {}
+                previousData: {},
             });
         } else {
             create(resource, {
@@ -70,10 +85,10 @@ const EditPriceButton = ({ label, icon, loader }) => {
                     code: record.code,
                     description: record.description,
                     price: data.price,
-                }
+                },
             });
         }
-    }
+    };
 
     const handleButtonClick = useCallback(() => {
         setShowDialog(true);
@@ -81,33 +96,38 @@ const EditPriceButton = ({ label, icon, loader }) => {
     const handleDialogClose = useCallback(() => {
         setShowDialog(false);
     }, [setShowDialog]);
-    const handleSubmit = useCallback(({ price }) => {
-        handleDialogClose();
-        handleSave({ price });
-    }, [handleDialogClose, handleSave]);
+    const handleSubmit = useCallback(
+        ({ price }) => {
+            handleDialogClose();
+            handleSave({ price });
+        },
+        [handleDialogClose, handleSave],
+    );
 
     const isLoading = createResponse.isLoading || updateResponse.isLoading;
 
-    return <>
-        <Button label={label} onClick={handleButtonClick} disabled={isLoading}>
-            {isLoading ? loader : icon}
-        </Button>
+    return (
+        <>
+            <Button label={label} onClick={handleButtonClick} disabled={isLoading}>
+                {isLoading ? loader : icon}
+            </Button>
 
-        <Dialog onClose={handleDialogClose} open={showDialog}>
-            <Form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Stack>
-                        <NumberInput source='price' label='מחיר' validate={[required()]} step={0.01} />
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDialogClose} label={translate('ra.action.cancel')} />
-                    <SaveButton alwaysEnable autoFocus variant='text' icon={null} />
-                </DialogActions>
-            </Form>
-        </Dialog>
-    </>
-}
+            <Dialog onClose={handleDialogClose} open={showDialog}>
+                <Form onSubmit={handleSubmit}>
+                    <DialogContent>
+                        <Stack>
+                            <NumberInput source="price" label="מחיר" validate={[required()]} step={0.01} />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDialogClose} label={translate('ra.action.cancel')} />
+                        <SaveButton alwaysEnable autoFocus variant="text" icon={null} />
+                    </DialogActions>
+                </Form>
+            </Dialog>
+        </>
+    );
+};
 
 const entity = {
     Datagrid,

@@ -14,7 +14,7 @@ import {
     useDataProvider,
     SelectField,
     useListContext,
-    useRecordContext
+    useRecordContext,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
 import { useState, useEffect } from 'react';
@@ -29,11 +29,20 @@ import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
 import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
 import { UpdateStudentCountButton } from './UpdateStudentCountButton';
-import { shouldShowField, getTeacherTypeKeyByTeacherTypeId, getTeacherTypeKeyByTeacherId } from '../utils/attReportFields';
+import {
+    shouldShowField,
+    getTeacherTypeKeyByTeacherTypeId,
+    getTeacherTypeKeyByTeacherId,
+} from '../utils/attReportFields';
 
 const filters = [
     ...commonAdminFilters,
-    <CommonReferenceInputFilter source="teacherReferenceId" reference="teacher" dynamicFilter={filterByUserId} alwaysOn />,
+    <CommonReferenceInputFilter
+        source="teacherReferenceId"
+        reference="teacher"
+        dynamicFilter={filterByUserId}
+        alwaysOn
+    />,
     <DateInput source="reportDate:$gte" />,
     <DateInput source="reportDate:$lte" />,
     <CommonReferenceInputFilter
@@ -70,7 +79,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
 
     const additionalBulkButtons = [
         isAdmin && <BulkFixReferenceButton key="fixReferences" label="תיקון שיוך מורה" />,
-        <UpdateStudentCountButton key="updateStudentCount" />
+        <UpdateStudentCountButton key="updateStudentCount" />,
     ];
 
     return (
@@ -90,12 +99,20 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {/* Common fields across multiple teacher types */}
             {shouldShowField('howManyStudents', selectedTeacherTypeKey) && <NumberField source="howManyStudents" />}
             {shouldShowField('howManyLessons', selectedTeacherTypeKey) && <NumberField source="howManyLessons" />}
-            {shouldShowField('howManyWatchOrIndividual', selectedTeacherTypeKey) && <NumberField source="howManyWatchOrIndividual" />}
-            {shouldShowField('howManyTeachedOrInterfering', selectedTeacherTypeKey) && <NumberField source="howManyTeachedOrInterfering" />}
-            {shouldShowField('howManyDiscussingLessons', selectedTeacherTypeKey) && <NumberField source="howManyDiscussingLessons" />}
+            {shouldShowField('howManyWatchOrIndividual', selectedTeacherTypeKey) && (
+                <NumberField source="howManyWatchOrIndividual" />
+            )}
+            {shouldShowField('howManyTeachedOrInterfering', selectedTeacherTypeKey) && (
+                <NumberField source="howManyTeachedOrInterfering" />
+            )}
+            {shouldShowField('howManyDiscussingLessons', selectedTeacherTypeKey) && (
+                <NumberField source="howManyDiscussingLessons" />
+            )}
             {/* SEMINAR_KITA specific */}
             {shouldShowField('wasKamal', selectedTeacherTypeKey) && <BooleanField source="wasKamal" />}
-            {shouldShowField('howManyLessonsAbsence', selectedTeacherTypeKey) && <NumberField source="howManyLessonsAbsence" />}
+            {shouldShowField('howManyLessonsAbsence', selectedTeacherTypeKey) && (
+                <NumberField source="howManyLessonsAbsence" />
+            )}
 
             {/* MANHA specific */}
             {shouldShowField('howManyMethodic', selectedTeacherTypeKey) && <NumberField source="howManyMethodic" />}
@@ -110,20 +127,30 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {shouldShowField('howManyStudentsHelpTeached', selectedTeacherTypeKey) && <NumberField source="howManyStudentsHelpTeached" />} */}
 
             {/* KINDERGARTEN specific */}
-            {shouldShowField('wasCollectiveWatch', selectedTeacherTypeKey) && <BooleanField source="wasCollectiveWatch" />}
+            {shouldShowField('wasCollectiveWatch', selectedTeacherTypeKey) && (
+                <BooleanField source="wasCollectiveWatch" />
+            )}
             {shouldShowField('wasStudentsGood', selectedTeacherTypeKey) && <BooleanField source="wasStudentsGood" />}
 
             {/* SPECIAL_EDUCATION specific */}
-            {shouldShowField('howManyStudentsTeached', selectedTeacherTypeKey) && <NumberField source="howManyStudentsTeached" />}
-            {shouldShowField('howManyStudentsWatched', selectedTeacherTypeKey) && <NumberField source="howManyStudentsWatched" />}
-            {shouldShowField('wasPhoneDiscussing', selectedTeacherTypeKey) && <BooleanField source="wasPhoneDiscussing" />}
-            {shouldShowField('whatIsYourSpeciality', selectedTeacherTypeKey) && <TextField source="whatIsYourSpeciality" />}
+            {shouldShowField('howManyStudentsTeached', selectedTeacherTypeKey) && (
+                <NumberField source="howManyStudentsTeached" />
+            )}
+            {shouldShowField('howManyStudentsWatched', selectedTeacherTypeKey) && (
+                <NumberField source="howManyStudentsWatched" />
+            )}
+            {shouldShowField('wasPhoneDiscussing', selectedTeacherTypeKey) && (
+                <BooleanField source="wasPhoneDiscussing" />
+            )}
+            {shouldShowField('whatIsYourSpeciality', selectedTeacherTypeKey) && (
+                <TextField source="whatIsYourSpeciality" />
+            )}
 
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
-}
+};
 
 const Inputs = ({ isCreate, isAdmin }) => {
     const teacherReferenceId = useWatch({ name: 'teacherReferenceId' });
@@ -140,56 +167,57 @@ const Inputs = ({ isCreate, isAdmin }) => {
         fetchTeacherType();
     }, [teacherReferenceId, dataProvider]);
 
-    return <>
-        {!isCreate && isAdmin && <TextInput source="id" disabled />}
-        {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
-        <CommonReferenceInput source="teacherReferenceId" reference="teacher" validate={[required()]} dynamicFilter={filterByUserId} />
-        <DateInput source="reportDate" validate={[required()]} />
-        {!isCreate && <DateTimeInput source="updateDate" disabled={!isAdmin} />}
-        <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
-        {/* <BooleanInput source="isConfirmed" /> */}
+    return (
+        <>
+            {!isCreate && isAdmin && <TextInput source="id" disabled />}
+            {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
+            <CommonReferenceInput
+                source="teacherReferenceId"
+                reference="teacher"
+                validate={[required()]}
+                dynamicFilter={filterByUserId}
+            />
+            <DateInput source="reportDate" validate={[required()]} />
+            {!isCreate && <DateTimeInput source="updateDate" disabled={!isAdmin} />}
+            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            {/* <BooleanInput source="isConfirmed" /> */}
 
-        {/* Salary fields - Universal */}
-        <CommonReferenceInput source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} disabled={!isAdmin && salaryReportId} />
-        <NumberInput source="salaryMonth" />
-        <TextInput source="comment" multiline />
+            {/* Salary fields - Universal */}
+            <CommonReferenceInput
+                source="salaryReportId"
+                reference="salary_report"
+                dynamicFilter={filterByUserId}
+                disabled={!isAdmin && salaryReportId}
+            />
+            <NumberInput source="salaryMonth" />
+            <TextInput source="comment" multiline />
 
-        {/* SEMINAR_KITA, KINDERGARTEN */}
-        {shouldShowField('howManyStudents', teacherTypeKey) && (
-            <NumberInput source="howManyStudents" />
-        )}
+            {/* SEMINAR_KITA, KINDERGARTEN */}
+            {shouldShowField('howManyStudents', teacherTypeKey) && <NumberInput source="howManyStudents" />}
 
-        {/* SEMINAR_KITA, SPECIAL_EDUCATION */}
-        {shouldShowField('howManyLessons', teacherTypeKey) && (
-            <NumberInput source="howManyLessons" />
-        )}
+            {/* SEMINAR_KITA, SPECIAL_EDUCATION */}
+            {shouldShowField('howManyLessons', teacherTypeKey) && <NumberInput source="howManyLessons" />}
 
-        {/* SEMINAR_KITA, PDS */}
-        {shouldShowField('howManyWatchOrIndividual', teacherTypeKey) && (
-            <NumberInput source="howManyWatchOrIndividual" />
-        )}
-        {shouldShowField('howManyTeachedOrInterfering', teacherTypeKey) && (
-            <NumberInput source="howManyTeachedOrInterfering" />
-        )}
+            {/* SEMINAR_KITA, PDS */}
+            {shouldShowField('howManyWatchOrIndividual', teacherTypeKey) && (
+                <NumberInput source="howManyWatchOrIndividual" />
+            )}
+            {shouldShowField('howManyTeachedOrInterfering', teacherTypeKey) && (
+                <NumberInput source="howManyTeachedOrInterfering" />
+            )}
 
-        {/* SEMINAR_KITA only */}
-        {shouldShowField('wasKamal', teacherTypeKey) && (
-            <BooleanInput source="wasKamal" />
-        )}
-        {shouldShowField('howManyLessonsAbsence', teacherTypeKey) && (
-            <NumberInput source="howManyLessonsAbsence" />
-        )}
+            {/* SEMINAR_KITA only */}
+            {shouldShowField('wasKamal', teacherTypeKey) && <BooleanInput source="wasKamal" />}
+            {shouldShowField('howManyLessonsAbsence', teacherTypeKey) && <NumberInput source="howManyLessonsAbsence" />}
 
-        {/* SEMINAR_KITA, MANHA, PDS */}
-        {shouldShowField('howManyDiscussingLessons', teacherTypeKey) && (
-            <NumberInput source="howManyDiscussingLessons" />
-        )}
+            {/* SEMINAR_KITA, MANHA, PDS */}
+            {shouldShowField('howManyDiscussingLessons', teacherTypeKey) && (
+                <NumberInput source="howManyDiscussingLessons" />
+            )}
 
-        {/* MANHA only */}
-        {shouldShowField('howManyMethodic', teacherTypeKey) && (
-            <NumberInput source="howManyMethodic" />
-        )}
-        {/* {shouldShowField('fourLastDigitsOfTeacherPhone', teacherTypeKey) && (
+            {/* MANHA only */}
+            {shouldShowField('howManyMethodic', teacherTypeKey) && <NumberInput source="howManyMethodic" />}
+            {/* {shouldShowField('fourLastDigitsOfTeacherPhone', teacherTypeKey) && (
             <TextInput source="fourLastDigitsOfTeacherPhone" validate={[maxLength(4)]} />
         )}
         {shouldShowField('isTaarifHulia', teacherTypeKey) && (
@@ -217,59 +245,71 @@ const Inputs = ({ isCreate, isAdmin }) => {
             <NumberInput source="teacherToReportFor" />
         )} */}
 
-        {/* MANHA, SPECIAL_EDUCATION */}
-        {shouldShowField('howManyStudentsTeached', teacherTypeKey) && (
-            <NumberInput source="howManyStudentsTeached" />
-        )}
+            {/* MANHA, SPECIAL_EDUCATION */}
+            {shouldShowField('howManyStudentsTeached', teacherTypeKey) && (
+                <NumberInput source="howManyStudentsTeached" />
+            )}
 
-        {/* KINDERGARTEN only */}
-        {shouldShowField('wasCollectiveWatch', teacherTypeKey) && (
-            <BooleanInput source="wasCollectiveWatch" />
-        )}
-        {shouldShowField('wasStudentsGood', teacherTypeKey) && (
-            <BooleanInput source="wasStudentsGood" />
-        )}
+            {/* KINDERGARTEN only */}
+            {shouldShowField('wasCollectiveWatch', teacherTypeKey) && <BooleanInput source="wasCollectiveWatch" />}
+            {shouldShowField('wasStudentsGood', teacherTypeKey) && <BooleanInput source="wasStudentsGood" />}
 
-        {/* SPECIAL_EDUCATION only */}
-        {shouldShowField('howManyStudentsWatched', teacherTypeKey) && (
-            <NumberInput source="howManyStudentsWatched" />
-        )}
-        {shouldShowField('wasPhoneDiscussing', teacherTypeKey) && (
-            <BooleanInput source="wasPhoneDiscussing" />
-        )}
-        {shouldShowField('whatIsYourSpeciality', teacherTypeKey) && (
-            <TextInput source="whatIsYourSpeciality" />
-        )}
+            {/* SPECIAL_EDUCATION only */}
+            {shouldShowField('howManyStudentsWatched', teacherTypeKey) && (
+                <NumberInput source="howManyStudentsWatched" />
+            )}
+            {shouldShowField('wasPhoneDiscussing', teacherTypeKey) && <BooleanInput source="wasPhoneDiscussing" />}
+            {shouldShowField('whatIsYourSpeciality', teacherTypeKey) && <TextInput source="whatIsYourSpeciality" />}
 
-        {/* Legacy/unused fields - show for backwards compatibility or admin */}
-        {isAdmin && (
-            <>
-                <BooleanInput source="wasDiscussing" />
-                <BooleanInput source="wasStudentsEnterOnTime" />
-                <BooleanInput source="wasStudentsExitOnTime" />
-                <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} />
-            </>
-        )}
+            {/* Legacy/unused fields - show for backwards compatibility or admin */}
+            {isAdmin && (
+                <>
+                    <BooleanInput source="wasDiscussing" />
+                    <BooleanInput source="wasStudentsEnterOnTime" />
+                    <BooleanInput source="wasStudentsExitOnTime" />
+                    <CommonReferenceInput source="activityType" reference="att_type" dynamicFilter={filterByUserId} />
+                </>
+            )}
 
-        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
-    </>
-}
+            {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+            {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
+        </>
+    );
+};
 
 const Representation = CommonRepresentation;
 
 const importer = {
     fields: [
-        'teacherTz', 'reportDate', 'updateDate', 'year', /* 'isConfirmed', */
-        'salaryReportId', 'salaryMonth', 'comment',
-        'howManyStudents', 'howManyMethodic', 'fourLastDigitsOfTeacherPhone',
-        'teachedStudentTz', 'howManyYalkutLessons', 'howManyDiscussingLessons',
-        'howManyStudentsHelpTeached', 'howManyLessonsAbsence', 'howManyWatchedLessons',
-        'wasDiscussing', 'wasKamal', 'wasStudentsGood', 'wasStudentsEnterOnTime', 'wasStudentsExitOnTime',
-        'activityType', 'teacherToReportFor', 'wasCollectiveWatch',
-        'isTaarifHulia', 'isTaarifHulia2', 'isTaarifHulia3'
+        'teacherTz',
+        'reportDate',
+        'updateDate',
+        'year' /* 'isConfirmed', */,
+        'salaryReportId',
+        'salaryMonth',
+        'comment',
+        'howManyStudents',
+        'howManyMethodic',
+        'fourLastDigitsOfTeacherPhone',
+        'teachedStudentTz',
+        'howManyYalkutLessons',
+        'howManyDiscussingLessons',
+        'howManyStudentsHelpTeached',
+        'howManyLessonsAbsence',
+        'howManyWatchedLessons',
+        'wasDiscussing',
+        'wasKamal',
+        'wasStudentsGood',
+        'wasStudentsEnterOnTime',
+        'wasStudentsExitOnTime',
+        'activityType',
+        'teacherToReportFor',
+        'wasCollectiveWatch',
+        'isTaarifHulia',
+        'isTaarifHulia2',
+        'isTaarifHulia3',
     ],
-}
+};
 
 const entity = {
     Datagrid,
