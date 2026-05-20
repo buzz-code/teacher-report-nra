@@ -55,10 +55,12 @@ import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config'
     BaseEntityModule.register(salaryReportByTeacherConfig),
 
     // View entities
-    BaseEntityModule.register(createAuditLogConfig({
-      teacher: Teacher,
-      student_group: StudentGroup,
-    })),
+    BaseEntityModule.register(
+      createAuditLogConfig({
+        teacher: Teacher,
+        student_group: StudentGroup,
+      }),
+    ),
     BaseEntityModule.register({ entity: PriceByUser }),
     BaseEntityModule.register({ entity: UserPricePivot }),
     BaseEntityModule.register(attReportWithPriceConfig),

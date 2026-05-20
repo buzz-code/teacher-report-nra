@@ -1,4 +1,14 @@
-import { DateField, DateTimeInput, maxLength, NumberInput, NumberField, ReferenceField, required, TextField, TextInput } from 'react-admin';
+import {
+    DateField,
+    DateTimeInput,
+    maxLength,
+    NumberInput,
+    NumberField,
+    ReferenceField,
+    required,
+    TextField,
+    TextInput,
+} from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
@@ -16,7 +26,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
         <CommonDatagrid {...props}>
             {children}
             {isAdmin && <TextField source="id" />}
-            {isAdmin && <ReferenceField source="userId" reference="user" emptyText='system' />}
+            {isAdmin && <ReferenceField source="userId" reference="user" emptyText="system" />}
             <TextField source="code" />
             <TextField source="description" />
             <NumberField source="price" />
@@ -24,19 +34,21 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
         </CommonDatagrid>
     );
-}
+};
 
 const Inputs = ({ isCreate, isAdmin }) => {
-    return <>
-        {!isCreate && isAdmin && <TextInput source="id" disabled />}
-        {isAdmin && <CommonReferenceInput source="userId" reference="user" emptyValue={0} emptyText='system' />}
-        <TextInput source="code" disabled={!isCreate} validate={[required(), maxLength(100)]} />
-        <TextInput source="description" disabled={!isCreate} validate={[required(), maxLength(500)]} />
-        <NumberInput source="price" validate={[required()]} step={0.01} />
-        {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
-        {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
-    </>
-}
+    return (
+        <>
+            {!isCreate && isAdmin && <TextInput source="id" disabled />}
+            {isAdmin && <CommonReferenceInput source="userId" reference="user" emptyValue={0} emptyText="system" />}
+            <TextInput source="code" disabled={!isCreate} validate={[required(), maxLength(100)]} />
+            <TextInput source="description" disabled={!isCreate} validate={[required(), maxLength(500)]} />
+            <NumberInput source="price" validate={[required()]} step={0.01} />
+            {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
+            {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
+        </>
+    );
+};
 
 const Representation = 'description';
 
