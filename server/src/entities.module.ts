@@ -31,6 +31,8 @@ import attReportWithPriceConfig from './entity-modules/att-report-with-price.con
 import { AnswerWithPrice } from './db/view-entities/AnswerWithPrice.entity';
 import reportableItemWithPriceConfig from './entity-modules/reportable-item-with-price.config';
 import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config';
+import phoneTemplateConfig from '@shared/entities/configs/phone-template.config';
+import phoneCampaignConfig from '@shared/entities/configs/phone-campaign.config';
 
 @Module({
   imports: [
@@ -66,6 +68,8 @@ import { createAuditLogConfig } from '@shared/entities/configs/audit-log.config'
     BaseEntityModule.register(attReportWithPriceConfig),
     BaseEntityModule.register({ entity: AnswerWithPrice }),
     BaseEntityModule.register(reportableItemWithPriceConfig),
+    BaseEntityModule.register(phoneTemplateConfig),
+    BaseEntityModule.register(phoneCampaignConfig),
   ],
 })
 export class EntitiesModule {}
