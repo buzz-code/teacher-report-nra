@@ -2,7 +2,6 @@ import {
     DateField,
     DateInput,
     DateTimeInput,
-    NumberField,
     ReferenceField,
     required,
     TextField,
