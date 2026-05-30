@@ -12,9 +12,8 @@ import {
     BooleanField,
     BooleanInput,
     useDataProvider,
-    SelectField,
     useListContext,
-    useRecordContext,
+    useRecordContext
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
 import { useState, useEffect } from 'react';
@@ -25,8 +24,8 @@ import { getResourceComponents } from '@shared/components/crudContainers/CommonE
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { BulkFixReferenceButton } from '@shared/components/crudContainers/BulkFixReferenceButton';
 import { UpdateStudentCountButton } from './UpdateStudentCountButton';
 import {
@@ -52,7 +51,7 @@ const filters = [
         alwaysOn
         dynamicFilter={filterByUserId}
     />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
     // <BooleanInput source="isConfirmed" />,
     <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
     <CommonReferenceInputFilter source="activityType" reference="att_type" dynamicFilter={filterByUserId} />,
@@ -90,7 +89,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <DateField source="reportDate" />
             <DateField showDate showTime source="updateDate" />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             {/* <BooleanField source="isConfirmed" /> */}
             <ReferenceField source="salaryReportId" reference="salary_report" />
             <NumberField source="salaryMonth" />
@@ -179,7 +178,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
             />
             <DateInput source="reportDate" validate={[required()]} />
             {!isCreate && <DateTimeInput source="updateDate" disabled={!isAdmin} />}
-            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            <CommonYearInput />
             {/* <BooleanInput source="isConfirmed" /> */}
 
             {/* Salary fields - Universal */}

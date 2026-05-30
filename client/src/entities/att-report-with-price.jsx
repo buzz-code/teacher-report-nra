@@ -9,11 +9,10 @@ import {
     useTranslate,
     useGetList,
     useGetIdentity,
-    SelectField,
     useListContext,
     useDataProvider,
     TextInput,
-    required,
+    required
 } from 'react-admin';
 import { get } from 'lodash';
 import { Tooltip, IconButton, Box, Typography, Chip, CircularProgress } from '@mui/material';
@@ -23,8 +22,8 @@ import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import { CommonReferenceInputFilter, filterByUserId } from '@shared/components/fields/CommonReferenceInputFilter';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
 import { calculatePriceExplanation, createPriceMap } from '../utils/priceCalculation';
 import { shouldShowField, getTeacherTypeKeyByTeacherTypeId } from '../utils/attReportFields';
 import { BulkActionButton } from '@shared/components/crudContainers/BulkActionButton';
@@ -100,7 +99,7 @@ const filters = [
         label="סוג מורה"
         dynamicFilter={filterByUserId}
     />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
     <CommonReferenceInputFilter source="salaryReportId" reference="salary_report" dynamicFilter={filterByUserId} />,
 ];
 
@@ -239,7 +238,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             <ReferenceField source="teacherReferenceId" reference="teacher" />
             <DateField source="reportDate" />
             <DateField showDate showTime source="updateDate" />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             <ReferenceField source="teacherTypeReferenceId" reference="teacher_type" />
             <ReferenceField source="salaryReportId" reference="salary_report" emptyText="-" />
             <TextField source="salaryMonth" />
