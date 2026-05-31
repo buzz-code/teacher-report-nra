@@ -3,21 +3,19 @@ import {
     DateInput,
     DateTimeInput,
     maxLength,
-    NumberField,
     ReferenceField,
     required,
-    SelectField,
     TextField,
     TextInput,
-    useRecordContext,
+    useRecordContext
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';
 import { getResourceComponents } from '@shared/components/crudContainers/CommonEntity';
 import CommonReferenceInput from '@shared/components/fields/CommonReferenceInput';
 import { commonAdminFilters } from '@shared/components/fields/PermissionFilter';
-import { defaultYearFilter, yearChoices } from '@shared/utils/yearFilter';
-import CommonAutocompleteInput from '@shared/components/fields/CommonAutocompleteInput';
+import { defaultYearFilter } from '@shared/utils/yearFilter';
+import { CommonYearField, CommonYearInput, CommonYearInputFilter } from '@shared/components/fields/CommonYear';
 import { ShowMatchingRecordsButton } from '@shared/components/fields/ShowMatchingRecordsButton';
 
 const ShowReportablesButton = ({ resource }) => {
@@ -32,7 +30,7 @@ const filters = [
     <TextInput source="name:$cont" alwaysOn />,
     <DateInput source="date:$gte" />,
     <DateInput source="date:$lte" />,
-    <CommonAutocompleteInput source="year" choices={yearChoices} alwaysOn />,
+    <CommonYearInputFilter />,
 ];
 
 const filterDefaultValues = {
@@ -47,7 +45,7 @@ const Datagrid = ({ isAdmin, children, ...props }) => {
             {isAdmin && <ReferenceField source="userId" reference="user" />}
             <DateField showDate showTime source="date" />
             <TextField source="name" />
-            <SelectField source="year" choices={yearChoices} />
+            <CommonYearField />
             {isAdmin && <DateField showDate showTime source="createdAt" />}
             {isAdmin && <DateField showDate showTime source="updatedAt" />}
             <ShowReportablesButton resource="att_report" label="דיווחים" />
@@ -63,7 +61,7 @@ const Inputs = ({ isCreate, isAdmin }) => {
             {isAdmin && <CommonReferenceInput source="userId" reference="user" validate={required()} />}
             <DateInput source="date" validate={[required()]} />
             <TextInput source="name" validate={[maxLength(255)]} />
-            <CommonAutocompleteInput source="year" choices={yearChoices} defaultValue={defaultYearFilter.year} />
+            <CommonYearInput />
             {!isCreate && isAdmin && <DateTimeInput source="createdAt" disabled />}
             {!isCreate && isAdmin && <DateTimeInput source="updatedAt" disabled />}
         </>
