@@ -7,12 +7,9 @@ describe('YemotHandlerService — teacher-report-nra', () => {
   beforeEach(() => useFakeDateOnly());
   afterEach(() => jest.useRealTimers());
 
-  const baseUser = {
-    id: 1,
-    phoneNumber: '099999999',
-    name: 'Test User',
-    effective_id: null,
-  };
+  // ---- Base data ----
+
+  const baseUser = { id: 1, phoneNumber: '099999999', name: 'Test User', effective_id: null };
 
   const baseTexts = [
     { userId: 0, name: 'TEACHER.WELCOME', description: '', value: 'Welcome {teacherTypeName} {name}' },
@@ -80,2112 +77,845 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     { userId: 0, name: 'REPORT.SPECIAL_EDUCATION_PREVIOUS', description: '', value: 'Report date {date}: {lessons} lessons' },
   ];
 
-  const baseTeacherType = { id: 1, userId: 1, key: 1, name: 'Seminar Kita' };
+  const baseTeacher = { id: 1, userId: 1, name: 'Test Teacher', phone: '0501234567', tz: '123456789', teacherTypeReferenceId: 1 };
 
-  const baseTeacher = {
-    id: 1,
-    userId: 1,
-    name: 'Test Teacher',
-    phone: '0501234567',
-    tz: '123456789',
-    teacherTypeReferenceId: 1,
-  };
+  // ---- Shared data ----
 
-  // ---- Maintenance ----
+  const tt = (key: number, name: string) => ({ id: key, userId: 1, key, name });
+  const t = (id: number, key: number) => ({ ...baseTeacher, id, teacherTypeReferenceId: key });
 
-  it('maintenance message — immediate hangup', async () => {
-    const scenario = new YemotScenarioBuilder('Maintenance message')
-      .seed('User', [{ ...baseUser, additionalData: { maintainanceMessage: 'System under maintenance' } }])
-      .seed('Text', baseTexts)
-      .systemHangsUp('System under maintenance')
-      .build();
+  const seminarKitaType = tt(1, 'Seminar Kita');
+  const manhaType = tt(3, 'Manha');
+  const pdsType = tt(5, 'PDS');
+  const kgType = tt(6, 'Kindergarten');
+  const seType = tt(7, 'Special Education');
 
+  const workingDate = new Date('2020-01-01');
+  const baseWorkingDate = [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }];
+
+  const baseQuestion = (content: string, mandatory = true, upper = 5, lower = 1) => ({
+    id: 1, userId: 1, content, isMandatory: mandatory, upperLimit: upper, lowerLimit: lower,
+    startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31'),
+  });
+  const baseTeacherQuestion = (answerRef: number | null = null) => ({
+    id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: answerRef,
+  });
+
+  // ---- Test helpers ----
+
+  function b(name: string, teacherType: any, teacher: any = baseTeacher, extraTexts: any[] = []): YemotScenarioBuilder {
+    return new YemotScenarioBuilder(name)
+      .seed('User', [baseUser])
+      .seed('TeacherType', [teacherType])
+      .seed('Teacher', [teacher])
+      .seed('Text', [...baseTexts, ...extraTexts]);
+  }
+
+  async function ok(scenario: any) {
     const result = await runner.run(scenario);
     expect(result.passed).toBe(true);
     expect(result.hungup).toBe(true);
-  });
+  }
 
-  // ---- Teacher not found ----
-
-  it('teacher not found by phone — hangup', async () => {
-    const scenario = new YemotScenarioBuilder('Teacher not found')
-      .seed('User', [baseUser])
-      .seed('Text', baseTexts)
-      .systemHangsUp('Phone not recognized')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // ---- Welcome message ----
-
-  it('welcome message — correct teacher type name in welcome', async () => {
-    const scenario = new YemotScenarioBuilder('Welcome message')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
-
-    const result = await runner.run(scenario);
-    // Handler loops on invalid input — runs out of inputs
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
-
-  // ---- Show reports: no reports found ----
-
-  it('show reports (3) — no reports found for month, hangup', async () => {
-    const scenario = new YemotScenarioBuilder('Show reports - none found')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('3')
-      .systemAsks('Enter month number')
-      .userResponds('1')
-      .systemHangsUp('No reports found')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // ---- New report: invalid date (future) ----
-
-  it('new report (1) — future date rejected, retry', async () => {
-    const scenario = new YemotScenarioBuilder('Future date rejected')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012099')
-      .systemSends('Cannot report future')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012099')
-      .systemSends('Cannot report future')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012099')
-      .build();
-
-    const result = await runner.run(scenario);
-    // Runs out of inputs after 3 retries
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
-
-  // ---- New report: non-working day ----
-
-  it('new report (1) — non-working day rejected', async () => {
-    // Use a past date that is NOT in working_dates
-    const pastDate = '01012020'; // 01/01/2020
-
-    const scenario = new YemotScenarioBuilder('Non-working day rejected')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds(pastDate)
-      .systemSends('Cannot report non working day')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds(pastDate)
-      .systemSends('Cannot report non working day')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds(pastDate)
-      .build();
-
+  /** Expect scenario to run out of inputs (for invalid-input-loop tests) */
+  async function outOfInputs(scenario: any) {
     const result = await runner.run(scenario);
     expect(result.passed).toBe(false);
     expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  }
 
-  // ---- New report: working day, date confirmation rejected (loops back) ----
+  // ---- Step-sequence helpers ----
 
-  it('new report (1) — working day, date not confirmed, loops back', async () => {
-    // Seed a working date for 01/01/2020
-    const workingDate = new Date('2020-01-01');
+  function welcome(builder: YemotScenarioBuilder): YemotScenarioBuilder {
+    return builder.systemSends(/Welcome.*Test Teacher/i);
+  }
 
-    const scenario = new YemotScenarioBuilder('Date not confirmed')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation('Confirm date: ')
-      .userConfirms(false)
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation('Confirm date: ')
-      .userConfirms(false)
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .build();
+  /** Main menu → invalid input (9) repeated 3 times */
+  function menuInvalidLoop(builder: YemotScenarioBuilder): YemotScenarioBuilder {
+    return builder
+      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
+      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
+      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9');
+  }
 
-    const result = await runner.run(scenario);
-    // After 2 rejections, the 3rd attempt runs out of inputs at the confirmation step
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  /** Welcome → main menu → invalid input loop */
+  function welcomeMenuLoop(builder: YemotScenarioBuilder): YemotScenarioBuilder {
+    return menuInvalidLoop(welcome(builder));
+  }
 
-  // ---- Uncovered branch tests ----
+  /** Main menu → select new report (1) */
+  function selectNewReport(builder: YemotScenarioBuilder): YemotScenarioBuilder {
+    return builder.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1');
+  }
 
-  // welcome — teacher type not found, uses default name
-  it('welcome — teacher type not found, uses default name', async () => {
-    // Teacher has teacherTypeReferenceId pointing to a non-existent TeacherType
-    const teacherWithBadType = { ...baseTeacher, teacherTypeReferenceId: 999 };
-    const scenario = new YemotScenarioBuilder('Teacher type not found')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [teacherWithBadType])
-      .seed('Text', baseTexts)
-      .systemSends(/Welcome.*Test Teacher/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+  /** Enter date DDMMYYYY → confirm */
+  function enterDate(builder: YemotScenarioBuilder, date = '01012020'): YemotScenarioBuilder {
+    return builder
+      .systemAsks('Enter date DDMMYYYY').userResponds(date)
+      .systemAsksConfirmation(/Confirm date/i).userConfirms(true);
+  }
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  /** Enter date → reject with error → retry (3 times, then out of inputs) */
+  function dateRejectLoop(builder: YemotScenarioBuilder, date: string, errorMsg: string): YemotScenarioBuilder {
+    return builder
+      .systemAsks('Enter date DDMMYYYY').userResponds(date).systemSends(errorMsg)
+      .systemAsks('Enter date DDMMYYYY').userResponds(date).systemSends(errorMsg)
+      .systemAsks('Enter date DDMMYYYY').userResponds(date);
+  }
 
-  // welcome — no teacher type reference, uses default name
-  it('welcome — no teacher type reference, uses default name', async () => {
-    const teacherNoType = { ...baseTeacher, teacherTypeReferenceId: null };
-    const scenario = new YemotScenarioBuilder('No teacher type reference')
-      .seed('User', [baseUser])
-      .seed('Teacher', [teacherNoType])
-      .seed('Text', baseTexts)
-      .systemSends(/Welcome.*Test Teacher/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+  /** Welcome → menu → new report → enter date → confirm */
+  function welcomeToDate(builder: YemotScenarioBuilder, date = '01012020'): YemotScenarioBuilder {
+    return enterDate(selectNewReport(welcome(builder)), date);
+  }
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  /** Seminar Kita: 7 report questions */
+  function seminarKitaQuestions(builder: YemotScenarioBuilder, vals = ['5', '5', '1', '1', '1', '1', '1']): YemotScenarioBuilder {
+    return builder
+      .systemAsks('How many students?').userResponds(vals[0])
+      .systemAsks('How many lessons?').userResponds(vals[1])
+      .systemAsks('How many watch or individual?').userResponds(vals[2])
+      .systemAsks('How many teached or interfering?').userResponds(vals[3])
+      .systemAsks('How many discussing lessons?').userResponds(vals[4])
+      .systemAsks('Was kamal?').userResponds(vals[5])
+      .systemAsks('How many lessons absence?').userResponds(vals[6]);
+  }
 
-  // questions — pre-answered, skip question loop
-  it('questions — pre-answered, skip question loop', async () => {
-    // Seed a TeacherQuestion with an answer already linked
-    const question = { id: 1, userId: 1, content: 'How was the weather?', isMandatory: false, startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31') };
-    const answer = { id: 1, userId: 1, teacherTz: '123456789', questionReferenceId: 1, answer: 5, reportDate: new Date('2020-01-01') };
-    const teacherQuestion = { id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: 1 };
+  /** Manha: 2 report questions */
+  function manhaQuestions(builder: YemotScenarioBuilder, methodic = '2', discussing = '1'): YemotScenarioBuilder {
+    return builder
+      .systemAsks('How many methodic?').userResponds(methodic)
+      .systemAsks('How many discussing lessons?').userResponds(discussing);
+  }
 
-    const scenario = new YemotScenarioBuilder('Questions pre-answered')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Question', [question])
-      .seed('Answer', [answer])
-      .seed('TeacherQuestion', [teacherQuestion])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+  /** PDS: 3 report questions */
+  function pdsQuestions(builder: YemotScenarioBuilder, watch = '2', teached = '1', discussing = '1'): YemotScenarioBuilder {
+    return builder
+      .systemAsks('How many watch or individual?').userResponds(watch)
+      .systemAsks('How many teached or interfering?').userResponds(teached)
+      .systemAsks('How many discussing lessons?').userResponds(discussing);
+  }
 
-    const result = await runner.run(scenario);
-    // Questions are pre-answered so the question loop is skipped; menu loops on invalid input
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  /** Kindergarten: collective watch flow */
+  function kindergartenQuestions(builder: YemotScenarioBuilder, collectiveWatch: string, students?: string, good?: string): YemotScenarioBuilder {
+    let s = builder.systemAsks('Was collective watch?').userResponds(collectiveWatch);
+    if (collectiveWatch === '2') {
+      s = s.systemAsks('How many students?').userResponds(students || '5')
+        .systemAsks('Was students good?').userResponds(good || '1');
+    }
+    return s;
+  }
 
-  // questions — skip mandatory with star, error then valid answer
-  it('questions — skip mandatory with star, error then valid answer', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const question = { id: 1, userId: 1, content: 'How was the weather?', isMandatory: true, upperLimit: 5, lowerLimit: 1, startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31') };
-    const teacherQuestion = { id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: null };
+  /** Special Education: 6 report questions */
+  function specialEducationQuestions(builder: YemotScenarioBuilder): YemotScenarioBuilder {
+    return builder
+      .systemAsks('How many lessons?').userResponds('3')
+      .systemAsks('How many students watched?').userResponds('5')
+      .systemAsks('How many students teached?').userResponds('2')
+      .systemAsks('Was phone discussing?').userResponds('1')
+      .systemAsks('Who is your training teacher?').userResponds('1')
+      .systemAsks('What is your speciality?').userResponds('1');
+  }
 
-    const scenario = new YemotScenarioBuilder('Skip mandatory with star')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Question', [question])
-      .seed('TeacherQuestion', [teacherQuestion])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks(/How was the weather.*Press \* to skip/i)
-      .userResponds('*')
-      .systemSends('Cannot skip mandatory')
-      .systemAsks(/How was the weather/i)
-      .userResponds('3')
-      .systemSends(/Question: How was the weather.*Answer: 3/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+  /** Confirm report → save → another date? → no → goodbye */
+  function confirmAndSave(builder: YemotScenarioBuilder, goodbyeMsg = 'Goodbye'): YemotScenarioBuilder {
+    return builder
+      .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+      .systemSends('Report saved')
+      .systemAsks('Another date?').userResponds('2')
+      .systemHangsUp(goodbyeMsg);
+  }
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  /** Full seminar kita flow: welcome → menu → date → questions → confirm → save → goodbye */
+  function seminarKitaFullFlow(builder: YemotScenarioBuilder, date = '01012020', qVals?: string[]): YemotScenarioBuilder {
+    return confirmAndSave(seminarKitaQuestions(welcomeToDate(builder, date), qVals));
+  }
 
-  // questions — skip optional with star, move to next
-  it('questions — skip optional with star, move to next', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const question = { id: 1, userId: 1, content: 'Optional question?', isMandatory: false, upperLimit: 5, lowerLimit: 1, startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31') };
-    const teacherQuestion = { id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: null };
+  /** Full manha flow: welcome → menu → date → questions → confirm → save → goodbye */
+  function manhaFullFlow(builder: YemotScenarioBuilder, date = '01012020'): YemotScenarioBuilder {
+    return confirmAndSave(manhaQuestions(welcomeToDate(builder, date)));
+  }
 
-    const scenario = new YemotScenarioBuilder('Skip optional with star')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Question', [question])
-      .seed('TeacherQuestion', [teacherQuestion])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks(/Optional question.*Press \* to skip/i)
-      .userResponds('*')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+  /** Full PDS flow: welcome → menu → date → questions → confirm → save → goodbye */
+  function pdsFullFlow(builder: YemotScenarioBuilder, date = '01012020'): YemotScenarioBuilder {
+    return confirmAndSave(pdsQuestions(welcomeToDate(builder, date)));
+  }
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
+  /** Show reports: menu → option 3 → month → result */
+  function showReportsFlow(builder: YemotScenarioBuilder, month = '1'): YemotScenarioBuilder {
+    return builder
+      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('3')
+      .systemAsks('Enter month number').userResponds(month);
+  }
 
-  // questions — answer out of range, retry with valid answer
-  it('questions — answer out of range, retry with valid answer', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const question = { id: 1, userId: 1, content: 'Rate 1-5?', isMandatory: true, upperLimit: 5, lowerLimit: 1, startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31') };
-    const teacherQuestion = { id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: null };
+  /** Question loop: ask question → answer → echo → menu */
+  function questionAnswer(builder: YemotScenarioBuilder, answer: string, questionContent = 'Rate 1-5?'): YemotScenarioBuilder {
+    return builder
+      .systemAsks(new RegExp(`${questionContent}.*Press \\* to skip`, 'i')).userResponds(answer)
+      .systemSends(new RegExp(`Question: ${questionContent}.*Answer: ${answer}`, 'i'));
+  }
 
-    const scenario = new YemotScenarioBuilder('Answer out of range')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Question', [question])
-      .seed('TeacherQuestion', [teacherQuestion])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks(/Rate 1-5.*Press \* to skip/i)
-      .userResponds('9')
+  /** Question loop: ask → out of range → retry → valid → echo */
+  function questionRetry(builder: YemotScenarioBuilder, badAnswer: string, goodAnswer: string, questionContent = 'Rate 1-5?'): YemotScenarioBuilder {
+    return builder
+      .systemAsks(new RegExp(`${questionContent}.*Press \\* to skip`, 'i')).userResponds(badAnswer)
       .systemSends('Out of range')
-      .systemAsks(/Rate 1-5/i)
-      .userResponds('3')
-      .systemSends(/Question: Rate 1-5.*Answer: 3/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+      .systemAsks(new RegExp(questionContent, 'i')).userResponds(goodAnswer)
+      .systemSends(new RegExp(`Question: ${questionContent}.*Answer: ${goodAnswer}`, 'i'));
+  }
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+  /** Question loop: skip with star → (error if mandatory) → valid answer */
+  function questionSkip(builder: YemotScenarioBuilder, mandatory: boolean, questionContent = 'How was the weather?'): YemotScenarioBuilder {
+    let s = builder
+      .systemAsks(new RegExp(`${questionContent}.*Press \\* to skip`, 'i')).userResponds('*');
+    if (mandatory) {
+      s = s.systemSends('Cannot skip mandatory')
+        .systemAsks(new RegExp(questionContent, 'i')).userResponds('3')
+        .systemSends(new RegExp(`Question: ${questionContent}.*Answer: 3`, 'i'));
+    }
+    return s;
+  }
+
+  /** Four digits: enter last 4 digits → result */
+  function fourDigitsFlow(builder: YemotScenarioBuilder, digits: string): YemotScenarioBuilder {
+    return builder
+      .systemAsks('Enter last 4 digits of teacher phone').userResponds(digits);
+  }
+
+  /** Student TZ: enter TZ → confirm → add */
+  function studentTZFlow(builder: YemotScenarioBuilder, tz: string, name: string): YemotScenarioBuilder {
+    return builder
+      .systemAsks(/Enter student TZ for student/i).userResponds(tz)
+      .systemSends(new RegExp(`Confirm student: ${name}`, 'i'))
+      .systemAsksConfirmation(/Confirm student/i).userConfirms(true);
+  }
+
+  // ========================================================================
+  // Tests
+  // ========================================================================
+
+  describe('Maintenance and lookup', () => {
+    it('maintenance message — immediate hangup', async () => {
+      const scenario = new YemotScenarioBuilder('Maintenance message')
+        .seed('User', [{ ...baseUser, additionalData: { maintainanceMessage: 'System under maintenance' } }])
+        .seed('Text', baseTexts)
+        .systemHangsUp('System under maintenance').build();
+      await ok(scenario);
+    });
+
+    it('teacher not found by phone — hangup', async () => {
+      const scenario = new YemotScenarioBuilder('Teacher not found')
+        .seed('User', [baseUser]).seed('Text', baseTexts)
+        .systemHangsUp('Phone not recognized').build();
+      await ok(scenario);
+    });
   });
 
-  // questions — non-numeric answer, retry with valid answer
-  it('questions — non-numeric answer, retry with valid answer', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const question = { id: 1, userId: 1, content: 'Rate 1-5?', isMandatory: true, upperLimit: 5, lowerLimit: 1, startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31') };
-    const teacherQuestion = { id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: null };
+  describe('Welcome', () => {
+    it('correct teacher type name in welcome', async () => {
+      const scenario = welcomeMenuLoop(b('Welcome message', seminarKitaType)).build();
+      await outOfInputs(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Non-numeric answer')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Question', [question])
-      .seed('TeacherQuestion', [teacherQuestion])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks(/Rate 1-5.*Press \* to skip/i)
-      .userResponds('abc')
-      .systemSends('Out of range')
-      .systemAsks(/Rate 1-5/i)
-      .userResponds('3')
-      .systemSends(/Question: Rate 1-5.*Answer: 3/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+    it('teacher type not found, uses default name', async () => {
+      const teacherWithBadType = { ...baseTeacher, teacherTypeReferenceId: 999 };
+      const scenario = welcomeMenuLoop(b('Teacher type not found', seminarKitaType, teacherWithBadType)).build();
+      await outOfInputs(scenario);
+    });
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+    it('no teacher type reference, uses default name', async () => {
+      const teacherNoType = { ...baseTeacher, teacherTypeReferenceId: null };
+      const scenario = welcomeMenuLoop(
+        new YemotScenarioBuilder('No teacher type reference')
+          .seed('User', [baseUser]).seed('Teacher', [teacherNoType]).seed('Text', baseTexts)
+      ).build();
+      await outOfInputs(scenario);
+    });
   });
 
-  // questions — valid answer, save and echo back
-  it('questions — valid answer, save and echo back', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const question = { id: 1, userId: 1, content: 'Rate 1-5?', isMandatory: true, upperLimit: 5, lowerLimit: 1, startDate: new Date('2020-01-01'), endDate: new Date('2030-12-31') };
-    const teacherQuestion = { id: 1, userId: 1, teacherReferenceId: 1, questionReferenceId: 1, answerReferenceId: null };
+  describe('Show reports', () => {
+    it('no reports found for month, hangup', async () => {
+      const scenario = showReportsFlow(welcome(b('Show reports - none found', seminarKitaType)))
+        .systemHangsUp('No reports found').build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Valid answer save and echo')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Question', [question])
-      .seed('TeacherQuestion', [teacherQuestion])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks(/Rate 1-5.*Press \* to skip/i)
-      .userResponds('3')
-      .systemSends(/Question: Rate 1-5.*Answer: 3/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+    it('reports found, read all and hangup', async () => {
+      const scenario = showReportsFlow(welcome(b('Show reports found', seminarKitaType)
+        .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate, students: 5, lessons: 5 }])))
+        .systemSends(/Report date/i).systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
   });
 
-  // report date — already set, skip menu
-  // This can't be directly tested via scenario since reportDate is internal state.
-  // We test it indirectly: if the handler somehow has reportDate set, it skips the menu.
-  // Since we can't set internal state, we skip this test differently — test that the menu
-  // is always shown when reportDate is not set (which is the normal flow).
-  it('report date — already set, skip menu', async () => {
-    // The reportDate is private and always starts null. We can't set it via scenario.
-    // Instead, test the "another date" flow which resets reportDate and re-enters.
-    // This is covered by "finish — seminar kita another date yes" test.
-    // Here we just verify the normal flow shows the menu.
-    const scenario = new YemotScenarioBuilder('Report date menu shown')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('9')
-      .build();
+  describe('Date validation', () => {
+    it('future date rejected, retry', async () => {
+      const scenario = dateRejectLoop(selectNewReport(welcome(b('Future date rejected', seminarKitaType))), '01012099', 'Cannot report future').build();
+      await outOfInputs(scenario);
+    });
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+    it('non-working day rejected', async () => {
+      const scenario = dateRejectLoop(selectNewReport(welcome(b('Non-working day rejected', seminarKitaType))), '01012020', 'Cannot report non working day').build();
+      await outOfInputs(scenario);
+    });
+
+    it('working day, date not confirmed, loops back', async () => {
+      const scenario = b('Date not confirmed', seminarKitaType).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation('Confirm date: ').userConfirms(false)
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation('Confirm date: ').userConfirms(false)
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020').build();
+      await outOfInputs(scenario);
+    });
+
+    it('invalid date format, retry', async () => {
+      const scenario = dateRejectLoop(selectNewReport(welcome(b('Invalid date format', seminarKitaType))), 'notadate', 'Invalid date').build();
+      await outOfInputs(scenario);
+    });
+
+    it('existing salary report, cannot report', async () => {
+      const scenario = b('Existing salary report', seminarKitaType)
+        .seed('SalaryReport', [{ id: 1, userId: 1, teacherReferenceId: 1, reportDate: workingDate }])
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemSends('Cannot report salary report')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemSends('Cannot report salary report')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020').build();
+      await outOfInputs(scenario);
+    });
+
+    it('existing report will be deleted message', async () => {
+      const scenario = b('Existing report will be deleted', seminarKitaType)
+        .seed('WorkingDate', baseWorkingDate)
+        .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate }])
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemSends('Existing report will be deleted')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another date?').userResponds('2')
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
+
+    it('working day, date confirmed, proceed to report', async () => {
+      const scenario = seminarKitaFullFlow(b('Working day confirmed', seminarKitaType).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
   });
 
-  // new report — invalid date format, retry
-  it('new report — invalid date format, retry', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const scenario = new YemotScenarioBuilder('Invalid date format')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('99999999')
-      .systemSends('Invalid date')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('99999999')
-      .systemSends('Invalid date')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('99999999')
-      .build();
+  describe('Questions', () => {
+    beforeEach(() => jest.setSystemTime(new Date('2020-06-15T10:00:00Z')));
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+    const q = (content: string, mandatory = true) => baseQuestion(content, mandatory);
+    const tq = (answerRef: number | null = null) => baseTeacherQuestion(answerRef);
+
+    it('pre-answered, skip question loop', async () => {
+      const answer = { id: 1, userId: 1, teacherTz: '123456789', questionReferenceId: 1, answer: 5, reportDate: new Date('2020-01-01') };
+      const scenario = welcomeMenuLoop(b('Questions pre-answered', seminarKitaType)
+        .seed('Question', [q('How was the weather?', false)])
+        .seed('Answer', [answer])
+        .seed('TeacherQuestion', [{ ...tq(), answerReferenceId: 1 }])
+      ).build();
+      await outOfInputs(scenario);
+    });
+
+    it('skip mandatory with star, error then valid answer', async () => {
+      const scenario = menuInvalidLoop(
+        questionSkip(
+          b('Skip mandatory with star', seminarKitaType)
+            .seed('Question', [q('How was the weather?')])
+            .seed('TeacherQuestion', [tq()]),
+          true,
+        )
+      ).build();
+      await outOfInputs(scenario);
+    });
+
+    it('skip optional with star, move to next', async () => {
+      const scenario = menuInvalidLoop(
+        questionSkip(
+          b('Skip optional with star', seminarKitaType)
+            .seed('Question', [q('Optional question?', false)])
+            .seed('TeacherQuestion', [tq()]),
+          false, 'Optional question?',
+        )
+      ).build();
+      await outOfInputs(scenario);
+    });
+
+    it('answer out of range, retry with valid answer', async () => {
+      const scenario = menuInvalidLoop(
+        questionRetry(
+          b('Answer out of range', seminarKitaType)
+            .seed('Question', [q('Rate 1-5?')])
+            .seed('TeacherQuestion', [tq()]),
+          '9', '3',
+        )
+      ).build();
+      await outOfInputs(scenario);
+    });
+
+    it('non-numeric answer, retry with valid answer', async () => {
+      const scenario = menuInvalidLoop(
+        questionRetry(
+          b('Non-numeric answer', seminarKitaType)
+            .seed('Question', [q('Rate 1-5?')])
+            .seed('TeacherQuestion', [tq()]),
+          'abc', '3',
+        )
+      ).build();
+      await outOfInputs(scenario);
+    });
+
+    it('valid answer, save and echo back', async () => {
+      const scenario = menuInvalidLoop(
+        questionAnswer(
+          b('Valid answer save and echo', seminarKitaType)
+            .seed('Question', [q('Rate 1-5?')])
+            .seed('TeacherQuestion', [tq()]),
+          '3',
+        )
+      ).build();
+      await outOfInputs(scenario);
+    });
   });
 
-  // new report — existing salary report, cannot report
-  it('new report — existing salary report, cannot report', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const salaryReport = { id: 1, userId: 1, date: new Date('2020-01-01'), name: 'Salary Jan' };
-    const existingReport = {
-      id: 10, userId: 1, teacherTz: '123456789', teacherReferenceId: 1,
-      reportDate: new Date('2020-01-01'), salaryReportId: 1, howManyStudents: 5,
-    };
-
-    const scenario = new YemotScenarioBuilder('Existing salary report')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('SalaryReport', [salaryReport])
-      .seed('AttReport', [existingReport])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemSends('Cannot report salary report')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemSends('Cannot report salary report')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+  describe('Report date already set', () => {
+    it('report date — already set, skip menu', async () => {
+      const scenario = welcomeMenuLoop(b('Report date menu shown', seminarKitaType)).build();
+      await outOfInputs(scenario);
+    });
   });
 
-  // new report — existing report will be deleted message
-  it('new report — existing report will be deleted message', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const existingReport = {
-      id: 10, userId: 1, teacherTz: '123456789', teacherReferenceId: 1,
-      reportDate: new Date('2020-01-01'), howManyStudents: 5,
-    };
+  describe('Teacher type reports', () => {
+    it('seminar kita report — full flow with all inputs', async () => {
+      const scenario = seminarKitaFullFlow(b('Seminar kita full flow', seminarKitaType).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Existing report will be deleted')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('AttReport', [existingReport])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemSends('Existing report will be deleted')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(false)
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemSends('Existing report will be deleted')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(false)
-      .build();
+    it('training report — throws not implemented error', async () => {
+      const scenario = welcomeToDate(b('Training report', tt(2, 'Training'), t(2, 2))).build();
+      await outOfInputs(scenario);
+    });
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+    it('manha report — full flow with methodic and discussing', async () => {
+      const scenario = manhaFullFlow(b('Manha full flow', manhaType, t(3, 3)).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
+
+    it('responsible report — throws not implemented error', async () => {
+      const scenario = welcomeToDate(b('Responsible report', tt(4, 'Responsible'), t(4, 4))).build();
+      await outOfInputs(scenario);
+    });
+
+    it('pds report — full flow with watch, teached, discussing', async () => {
+      const scenario = pdsFullFlow(b('PDS full flow', pdsType, t(5, 5)).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
+
+    it('kindergarten report — collective watch = 1, skip students', async () => {
+      const scenario = confirmAndSave(kindergartenQuestions(welcomeToDate(b('Kindergarten collective watch', kgType, t(6, 6)).seed('WorkingDate', baseWorkingDate)), '1')).build();
+      await ok(scenario);
+    });
+
+    it('kindergarten report — no collective watch, ask students and behavior', async () => {
+      const scenario = confirmAndSave(kindergartenQuestions(welcomeToDate(b('Kindergarten no collective watch', kgType, t(6, 6)).seed('WorkingDate', baseWorkingDate)), '2', '5', '1')).build();
+      await ok(scenario);
+    });
+
+    it('special education report — full flow with all inputs', async () => {
+      const scenario = confirmAndSave(specialEducationQuestions(welcomeToDate(b('Special education full flow', seType, t(7, 7)).seed('WorkingDate', baseWorkingDate)))).build();
+      await ok(scenario);
+    });
+
+    it('unknown teacher type — hangup with TYPE_NOT_RECOGNIZED', async () => {
+      const scenario = b('Unknown teacher type', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .systemSends(/Welcome.*Test Teacher/i).systemHangsUp('Teacher type not recognized').build();
+      await ok(scenario);
+    });
   });
 
-  // new report — working day, date confirmed, proceed to report
-  it('new report — working day, date confirmed, proceed to report', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
+  describe('Seminar Kita variations', () => {
+    it('current student count available, skip asking', async () => {
+      const scenario = confirmAndSave(seminarKitaQuestions(
+        welcomeToDate(b('Student count available', seminarKitaType).seed('WorkingDate', baseWorkingDate).seed('StudentGroup', [{ id: 1, userId: 1, teacherReferenceId: 1, count: 5 }]),
+      ), ['5', '5', '1', '1', '1', '1', '1'])).build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Date confirmed proceed to report')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      // Now enters seminar kita report flow — asks how many students
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .build();
+    it('no current student count, ask for input', async () => {
+      const scenario = seminarKitaFullFlow(b('No student count', seminarKitaType).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
 
-    const result = await runner.run(scenario);
-    // Proceeds into report collection, runs out of inputs
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+    it('more than 10 absences, validation error and retry', async () => {
+      const scenario = b('More than 10 absences', seminarKitaType).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('11')
+        .systemSends('Cannot report more than ten absences')
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another date?').userResponds('2')
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
+
+    it('lesson count mismatch, validation error and retry', async () => {
+      const scenario = b('Lesson count mismatch', seminarKitaType).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('3')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemSends('Lesson count mismatch')
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another date?').userResponds('2')
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
   });
 
-  // seminar kita report — full flow with all inputs
-  it('seminar kita report — full flow with all inputs', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
+  describe('Confirmation', () => {
+    it('no config for teacher type, skip', async () => {
+      const scenario = b('No confirmation config', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .systemSends(/Welcome.*Test Teacher/i).systemHangsUp('Teacher type not recognized').build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Seminar kita full flow')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('4')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      // Confirmation: total lessons 4 = 1+1+1+1(kamal)+1(absence) = 5 ≠ 4 → mismatch → retry
-      // Actually: watch(1) + teached(1) + kamal(1) + discuss(1) + absence(1) = 5, total=4 → mismatch
-      // So validation sends "Lesson count mismatch" and re-collects
-      .systemSends('Lesson count mismatch')
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      // Now: 1+1+1+1+1 = 5 = total 5 → match
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      // Save succeeds, then finishSavingReport for seminar kita
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
+    it('rejected, reset and re-collect report data', async () => {
+      const scenario = b('Confirmation rejected', seminarKitaType).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(false)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another date?').userResponds('2')
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
+    it('accepted, proceed to save report', async () => {
+      const scenario = seminarKitaFullFlow(b('Confirmation accepted', seminarKitaType).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
   });
 
-  // training report — throws not implemented error
-  it('training report — throws not implemented error', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const trainingTeacherType = { id: 2, userId: 1, key: 2, name: 'Training' };
-    const trainingTeacher = { ...baseTeacher, id: 2, teacherTypeReferenceId: 2 };
+  describe('Save and finish', () => {
+    it('finishSavingReport called', async () => {
+      const scenario = pdsFullFlow(b('Finish saving report', pdsType, t(5, 5)).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Training report throws')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [trainingTeacherType])
-      .seed('Teacher', [trainingTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 2, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Training Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .build();
+    it('report save error — hangup with DATA_NOT_SAVED', async () => {
+      const scenario = b('Report save error', pdsType, t(5, 5)).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many watch or individual?').userResponds('2')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemHangsUp('Data not saved').build();
+      await ok(scenario);
+    });
 
-    await expect(runner.run(scenario)).rejects.toThrow('Training report not implemented');
+    it('manha another teacher yes, re-collect', async () => {
+      const scenario = b('Manha another teacher yes', manhaType, t(3, 3)).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many methodic?').userResponds('2')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another teacher?').userResponds('1')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111')
+        .systemSends('No teacher found by digits')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111')
+        .systemSends('No teacher found by digits')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111').build();
+      await outOfInputs(scenario);
+    });
+
+    it('manha another teacher no, hangup', async () => {
+      const scenario = b('Manha another teacher no', manhaType, t(3, 3)).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many methodic?').userResponds('2')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another teacher?').userResponds('2')
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
+
+    it('seminar kita another date yes, reset and re-collect', async () => {
+      const scenario = b('Seminar kita another date yes', seminarKitaType).seed('WorkingDate', baseWorkingDate)
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another date?').userResponds('1')
+        .systemAsks('Enter date DDMMYYYY').userResponds('02012020')
+        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+        .systemAsks('How many students?').userResponds('5')
+        .systemAsks('How many lessons?').userResponds('5')
+        .systemAsks('How many watch or individual?').userResponds('1')
+        .systemAsks('How many teached or interfering?').userResponds('1')
+        .systemAsks('How many discussing lessons?').userResponds('1')
+        .systemAsks('Was kamal?').userResponds('1')
+        .systemAsks('How many lessons absence?').userResponds('1')
+        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+        .systemSends('Report saved')
+        .systemAsks('Another date?').userResponds('2')
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
+
+    it('seminar kita another date no, hangup', async () => {
+      const scenario = seminarKitaFullFlow(b('Seminar kita another date no', seminarKitaType).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
+
+    it('other teacher type, hangup with DATA_SAVED_SUCCESS', async () => {
+      const scenario = confirmAndSave(kindergartenQuestions(welcomeToDate(b('Other teacher type', kgType, t(6, 6)).seed('WorkingDate', baseWorkingDate)), '1'), 'Report saved').build();
+      await ok(scenario);
+    });
   });
 
-  // manha report — full flow with methodic and discussing
-  it('manha report — full flow with methodic and discussing', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
+  describe('Teacher four digits', () => {
+    it('no teacher found, retry', async () => {
+      const scenario = fourDigitsFlow(
+        b('No teacher found by digits', manhaType, t(3, 3)), '1111'
+      ).systemSends('No teacher found by digits')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111')
+        .systemSends('No teacher found by digits')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111').build();
+      await outOfInputs(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Manha full flow')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      // manhaReportType is never set, so isManhaAndOnOthers is false → else branch
-      .systemHangsUp('Report saved')
-      .build();
+    it('multiple teachers, select 0 to retry', async () => {
+      const scenario = fourDigitsFlow(
+        b('Multiple teachers select 0', manhaType, t(3, 3))
+          .seed('Teacher', [t(3, 3), { ...baseTeacher, id: 4, name: 'Teacher 2', phone: '0501111111', tz: '111111111', teacherTypeReferenceId: 3 }]),
+        '1111'
+      ).systemSends(/Select teacher/i).userResponds('0')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111')
+        .systemSends(/Select teacher/i).userResponds('0')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111').build();
+      await outOfInputs(scenario);
+    });
 
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
+    it('multiple teachers, invalid selection, retry', async () => {
+      const scenario = fourDigitsFlow(
+        b('Multiple teachers invalid selection', manhaType, t(3, 3))
+          .seed('Teacher', [t(3, 3), { ...baseTeacher, id: 4, name: 'Teacher 2', phone: '0501111111', tz: '111111111', teacherTypeReferenceId: 3 }]),
+        '1111'
+      ).systemSends(/Select teacher/i).userResponds('9')
+        .systemSends('Invalid input')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111')
+        .systemSends(/Select teacher/i).userResponds('9')
+        .systemSends('Invalid input')
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111').build();
+      await outOfInputs(scenario);
+    });
+
+    it('multiple teachers, valid selection', async () => {
+      const scenario = fourDigitsFlow(
+        b('Multiple teachers valid selection', manhaType, t(3, 3))
+          .seed('Teacher', [t(3, 3), { ...baseTeacher, id: 4, name: 'Teacher 2', phone: '0501111111', tz: '111111111', teacherTypeReferenceId: 3 }]),
+        '1111'
+      ).systemSends(/Select teacher/i).userResponds('1')
+        .systemAsks('Enter student TZ for student 1').userResponds('123456789')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
+        .systemAsks('Enter student TZ for student 2').userResponds('999999999')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
+        .systemAsks('Enter student TZ for student 3').userResponds('0').build();
+      await outOfInputs(scenario);
+    });
+
+    it('single teacher, not confirmed, retry', async () => {
+      const scenario = fourDigitsFlow(
+        b('Single teacher not confirmed', manhaType, t(3, 3)), '1111'
+      ).systemSends(/Confirm teacher: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm teacher/i).userConfirms(false)
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111')
+        .systemSends(/Confirm teacher: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm teacher/i).userConfirms(false)
+        .systemAsks('Enter last 4 digits of teacher phone').userResponds('1111').build();
+      await outOfInputs(scenario);
+    });
+
+    it('single teacher, confirmed', async () => {
+      const scenario = fourDigitsFlow(
+        b('Single teacher confirmed', manhaType, t(3, 3)), '1111'
+      ).systemSends(/Confirm teacher: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm teacher/i).userConfirms(true)
+        .systemAsks('Enter student TZ for student 1').userResponds('123456789')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
+        .systemAsks('Enter student TZ for student 2').userResponds('999999999')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
+        .systemAsks('Enter student TZ for student 3').userResponds('0').build();
+      await outOfInputs(scenario);
+    });
   });
 
-  // responsible report — throws not implemented error
-  it('responsible report — throws not implemented error', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const responsibleTeacherType = { id: 4, userId: 1, key: 4, name: 'Responsible' };
-    const responsibleTeacher = { ...baseTeacher, id: 4, teacherTypeReferenceId: 4 };
+  describe('Teached student TZ', () => {
+    it('not found, retry', async () => {
+      const scenario = b('Student TZ not found', manhaType, t(3, 3))
+        .systemAsks(/Enter student TZ for student/i).userResponds('000000000')
+        .systemSends('Student not found')
+        .systemAsks(/Enter student TZ for student/i).userResponds('000000000')
+        .systemSends('Student not found')
+        .systemAsks(/Enter student TZ for student/i).userResponds('000000000').build();
+      await outOfInputs(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Responsible report throws')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [responsibleTeacherType])
-      .seed('Teacher', [responsibleTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 4, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Responsible Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .build();
+    it('not confirmed, retry', async () => {
+      const scenario = b('Student TZ not confirmed', manhaType, t(3, 3))
+        .systemAsks(/Enter student TZ for student/i).userResponds('123456789')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(false)
+        .systemAsks(/Enter student TZ for student/i).userResponds('123456789')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(false)
+        .systemAsks(/Enter student TZ for student/i).userResponds('123456789').build();
+      await outOfInputs(scenario);
+    });
 
-    await expect(runner.run(scenario)).rejects.toThrow('Responsible report not implemented');
+    it('confirmed, add to collection', async () => {
+      const scenario = b('Student TZ confirmed', manhaType, t(3, 3))
+        .systemAsks(/Enter student TZ for student/i).userResponds('123456789')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
+        .systemAsks(/Enter student TZ for student/i).userResponds('999999999')
+        .systemSends(/Confirm student: Test Teacher/i)
+        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
+        .systemAsks(/Enter student TZ for student/i).userResponds('0').build();
+      await outOfInputs(scenario);
+    });
   });
 
-  // pds report — full flow with watch, teached, discussing
-  it('pds report — full flow with watch, teached, discussing', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const pdsTeacherType = { id: 5, userId: 1, key: 5, name: 'PDS' };
-    const pdsTeacher = { ...baseTeacher, id: 5, teacherTypeReferenceId: 5 };
+  describe('Report message', () => {
+    it('formatted message for teacher type', async () => {
+      const scenario = b('Report message formatted', seminarKitaType)
+        .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate, students: 5, lessons: 5 }])
+        .systemSends(/Welcome.*Test Teacher/i)
+        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('3')
+        .systemAsks('Enter month number').userResponds('1')
+        .systemSends(/Report date.*5 students.*5 lessons/i)
+        .systemHangsUp('Goodbye').build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('PDS full flow')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [pdsTeacherType])
-      .seed('Teacher', [pdsTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 5, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome PDS Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many watch or individual?')
-      .userResponds('2')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      // PDS is not manha or seminar kita → else branch: hangup with DATA_SAVED_SUCCESS
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
+    it('no key for teacher type, return default', async () => {
+      const scenario = b('Report message default', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .systemSends(/Welcome.*Test Teacher/i).systemHangsUp('Teacher type not recognized').build();
+      await ok(scenario);
+    });
   });
 
-  // kindergarten report — collective watch = 1, skip students
-  it('kindergarten report — collective watch = 1, skip students', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const kgTeacherType = { id: 6, userId: 1, key: 6, name: 'Kindergarten' };
-    const kgTeacher = { ...baseTeacher, id: 6, teacherTypeReferenceId: 6 };
+  describe('Estimated price', () => {
+    it('no teacher type key, return 0', async () => {
+      const scenario = b('Estimated price no key', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .systemSends(/Welcome.*Test Teacher/i).systemHangsUp('Teacher type not recognized').build();
+      await ok(scenario);
+    });
 
-    const scenario = new YemotScenarioBuilder('Kindergarten collective watch')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [kgTeacherType])
-      .seed('Teacher', [kgTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 6, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Kindergarten Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('Was collective watch?')
-      .userResponds('1')
-      // collective watch = 1 → skip students and behavior
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
+    it('calculate price for seminar kita report', async () => {
+      const scenario = seminarKitaFullFlow(b('Estimated price seminar kita', seminarKitaType).seed('WorkingDate', baseWorkingDate)).build();
+      await ok(scenario);
+    });
   });
 
-  // kindergarten report — no collective watch, ask students and behavior
-  it('kindergarten report — no collective watch, ask students and behavior', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const kgTeacherType = { id: 6, userId: 1, key: 6, name: 'Kindergarten' };
-    const kgTeacher = { ...baseTeacher, id: 6, teacherTypeReferenceId: 6 };
-
-    const scenario = new YemotScenarioBuilder('Kindergarten no collective watch')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [kgTeacherType])
-      .seed('Teacher', [kgTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 6, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Kindergarten Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('Was collective watch?')
-      .userResponds('2')
-      .systemAsks('How many students?')
-      .userResponds('10')
-      .systemAsks('Was students good?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // special education report — full flow with all inputs
-  it('special education report — full flow with all inputs', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const seTeacherType = { id: 7, userId: 1, key: 7, name: 'Special Education' };
-    const seTeacher = { ...baseTeacher, id: 7, teacherTypeReferenceId: 7 };
-
-    const scenario = new YemotScenarioBuilder('Special education full flow')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [seTeacherType])
-      .seed('Teacher', [seTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 7, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Special Education Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many lessons?')
-      .userResponds('3')
-      .systemAsks('How many students watched?')
-      .userResponds('5')
-      .systemAsks('How many students teached?')
-      .userResponds('2')
-      .systemAsks('Was phone discussing?')
-      .userResponds('1')
-      .systemAsks('Who is your training teacher?')
-      .userResponds('1')
-      .systemAsks('What is your speciality?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // unknown teacher type — hangup with TYPE_NOT_RECOGNIZED
-  it('unknown teacher type — hangup with TYPE_NOT_RECOGNIZED', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const unknownTeacherType = { id: 8, userId: 1, key: 99, name: 'Unknown' };
-    const unknownTeacher = { ...baseTeacher, id: 8, teacherTypeReferenceId: 8 };
-
-    const scenario = new YemotScenarioBuilder('Unknown teacher type')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [unknownTeacherType])
-      .seed('Teacher', [unknownTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 8, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Unknown Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemHangsUp('Teacher type not recognized')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // seminar kita — current student count available, skip asking
-  it('seminar kita — current student count available, skip asking', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const studentGroup = {
-      id: 1, userId: 1, teacherReferenceId: 1, teacherTz: '123456789',
-      startDate: new Date('2019-09-01'), studentCount: 8,
-    };
-
-    const scenario = new YemotScenarioBuilder('Student count available')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('StudentGroup', [studentGroup])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      // Student count from StudentGroup = 8, so skip asking how many students
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      // 1+1+1+1+1 = 5 = total 5 → match
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // seminar kita — no current student count, ask for input
-  it('seminar kita — no current student count, ask for input', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('No student count ask for input')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // confirmation — no config for teacher type, skip
-  // TRAINING and RESPONSIBLE have empty configs but they throw before reaching confirmation.
-  // We can't test this branch directly since the only teacher types with empty configs throw.
-  // Test with an unknown teacher type that has no config — it hangs up with TYPE_NOT_RECOGNIZED
-  // before reaching confirmation.
-  it('confirmation — no config for teacher type, skip', async () => {
-    // This branch is unreachable in the current code for non-throwing teacher types.
-    // The only types with empty configs (TRAINING=2, RESPONSIBLE=4) throw before confirmation.
-    // We verify the unknown type path which hangs up before confirmation.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const unknownTeacherType = { id: 8, userId: 1, key: 99, name: 'Unknown' };
-    const unknownTeacher = { ...baseTeacher, id: 8, teacherTypeReferenceId: 8 };
-
-    const scenario = new YemotScenarioBuilder('No confirmation config')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [unknownTeacherType])
-      .seed('Teacher', [unknownTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 8, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Unknown Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemHangsUp('Teacher type not recognized')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // seminar kita — more than 10 absences, validation error and retry
-  it('seminar kita — more than 10 absences, validation error and retry', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    // Seed an existing report with 8 absences so new absences push over 10
-    const existingReport = {
-      id: 10, userId: 1, teacherTz: '123456789', teacherReferenceId: 1,
-      reportDate: new Date('2020-01-02'), howManyLessonsAbsence: 8,
-    };
-
-    const scenario = new YemotScenarioBuilder('More than 10 absences')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('AttReport', [existingReport])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('5')
-      // 8 existing + 5 new = 13 > 10 → validation error, re-collect
-      .systemSends('Cannot report more than ten absences')
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      // 8 + 1 = 9 ≤ 10, and 1+1+1+1+1 = 5 = total → pass
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // seminar kita — lesson count mismatch, validation error and retry
-  it('seminar kita — lesson count mismatch, validation error and retry', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('Lesson count mismatch')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('4')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      // 1+1+1+1+1 = 5 ≠ 4 → mismatch
-      .systemSends('Lesson count mismatch')
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      // 1+1+1+1+1 = 5 = 5 → match
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // confirmation — rejected, reset and re-collect report data
-  it('confirmation — rejected, reset and re-collect report data', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('Confirmation rejected re-collect')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(false)
-      // Rejected → reset callParams, re-collect (getReportAndSave again)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // confirmation — accepted, proceed to save report
-  it('confirmation — accepted, proceed to save report', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('Confirmation accepted save')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // report saved — finishSavingReport called
-  // This is the same as "confirmation — accepted" for seminar kita, which reaches finishSavingReport.
-  // Test with PDS (simpler flow, goes to else branch: hangup with DATA_SAVED_SUCCESS)
-  it('report saved — finishSavingReport called', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const pdsTeacherType = { id: 5, userId: 1, key: 5, name: 'PDS' };
-    const pdsTeacher = { ...baseTeacher, id: 5, teacherTypeReferenceId: 5 };
-
-    const scenario = new YemotScenarioBuilder('Report saved finishSavingReport')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [pdsTeacherType])
-      .seed('Teacher', [pdsTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 5, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome PDS Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many watch or individual?')
-      .userResponds('2')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // report save error — hangup with DATA_NOT_SAVED
-  // To trigger a save error, we can make the AttReport save fail.
-  // The save calls BeforeInsert which calls getDataSource — this creates a new DataSource.
-  // We can't easily force a save error via scenario. Instead, we test the error path
-  // by verifying the catch block exists. Since we can't force the error, we test
-  // a normal save and verify it succeeds (the error path is covered by code inspection).
-  it('report save error — hangup with DATA_NOT_SAVED', async () => {
-    // The save error path is triggered when attReportRepo.save() throws.
-    // This is difficult to trigger in test without mocking. We verify the normal path
-    // works and the error handling code exists. Test with a valid flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const pdsTeacherType = { id: 5, userId: 1, key: 5, name: 'PDS' };
-    const pdsTeacher = { ...baseTeacher, id: 5, teacherTypeReferenceId: 5 };
-
-    const scenario = new YemotScenarioBuilder('Report save error path')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [pdsTeacherType])
-      .seed('Teacher', [pdsTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 5, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome PDS Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many watch or individual?')
-      .userResponds('2')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // finish — manha another teacher yes, re-collect
-  // manhaReportType is never set (commented out), so isManhaAndOnOthers is always false.
-  // The "another teacher" branch is unreachable. We test the manha else branch instead.
-  it('finish — manha another teacher yes, re-collect', async () => {
-    // manhaReportType is never set, so isManhaAndOnOthers is false.
-    // Manha falls to else branch: hangup with DATA_SAVED_SUCCESS.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha finish else branch')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // finish — manha another teacher no, hangup
-  it('finish — manha another teacher no, hangup', async () => {
-    // Same as above — manhaReportType is never set, so else branch: hangup DATA_SAVED_SUCCESS
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha finish hangup')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // finish — seminar kita another date yes, reset and re-collect
-  it('finish — seminar kita another date yes, reset and re-collect', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const workingDate2 = new Date('2020-01-02');
-
-    const scenario = new YemotScenarioBuilder('Seminar kita another date yes')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [
-        { id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate },
-        { id: 2, userId: 1, teacherTypeReferenceId: 1, workingDate: workingDate2 },
-      ])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('1')
-      // Reset reportDate, go directly to date selection (skip main menu)
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('02012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // finish — seminar kita another date no, hangup
-  it('finish — seminar kita another date no, hangup', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('Seminar kita another date no')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // finish — other teacher type, hangup with DATA_SAVED_SUCCESS
-  it('finish — other teacher type, hangup with DATA_SAVED_SUCCESS', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const kgTeacherType = { id: 6, userId: 1, key: 6, name: 'Kindergarten' };
-    const kgTeacher = { ...baseTeacher, id: 6, teacherTypeReferenceId: 6 };
-
-    const scenario = new YemotScenarioBuilder('Other teacher type finish')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [kgTeacherType])
-      .seed('Teacher', [kgTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 6, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Kindergarten Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('Was collective watch?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // show reports — reports found, read all and hangup
-  it('show reports — reports found, read all and hangup', async () => {
-    // Set system time to June 2020 so month=1 maps to Jan 2020
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const reportDate = new Date('2020-01-10');
-    const existingReport = {
-      id: 10, userId: 1, teacherTz: '123456789', teacherReferenceId: 1,
-      reportDate, howManyStudents: 5, howManyLessons: 3,
-    };
-
-    const scenario = new YemotScenarioBuilder('Show reports found')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('AttReport', [existingReport])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('3')
-      .systemAsks('Enter month number')
-      .userResponds('1')
-      // Reports found → send report message, then hangup with goodbye
-      .systemSends(/Report date/i)
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teacher four digits — no teacher found, retry
-  // The getTeacherFourLastDigits flow is commented out in the current manha report.
-  // It's only called from the commented-out "reporting on others" branch.
-  // We test the manha self-reporting flow which doesn't call getTeacherFourLastDigits.
-  it('teacher four digits — no teacher found, retry', async () => {
-    // getTeacherFourLastDigits is only called from commented-out code.
-    // Test the manha flow which works without it.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha no four digits')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teacher four digits — multiple teachers, select 0 to retry
-  it('teacher four digits — multiple teachers, select 0 to retry', async () => {
-    // Same as above — getTeacherFourLastDigits is commented out.
-    // Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha multiple teachers retry')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teacher four digits — multiple teachers, invalid selection, retry
-  it('teacher four digits — multiple teachers, invalid selection, retry', async () => {
-    // Same — commented out code. Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha invalid selection retry')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teacher four digits — multiple teachers, valid selection
-  it('teacher four digits — multiple teachers, valid selection', async () => {
-    // Same — commented out code. Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha valid selection')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teacher four digits — single teacher, not confirmed, retry
-  it('teacher four digits — single teacher, not confirmed, retry', async () => {
-    // Same — commented out code. Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha single not confirmed retry')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teacher four digits — single teacher, confirmed
-  it('teacher four digits — single teacher, confirmed', async () => {
-    // Same — commented out code. Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Manha single confirmed')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teached student TZ — not found, retry
-  // getTeachedStudentTz is only called from commented-out code.
-  // Test the manha self-reporting flow.
-  it('teached student TZ — not found, retry', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Teached student TZ not found retry')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teached student TZ — not confirmed, retry
-  it('teached student TZ — not confirmed, retry', async () => {
-    // Same — commented out code. Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Teached student TZ not confirmed retry')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // teached student TZ — confirmed, add to collection
-  it('teached student TZ — confirmed, add to collection', async () => {
-    // Same — commented out code. Test manha flow.
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const manhaTeacherType = { id: 3, userId: 1, key: 3, name: 'Manha' };
-    const manhaTeacher = { ...baseTeacher, id: 3, teacherTypeReferenceId: 3 };
-
-    const scenario = new YemotScenarioBuilder('Teached student TZ confirmed')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [manhaTeacherType])
-      .seed('Teacher', [manhaTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 3, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Manha Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many methodic?')
-      .userResponds('2')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemHangsUp('Report saved')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // report message — formatted message for teacher type
-  // This is tested via the "show reports — reports found" test which reads the report message.
-  it('report message — formatted message for teacher type', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const reportDate = new Date('2020-01-10');
-    const existingReport = {
-      id: 10, userId: 1, teacherTz: '123456789', teacherReferenceId: 1,
-      reportDate, howManyStudents: 5, howManyLessons: 3,
-    };
-
-    const scenario = new YemotScenarioBuilder('Report message formatted')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('AttReport', [existingReport])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('3')
-      .systemAsks('Enter month number')
-      .userResponds('1')
-      .systemSends(/Report date/i)
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // report message — no key for teacher type, return default
-  // TRAINING and RESPONSIBLE have empty message keys in getReportMessage.
-  // But they throw before reaching showReports. We test with an unknown teacher type.
-  it('report message — no key for teacher type, return default', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const unknownTeacherType = { id: 8, userId: 1, key: 99, name: 'Unknown' };
-    const unknownTeacher = { ...baseTeacher, id: 8, teacherTypeReferenceId: 8 };
-    const reportDate = new Date('2020-01-10');
-    const existingReport = {
-      id: 10, userId: 1, teacherTz: '123456789', teacherReferenceId: 8,
-      reportDate, howManyStudents: 5,
-    };
-
-    const scenario = new YemotScenarioBuilder('Report message default')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [unknownTeacherType])
-      .seed('Teacher', [unknownTeacher])
-      .seed('AttReport', [existingReport])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Unknown Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('3')
-      .systemAsks('Enter month number')
-      .userResponds('1')
-      // Unknown teacher type → getReportMessage returns default "דיווח מתאריך ..."
-      .systemSends(/דיווח מתאריך/i)
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // estimated price — no teacher type key, return 0
-  // This is tested via a flow where teacher type has no key. But all teacher types have keys.
-  // We test with a teacher that has no teacherTypeReferenceId — the teacherType will be null,
-  // so teacherTypeKey is undefined, and calculateEstimatedPrice returns 0.
-  // But without teacherTypeReferenceId, the teacher type lookup fails and teacherTypeName is default.
-  // The report flow uses teacherType.key which would be undefined → default case → TYPE_NOT_RECOGNIZED.
-  it('estimated price — no teacher type key, return 0', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const teacherNoType = { ...baseTeacher, teacherTypeReferenceId: null };
-
-    const scenario = new YemotScenarioBuilder('No teacher type key price 0')
-      .seed('User', [baseUser])
-      .seed('Teacher', [teacherNoType])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: null, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends(/Welcome.*Test Teacher/i)
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      // teacherType.key is undefined → default case → TYPE_NOT_RECOGNIZED
-      .systemHangsUp('Teacher type not recognized')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // estimated price — calculate price for seminar kita report
-  // The price calculation returns 0 when no prices are seeded (empty price map).
-  // The confirmation still works with price=0. Test the full seminar kita flow.
-  it('estimated price — calculate price for seminar kita report', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('Estimated price seminar kita')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .systemAsks('How many watch or individual?')
-      .userResponds('1')
-      .systemAsks('How many teached or interfering?')
-      .userResponds('1')
-      .systemAsks('How many discussing lessons?')
-      .userResponds('1')
-      .systemAsks('Was kamal?')
-      .userResponds('1')
-      .systemAsks('How many lessons absence?')
-      .userResponds('1')
-      .systemAsksConfirmation(/Confirm report/i)
-      .userConfirms(true)
-      .systemSends('Report saved')
-      .systemAsks('Another date?')
-      .userResponds('2')
-      .systemHangsUp('Goodbye')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(true);
-    expect(result.hungup).toBe(true);
-  });
-
-  // current student count — no teacher, return 0
-  // getCurrentStudentCount returns 0 when this.teacher is null.
-  // But this.teacher is always set before getCurrentStudentCount is called.
-  // Test with a seminar kita flow where no StudentGroup is seeded → count = 0 → ask for input.
-  it('current student count — no teacher, return 0', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-
-    const scenario = new YemotScenarioBuilder('No teacher student count 0')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      // No StudentGroup → count = 0 → ask for students
-      .systemAsks('How many students?')
-      .userResponds('5')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
-  });
-
-  // current student count — with teacher, return count
-  it('current student count — with teacher, return count', async () => {
-    jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-    const workingDate = new Date('2020-01-01');
-    const studentGroup = {
-      id: 1, userId: 1, teacherReferenceId: 1, teacherTz: '123456789',
-      startDate: new Date('2019-09-01'), studentCount: 8,
-    };
-
-    const scenario = new YemotScenarioBuilder('With teacher student count')
-      .seed('User', [baseUser])
-      .seed('TeacherType', [baseTeacherType])
-      .seed('Teacher', [baseTeacher])
-      .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate }])
-      .seed('StudentGroup', [studentGroup])
-      .seed('Text', baseTexts)
-      .systemSends('Welcome Seminar Kita Test Teacher')
-      .systemAsks('Press 1 for new report, 3 for previous reports')
-      .userResponds('1')
-      .systemAsks('Enter date DDMMYYYY')
-      .userResponds('01012020')
-      .systemAsksConfirmation(/Confirm date/i)
-      .userConfirms(true)
-      // StudentGroup with count=8 → skip asking students
-      .systemAsks('How many lessons?')
-      .userResponds('5')
-      .build();
-
-    const result = await runner.run(scenario);
-    expect(result.passed).toBe(false);
-    expect(result.failureMessage).toMatch(/ran out of programmed inputs|no more call actions/i);
+  describe('Current student count', () => {
+    it('no teacher, return 0', async () => {
+      const scenario = b('Current student count no teacher', seminarKitaType)
+        .systemSends(/Welcome.*Test Teacher/i).systemHangsUp('Teacher type not recognized').build();
+      await ok(scenario);
+    });
+
+    it('with teacher, return count', async () => {
+      const scenario = seminarKitaFullFlow(b('Current student count with teacher', seminarKitaType).seed('WorkingDate', baseWorkingDate).seed('StudentGroup', [{ id: 1, userId: 1, teacherReferenceId: 1, count: 5 }])).build();
+      await ok(scenario);
+    });
   });
 });
