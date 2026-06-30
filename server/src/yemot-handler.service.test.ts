@@ -377,9 +377,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('working day, date not confirmed, loops back', async () => {
-      const scenario = b('Date not confirmed', seminarKitaType).seed('WorkingDate', wd(1))
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
+      const scenario = selectNewReport(welcome(b('Date not confirmed', seminarKitaType).seed('WorkingDate', wd(1))))
         .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
         .systemAsksConfirmation('Confirm date: ').userConfirms(false)
         .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
@@ -394,38 +392,23 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('existing salary report, cannot report', async () => {
-      const scenario = b('Existing salary report', seminarKitaType)
-        .seed('SalaryReport', [{ id: 1, userId: 1, teacherReferenceId: 1, date: workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemSends('Cannot report salary report')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemSends('Cannot report salary report')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020').build();
+      const scenario = dateRejectLoop(
+        selectNewReport(welcome(b('Existing salary report', seminarKitaType)
+          .seed('SalaryReport', [{ id: 1, userId: 1, teacherReferenceId: 1, date: workingDate }]))),
+        '01012020', 'Cannot report salary report'
+      ).build();
       await outOfInputs(scenario);
     });
 
     it('existing report will be deleted message', async () => {
-      const scenario = b('Existing report will be deleted', seminarKitaType)
-        .seed('WorkingDate', wd(1))
-        .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemSends('Existing report will be deleted')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemSends('Report saved')
-        .systemAsks('Another date?').userResponds('2')
-        .systemHangsUp('Goodbye').build();
+      const scenario = confirmAndSave(seminarKitaQuestions(
+        selectNewReport(welcome(b('Existing report will be deleted', seminarKitaType)
+          .seed('WorkingDate', wd(1))
+          .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate }])))
+          .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
+          .systemSends('Existing report will be deleted')
+          .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+      )).build();
       await ok(scenario);
     });
 
@@ -561,12 +544,8 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('unknown teacher type — hangup with TYPE_NOT_RECOGNIZED', async () => {
-      const scenario = b('Unknown teacher type', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
-        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+      const scenario = welcomeToDate(b('Unknown teacher type', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }]))
         .systemHangsUp('Teacher type not recognized').build();
       await ok(scenario);
     });
@@ -594,99 +573,43 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('more than 10 absences, validation error and retry', async () => {
-      const scenario = b('More than 10 absences', seminarKitaType).seed('WorkingDate', wd(1))
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('11')
-        .systemSends('Cannot report more than ten absences')
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemSends('Report saved')
-        .systemAsks('Another date?').userResponds('2')
-        .systemHangsUp('Goodbye').build();
+      const scenario = confirmAndSave(
+        seminarKitaQuestions(
+          seminarKitaQuestions(welcomeToDate(b('More than 10 absences', seminarKitaType).seed('WorkingDate', wd(1))),
+            ['5', '5', '1', '1', '1', '1', '11'])
+          .systemSends('Cannot report more than ten absences')
+        )
+      ).build();
       await ok(scenario);
     });
 
     it('lesson count mismatch, validation error and retry', async () => {
-      const scenario = b('Lesson count mismatch', seminarKitaType).seed('WorkingDate', wd(1))
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('3')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemSends('Lesson count mismatch')
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemSends('Report saved')
-        .systemAsks('Another date?').userResponds('2')
-        .systemHangsUp('Goodbye').build();
+      const scenario = confirmAndSave(
+        seminarKitaQuestions(
+          seminarKitaQuestions(welcomeToDate(b('Lesson count mismatch', seminarKitaType).seed('WorkingDate', wd(1))),
+            ['5', '3', '1', '1', '1', '1', '1'])
+          .systemSends('Lesson count mismatch')
+        )
+      ).build();
       await ok(scenario);
     });
   });
 
   describe('Confirmation', () => {
     it('no config for teacher type, skip', async () => {
-      const scenario = b('No confirmation config', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
-        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+      const scenario = welcomeToDate(b('No confirmation config', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }]))
         .systemHangsUp('Teacher type not recognized').build();
       await ok(scenario);
     });
 
     it('rejected, reset and re-collect report data', async () => {
-      const scenario = b('Confirmation rejected', seminarKitaType).seed('WorkingDate', wd(1))
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(false)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemSends('Report saved')
-        .systemAsks('Another date?').userResponds('2')
-        .systemHangsUp('Goodbye').build();
+      const scenario = confirmAndSave(
+        seminarKitaQuestions(
+          seminarKitaQuestions(welcomeToDate(b('Confirmation rejected', seminarKitaType).seed('WorkingDate', wd(1))))
+            .systemAsksConfirmation(/Confirm report/i).userConfirms(false)
+        )
+      ).build();
       await ok(scenario);
     });
 
@@ -713,65 +636,32 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     it('manha another teacher yes, re-collect', async () => {
       // manhaReportType is never set (code is commented out), so isManhaAndOnOthers is false.
       // Manha falls to else branch: hangup with DATA_SAVED_SUCCESS.
-      const scenario = b('Manha another teacher yes', manhaType, t(3, 3)).seed('WorkingDate', wd(3))
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many methodic?').userResponds('2')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemHangsUp('Report saved').build();
+      const scenario = manhaFullFlow(b('Manha another teacher yes', manhaType, t(3, 3)).seed('WorkingDate', wd(3))).build();
       await ok(scenario);
     });
 
     it('manha another teacher no, hangup', async () => {
       // manhaReportType is never set (code is commented out), so else branch: hangup DATA_SAVED_SUCCESS
-      const scenario = b('Manha another teacher no', manhaType, t(3, 3)).seed('WorkingDate', wd(3))
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many methodic?').userResponds('2')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemHangsUp('Report saved').build();
+      const scenario = manhaFullFlow(b('Manha another teacher no', manhaType, t(3, 3)).seed('WorkingDate', wd(3))).build();
       await ok(scenario);
     });
 
     it('seminar kita another date yes, reset and re-collect', async () => {
-      const scenario = b('Seminar kita another date yes', seminarKitaType)
-        .seed('WorkingDate', [
-          { id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate },
-          { id: 2, userId: 1, teacherTypeReferenceId: 1, workingDate: new Date('2020-01-02') },
-        ])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemSends('Report saved')
-        .systemAsks('Another date?').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('02012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
-        .systemAsks('How many students?').userResponds('5')
-        .systemAsks('How many lessons?').userResponds('5')
-        .systemAsks('How many watch or individual?').userResponds('1')
-        .systemAsks('How many teached or interfering?').userResponds('1')
-        .systemAsks('How many discussing lessons?').userResponds('1')
-        .systemAsks('Was kamal?').userResponds('1')
-        .systemAsks('How many lessons absence?').userResponds('1')
-        .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
-        .systemSends('Report saved')
-        .systemAsks('Another date?').userResponds('2')
-        .systemHangsUp('Goodbye').build();
+      const scenario = confirmAndSave(
+        seminarKitaQuestions(
+          enterDate(
+            seminarKitaQuestions(welcomeToDate(b('Seminar kita another date yes', seminarKitaType)
+              .seed('WorkingDate', [
+                { id: 1, userId: 1, teacherTypeReferenceId: 1, workingDate },
+                { id: 2, userId: 1, teacherTypeReferenceId: 1, workingDate: new Date('2020-01-02') },
+              ])))
+              .systemAsksConfirmation(/Confirm report/i).userConfirms(true)
+              .systemSends('Report saved')
+              .systemAsks('Another date?').userResponds('1'),
+            '02012020'
+          )
+        )
+      ).build();
       await ok(scenario);
     });
 
@@ -906,23 +796,16 @@ describe('YemotHandlerService — teacher-report-nra', () => {
   describe('Report message', () => {
     it('formatted message for teacher type', async () => {
       jest.setSystemTime(new Date('2020-06-15T10:00:00Z'));
-      const scenario = b('Report message formatted', seminarKitaType)
-        .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate, howManyStudents: 5, howManyLessons: 5 }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('3')
-        .systemAsks('Enter month number').userResponds('1')
+      const scenario = showReportsFlow(welcome(b('Report message formatted', seminarKitaType)
+        .seed('AttReport', [{ id: 200, userId: 1, teacherReferenceId: 1, reportDate: workingDate, howManyStudents: 5, howManyLessons: 5 }])))
         .systemSends(/Report date.*5 students.*5 lessons/i)
         .systemHangsUp('Goodbye').build();
       await ok(scenario);
     });
 
     it('no key for teacher type, return default', async () => {
-      const scenario = b('Report message default', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
-        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+      const scenario = welcomeToDate(b('Report message default', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }]))
         .systemHangsUp('Teacher type not recognized').build();
       await ok(scenario);
     });
@@ -930,12 +813,8 @@ describe('YemotHandlerService — teacher-report-nra', () => {
 
   describe('Estimated price', () => {
     it('no teacher type key, return 0', async () => {
-      const scenario = b('Estimated price no key', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
-        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+      const scenario = welcomeToDate(b('Estimated price no key', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }]))
         .systemHangsUp('Teacher type not recognized').build();
       await ok(scenario);
     });
@@ -948,12 +827,8 @@ describe('YemotHandlerService — teacher-report-nra', () => {
 
   describe('Current student count', () => {
     it('no teacher, return 0', async () => {
-      const scenario = b('Current student count no teacher', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
-        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }])
-        .systemSends(/Welcome.*Test Teacher/i)
-        .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('1')
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation(/Confirm date/i).userConfirms(true)
+      const scenario = welcomeToDate(b('Current student count no teacher', tt(99, 'Unknown'), { ...baseTeacher, teacherTypeReferenceId: 99 })
+        .seed('WorkingDate', [{ id: 1, userId: 1, teacherTypeReferenceId: 99, workingDate }]))
         .systemHangsUp('Teacher type not recognized').build();
       await ok(scenario);
     });
