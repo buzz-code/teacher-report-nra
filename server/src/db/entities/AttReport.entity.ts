@@ -22,6 +22,7 @@ import { IsNotEmpty, MaxLength, IsNumber } from '@shared/utils/validation/class-
 import { StringType, NumberType, BooleanType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { DateColumn } from '@shared/utils/entity/column-types.util';
 
 @Entity('att_reports')
 @Index('att_reports_user_id_idx', ['userId'], {})
@@ -82,7 +83,7 @@ export class AttReport implements IHasUserId {
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @Column('date', { name: 'report_date' })
+  @DateColumn({ name: 'report_date' })
   reportDate: Date;
 
   @IsOptional({ always: true })
