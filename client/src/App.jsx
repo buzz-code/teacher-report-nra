@@ -130,8 +130,18 @@ const App = () => (
                 {CommonSettingsResources()}
                 {isPhoneCampaign(permissions) && (
                     <>
-                        <Resource name="phone_template" {...phoneTemplate} options={{ menuGroup: 'phone' }} icon={PhoneIcon} />
-                        <Resource name="phone_campaign" {...phoneCampaign} options={{ menuGroup: 'phone' }} icon={PhoneIcon} />
+                        <Resource
+                            name="phone_template"
+                            {...phoneTemplate}
+                            options={{ menuGroup: 'phone' }}
+                            icon={PhoneIcon}
+                        />
+                        <Resource
+                            name="phone_campaign"
+                            {...phoneCampaign}
+                            options={{ menuGroup: 'phone' }}
+                            icon={PhoneIcon}
+                        />
                     </>
                 )}
 

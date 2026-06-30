@@ -7,7 +7,7 @@ import {
     required,
     TextField,
     TextInput,
-    useRecordContext
+    useRecordContext,
 } from 'react-admin';
 import { CommonDatagrid } from '@shared/components/crudContainers/CommonList';
 import { CommonRepresentation } from '@shared/components/CommonRepresentation';

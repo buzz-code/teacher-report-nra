@@ -12,7 +12,7 @@ import {
     useListContext,
     useDataProvider,
     TextInput,
-    required
+    required,
 } from 'react-admin';
 import { get } from 'lodash';
 import { Tooltip, IconButton, Box, Typography, Chip, CircularProgress } from '@mui/material';
