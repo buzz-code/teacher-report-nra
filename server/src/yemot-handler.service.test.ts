@@ -188,6 +188,17 @@ describe('YemotHandlerService — teacher-report-nra', () => {
       .systemAsks('How many lessons absence?').userResponds(vals[6]);
   }
 
+  /** Seminar Kita without "How many students?" (when StudentGroup exists) */
+  function seminarKitaQuestionsNoStudentCount(builder: YemotScenarioBuilder, vals = ['5', '1', '1', '1', '1', '1']): YemotScenarioBuilder {
+    return builder
+      .systemAsks('How many lessons?').userResponds(vals[0])
+      .systemAsks('How many watch or individual?').userResponds(vals[1])
+      .systemAsks('How many teached or interfering?').userResponds(vals[2])
+      .systemAsks('How many discussing lessons?').userResponds(vals[3])
+      .systemAsks('Was kamal?').userResponds(vals[4])
+      .systemAsks('How many lessons absence?').userResponds(vals[5]);
+  }
+
   /** Manha: 2 report questions */
   function manhaQuestions(builder: YemotScenarioBuilder, methodic = '2', discussing = '1'): YemotScenarioBuilder {
     return builder
@@ -302,6 +313,12 @@ describe('YemotHandlerService — teacher-report-nra', () => {
       .systemAsks(/Enter student TZ for student/i).userResponds(tz)
       .systemSends(new RegExp(`Confirm student: ${name}`, 'i'))
       .systemAsksConfirmation(/Confirm student/i).userConfirms(true);
+  }
+
+  /** Student TZ collection: 2 students confirmed, then 0 to stop */
+  function studentTZCollection(builder: YemotScenarioBuilder): YemotScenarioBuilder {
+    return studentTZFlow(studentTZFlow(builder, '123456789', 'Test Teacher'), '999999999', 'Test Teacher')
+      .systemAsks(/Enter student TZ for student/i).userResponds('0');
   }
 
   // ========================================================================
@@ -556,13 +573,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
       // When StudentGroup exists, "How many students?" is skipped (count comes from DB).
       // Build scenario without that step, and use values where lessons = watch + teached + kamal + discuss + absence.
       const scenario = confirmAndSave(
-        welcomeToDate(b('Student count available', seminarKitaType).seed('WorkingDate', wd(1)).seed('StudentGroup', [{ id: 1, userId: 1, teacherReferenceId: 1, startDate: new Date('2020-01-01'), studentCount: 5 }]))
-          .systemAsks('How many lessons?').userResponds('5')
-          .systemAsks('How many watch or individual?').userResponds('1')
-          .systemAsks('How many teached or interfering?').userResponds('1')
-          .systemAsks('How many discussing lessons?').userResponds('1')
-          .systemAsks('Was kamal?').userResponds('1')
-          .systemAsks('How many lessons absence?').userResponds('1')
+        seminarKitaQuestionsNoStudentCount(welcomeToDate(b('Student count available', seminarKitaType).seed('WorkingDate', wd(1)).seed('StudentGroup', [{ id: 1, userId: 1, teacherReferenceId: 1, startDate: new Date('2020-01-01'), studentCount: 5 }])))
       ).build();
       await ok(scenario);
     });
@@ -577,7 +588,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
         seminarKitaQuestions(
           seminarKitaQuestions(welcomeToDate(b('More than 10 absences', seminarKitaType).seed('WorkingDate', wd(1))),
             ['5', '5', '1', '1', '1', '1', '11'])
-          .systemSends('Cannot report more than ten absences')
+            .systemSends('Cannot report more than ten absences')
         )
       ).build();
       await ok(scenario);
@@ -588,7 +599,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
         seminarKitaQuestions(
           seminarKitaQuestions(welcomeToDate(b('Lesson count mismatch', seminarKitaType).seed('WorkingDate', wd(1))),
             ['5', '3', '1', '1', '1', '1', '1'])
-          .systemSends('Lesson count mismatch')
+            .systemSends('Lesson count mismatch')
         )
       ).build();
       await ok(scenario);
@@ -714,18 +725,13 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('multiple teachers, valid selection', async () => {
-      const scenario = fourDigitsFlow(
-        b('Multiple teachers valid selection', manhaType, t(3, 3))
-          .seed('Teacher', [t(3, 3), { ...baseTeacher, id: 4, name: 'Teacher 2', phone: '0501111111', tz: '111111111', teacherTypeReferenceId: 3 }]),
-        '1111'
-      ).systemAsks(/Select teacher/i).userResponds('1')
-        .systemAsks('Enter student TZ for student 1').userResponds('123456789')
-        .systemSends(/Confirm student: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
-        .systemAsks('Enter student TZ for student 2').userResponds('999999999')
-        .systemSends(/Confirm student: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
-        .systemAsks('Enter student TZ for student 3').userResponds('0').build();
+      const scenario = studentTZCollection(
+        fourDigitsFlow(
+          b('Multiple teachers valid selection', manhaType, t(3, 3))
+            .seed('Teacher', [t(3, 3), { ...baseTeacher, id: 4, name: 'Teacher 2', phone: '0501111111', tz: '111111111', teacherTypeReferenceId: 3 }]),
+          '1111'
+        ).systemAsks(/Select teacher/i).userResponds('1')
+      ).build();
       await outOfInputs(scenario);
     });
 
@@ -742,17 +748,12 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('single teacher, confirmed', async () => {
-      const scenario = fourDigitsFlow(
-        b('Single teacher confirmed', manhaType, t(3, 3)), '1111'
-      ).systemSends(/Confirm teacher: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm teacher/i).userConfirms(true)
-        .systemAsks('Enter student TZ for student 1').userResponds('123456789')
-        .systemSends(/Confirm student: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
-        .systemAsks('Enter student TZ for student 2').userResponds('999999999')
-        .systemSends(/Confirm student: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
-        .systemAsks('Enter student TZ for student 3').userResponds('0').build();
+      const scenario = studentTZCollection(
+        fourDigitsFlow(
+          b('Single teacher confirmed', manhaType, t(3, 3)), '1111'
+        ).systemSends(/Confirm teacher: Test Teacher/i)
+          .systemAsksConfirmation(/Confirm teacher/i).userConfirms(true)
+      ).build();
       await outOfInputs(scenario);
     });
   });
@@ -781,14 +782,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     });
 
     it('confirmed, add to collection', async () => {
-      const scenario = b('Student TZ confirmed', manhaType, t(3, 3))
-        .systemAsks(/Enter student TZ for student/i).userResponds('123456789')
-        .systemSends(/Confirm student: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
-        .systemAsks(/Enter student TZ for student/i).userResponds('999999999')
-        .systemSends(/Confirm student: Test Teacher/i)
-        .systemAsksConfirmation(/Confirm student/i).userConfirms(true)
-        .systemAsks(/Enter student TZ for student/i).userResponds('0').build();
+      const scenario = studentTZCollection(b('Student TZ confirmed', manhaType, t(3, 3))).build();
       await outOfInputs(scenario);
     });
   });
@@ -835,13 +829,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
 
     it('with teacher, return count', async () => {
       const scenario = confirmAndSave(
-        welcomeToDate(b('Current student count with teacher', seminarKitaType).seed('WorkingDate', wd(1)).seed('StudentGroup', [{ id: 1, userId: 1, teacherReferenceId: 1, startDate: new Date('2020-01-01'), studentCount: 5 }]))
-          .systemAsks('How many lessons?').userResponds('5')
-          .systemAsks('How many watch or individual?').userResponds('1')
-          .systemAsks('How many teached or interfering?').userResponds('1')
-          .systemAsks('How many discussing lessons?').userResponds('1')
-          .systemAsks('Was kamal?').userResponds('1')
-          .systemAsks('How many lessons absence?').userResponds('1')
+        seminarKitaQuestionsNoStudentCount(welcomeToDate(b('Current student count with teacher', seminarKitaType).seed('WorkingDate', wd(1)).seed('StudentGroup', [{ id: 1, userId: 1, teacherReferenceId: 1, startDate: new Date('2020-01-01'), studentCount: 5 }])))
       ).build();
       await ok(scenario);
     });
