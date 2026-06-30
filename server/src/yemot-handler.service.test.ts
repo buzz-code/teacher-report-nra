@@ -138,17 +138,10 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     return builder.systemSends(/Welcome.*Test Teacher/i);
   }
 
-  /** Main menu → invalid input (9) repeated 3 times */
-  function menuInvalidLoop(builder: YemotScenarioBuilder): YemotScenarioBuilder {
-    return builder
-      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
-      .systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9');
-  }
-
-  /** Welcome → main menu → invalid input loop */
-  function welcomeMenuLoop(builder: YemotScenarioBuilder): YemotScenarioBuilder {
-    return menuInvalidLoop(welcome(builder));
+  /** Repeat a step function N times on the builder */
+  function repeat(builder: YemotScenarioBuilder, count: number, step: (b: YemotScenarioBuilder) => YemotScenarioBuilder): YemotScenarioBuilder {
+    for (let i = 0; i < count; i++) builder = step(builder);
+    return builder;
   }
 
   /** Main menu → select new report (1) */
@@ -161,14 +154,6 @@ describe('YemotHandlerService — teacher-report-nra', () => {
     return builder
       .systemAsks('Enter date DDMMYYYY').userResponds(date)
       .systemAsksConfirmation(/Confirm date/i).userConfirms(true);
-  }
-
-  /** Enter date → reject with error → retry (3 times, then out of inputs) */
-  function dateRejectLoop(builder: YemotScenarioBuilder, date: string, errorMsg: string): YemotScenarioBuilder {
-    return builder
-      .systemAsks('Enter date DDMMYYYY').userResponds(date).systemSends(errorMsg)
-      .systemAsks('Enter date DDMMYYYY').userResponds(date).systemSends(errorMsg)
-      .systemAsks('Enter date DDMMYYYY').userResponds(date);
   }
 
   /** Welcome → menu → new report → enter date → confirm */
@@ -343,24 +328,27 @@ describe('YemotHandlerService — teacher-report-nra', () => {
   });
 
   describe('Welcome', () => {
+    const menuInvalid = (b: YemotScenarioBuilder) => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9');
+
     it('correct teacher type name in welcome', async () => {
-      const scenario = welcomeMenuLoop(b('Welcome message', seminarKitaType)).build();
+      const scenario = repeat(welcome(b('Welcome message', seminarKitaType)), 3, menuInvalid).build();
       await outOfInputs(scenario);
     });
 
     it('teacher type not found, uses default name', async () => {
       const teacherWithBadType = { ...baseTeacher, teacherTypeReferenceId: 999 };
-      const scenario = welcomeMenuLoop(b('Teacher type not found', seminarKitaType, teacherWithBadType)
+      const scenario = repeat(welcome(b('Teacher type not found', seminarKitaType, teacherWithBadType)
         .seed('User', [baseUser, { ...baseUser, id: 999, phoneNumber: '099999998' }])
-        .seed('TeacherType', [{ id: 999, userId: 999, key: 999, name: 'Ghost' }])).build();
+        .seed('TeacherType', [{ id: 999, userId: 999, key: 999, name: 'Ghost' }])), 3, menuInvalid).build();
       await outOfInputs(scenario);
     });
 
     it('no teacher type reference, uses default name', async () => {
       const teacherNoType = { ...baseTeacher, teacherTypeReferenceId: null };
-      const scenario = welcomeMenuLoop(
-        new YemotScenarioBuilder('No teacher type reference')
-          .seed('User', [baseUser]).seed('Teacher', [teacherNoType]).seed('Text', baseTexts)
+      const scenario = repeat(
+        welcome(new YemotScenarioBuilder('No teacher type reference')
+          .seed('User', [baseUser]).seed('Teacher', [teacherNoType]).seed('Text', baseTexts)),
+        3, menuInvalid
       ).build();
       await outOfInputs(scenario);
     });
@@ -383,37 +371,42 @@ describe('YemotHandlerService — teacher-report-nra', () => {
   });
 
   describe('Date validation', () => {
+    const dateReject = (date: string, errorMsg: string) => (b: YemotScenarioBuilder) =>
+      b.systemAsks('Enter date DDMMYYYY').userResponds(date).systemSends(errorMsg);
+
     it('future date rejected, retry', async () => {
-      const scenario = dateRejectLoop(selectNewReport(welcome(b('Future date rejected', seminarKitaType))), '01012099', 'Cannot report future').build();
+      const scenario = repeat(selectNewReport(welcome(b('Future date rejected', seminarKitaType))), 2, dateReject('01012099', 'Cannot report future'))
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012099').build();
       await outOfInputs(scenario);
     });
 
     it('non-working day rejected', async () => {
-      const scenario = dateRejectLoop(selectNewReport(welcome(b('Non-working day rejected', seminarKitaType))), '01012020', 'Cannot report non working day').build();
+      const scenario = repeat(selectNewReport(welcome(b('Non-working day rejected', seminarKitaType))), 2, dateReject('01012020', 'Cannot report non working day'))
+        .systemAsks('Enter date DDMMYYYY').userResponds('01012020').build();
       await outOfInputs(scenario);
     });
 
     it('working day, date not confirmed, loops back', async () => {
-      const scenario = selectNewReport(welcome(b('Date not confirmed', seminarKitaType).seed('WorkingDate', wd(1))))
+      const dateNotConfirmed = (b: YemotScenarioBuilder) => b
         .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation('Confirm date: ').userConfirms(false)
-        .systemAsks('Enter date DDMMYYYY').userResponds('01012020')
-        .systemAsksConfirmation('Confirm date: ').userConfirms(false)
+        .systemAsksConfirmation('Confirm date: ').userConfirms(false);
+      const scenario = repeat(selectNewReport(welcome(b('Date not confirmed', seminarKitaType).seed('WorkingDate', wd(1)))), 2, dateNotConfirmed)
         .systemAsks('Enter date DDMMYYYY').userResponds('01012020').build();
       await outOfInputs(scenario);
     });
 
     it('invalid date format, retry', async () => {
-      const scenario = dateRejectLoop(selectNewReport(welcome(b('Invalid date format', seminarKitaType))), 'notadate', 'Invalid date').build();
+      const scenario = repeat(selectNewReport(welcome(b('Invalid date format', seminarKitaType))), 2, dateReject('notadate', 'Invalid date'))
+        .systemAsks('Enter date DDMMYYYY').userResponds('notadate').build();
       await outOfInputs(scenario);
     });
 
     it('existing salary report, cannot report', async () => {
-      const scenario = dateRejectLoop(
+      const scenario = repeat(
         selectNewReport(welcome(b('Existing salary report', seminarKitaType)
           .seed('SalaryReport', [{ id: 1, userId: 1, teacherReferenceId: 1, date: workingDate }]))),
-        '01012020', 'Cannot report salary report'
-      ).build();
+        2, dateReject('01012020', 'Cannot report salary report')
+      ).systemAsks('Enter date DDMMYYYY').userResponds('01012020').build();
       await outOfInputs(scenario);
     });
 
@@ -443,70 +436,70 @@ describe('YemotHandlerService — teacher-report-nra', () => {
 
     it('pre-answered, skip question loop', async () => {
       const answer = { id: 1, userId: 1, teacherTz: '123456789', questionReferenceId: 1, answer: 5, reportDate: new Date('2020-01-01') };
-      const scenario = welcomeMenuLoop(b('Questions pre-answered', seminarKitaType)
+      const scenario = repeat(welcome(b('Questions pre-answered', seminarKitaType)
         .seed('Question', [q('How was the weather?', false)])
         .seed('Answer', [answer])
         .seed('TeacherQuestion', [{ ...tq(), answerReferenceId: 1 }])
-      ).build();
+      ), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')).build();
       await outOfInputs(scenario);
     });
 
     it('skip mandatory with star, error then valid answer', async () => {
-      const scenario = menuInvalidLoop(
+      const scenario = repeat(
         questionSkip(
           b('Skip mandatory with star', seminarKitaType)
             .seed('Question', [q('How was the weather?')])
             .seed('TeacherQuestion', [tq()]),
           true,
-        )
+        ), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
       ).build();
       await outOfInputs(scenario);
     });
 
     it('skip optional with star, move to next', async () => {
-      const scenario = menuInvalidLoop(
+      const scenario = repeat(
         questionSkip(
           b('Skip optional with star', seminarKitaType)
             .seed('Question', [q('Optional question?', false)])
             .seed('TeacherQuestion', [tq()]),
           false, 'Optional question?',
-        )
+        ), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
       ).build();
       await outOfInputs(scenario);
     });
 
     it('answer out of range, retry with valid answer', async () => {
-      const scenario = menuInvalidLoop(
+      const scenario = repeat(
         questionRetry(
           b('Answer out of range', seminarKitaType)
             .seed('Question', [q('Rate 1-5?')])
             .seed('TeacherQuestion', [tq()]),
           '9', '3',
-        )
+        ), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
       ).build();
       await outOfInputs(scenario);
     });
 
     it('non-numeric answer, retry with valid answer', async () => {
-      const scenario = menuInvalidLoop(
+      const scenario = repeat(
         questionRetry(
           b('Non-numeric answer', seminarKitaType)
             .seed('Question', [q('Rate 1-5?')])
             .seed('TeacherQuestion', [tq()]),
           'abc', '3',
-        )
+        ), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
       ).build();
       await outOfInputs(scenario);
     });
 
     it('valid answer, save and echo back', async () => {
-      const scenario = menuInvalidLoop(
+      const scenario = repeat(
         questionAnswer(
           b('Valid answer save and echo', seminarKitaType)
             .seed('Question', [q('Rate 1-5?')])
             .seed('TeacherQuestion', [tq()]),
           '3',
-        )
+        ), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')
       ).build();
       await outOfInputs(scenario);
     });
@@ -514,7 +507,7 @@ describe('YemotHandlerService — teacher-report-nra', () => {
 
   describe('Report date already set', () => {
     it('report date — already set, skip menu', async () => {
-      const scenario = welcomeMenuLoop(b('Report date menu shown', seminarKitaType)).build();
+      const scenario = repeat(welcome(b('Report date menu shown', seminarKitaType)), 3, b => b.systemAsks('Press 1 for new report, 3 for previous reports').userResponds('9')).build();
       await outOfInputs(scenario);
     });
   });
