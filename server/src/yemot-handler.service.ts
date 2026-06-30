@@ -497,6 +497,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       await this.finishSavingReport();
     } catch (error) {
+      // If the call was already hung up (e.g. finishSavingReport called hangup),
+      // re-throw the exit error — it's not a save failure.
+      if (error.name.includes('ExitError')) {
+        throw error;
+      }
       this.logger.error('Error saving report:', error);
       this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_NOT_SAVED'));
     }
@@ -508,7 +513,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Use teacher's current student count if available, otherwise ask
     const currentStudentCount = await this.getCurrentStudentCount();
-    this.callParams.howManyStudents = currentStudentCount?.toString();
+    this.callParams.howManyStudents = currentStudentCount ? currentStudentCount.toString() : null;
     if (!this.callParams.howManyStudents) {
       // כמה תלמידות היו אצלך היום
       this.callParams.howManyStudents = await this.askForInput(

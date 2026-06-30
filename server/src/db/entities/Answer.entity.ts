@@ -23,6 +23,7 @@ import { IsNotEmpty, IsNumber } from '@shared/utils/validation/class-validator-h
 import { NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
+import { DateColumn } from '@shared/utils/entity/column-types.util';
 
 @Entity('answers')
 @Index('answers_user_id_idx', ['userId'], {})
@@ -104,7 +105,7 @@ export class Answer implements IHasUserId {
   answer: number;
 
   @IsOptional({ always: true })
-  @Column('date', { name: 'report_date', nullable: true })
+  @DateColumn({ name: 'report_date', nullable: true })
   reportDate: Date;
 
   @CreateDateColumn()

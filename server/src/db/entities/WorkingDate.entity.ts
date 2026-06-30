@@ -20,6 +20,7 @@ import { NumberType } from '@shared/utils/entity/class-transformer';
 import { IHasUserId } from '@shared/base-entity/interface';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
+import { DateColumn } from '@shared/utils/entity/column-types.util';
 
 @Entity('working_dates')
 @Index('working_dates_user_id_idx', ['userId'], {})
@@ -72,7 +73,7 @@ export class WorkingDate implements IHasUserId {
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @Column('date', { name: 'working_date' })
+  @DateColumn({ name: 'working_date' })
   workingDate: Date;
 
   @IsOptional({ always: true })

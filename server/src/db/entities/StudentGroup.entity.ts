@@ -21,6 +21,7 @@ import { User } from './User.entity';
 import { TeacherType } from './TeacherType.entity';
 import { findOneAndAssignReferenceId, getDataSource } from '@shared/utils/entity/foreignKey.util';
 import { fillDefaultYearValue } from '@shared/utils/entity/year.util';
+import { DateColumn } from '@shared/utils/entity/column-types.util';
 
 @Entity('student_groups')
 @Index('student_groups_user_id_idx', ['userId'], {})
@@ -73,11 +74,11 @@ export class StudentGroup implements IHasUserId {
 
   @IsNotEmpty({ groups: [CrudValidationGroups.CREATE] })
   @IsOptional({ groups: [CrudValidationGroups.UPDATE] })
-  @Column('date', { name: 'start_date' })
+  @DateColumn({ name: 'start_date' })
   startDate: Date;
 
   @IsOptional({ always: true })
-  @Column('date', { name: 'end_date', nullable: true })
+  @DateColumn({ name: 'end_date', nullable: true })
   endDate: Date;
 
   @IsOptional({ always: true })
