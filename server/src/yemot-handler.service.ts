@@ -499,7 +499,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     } catch (error) {
       // If the call was already hung up (e.g. finishSavingReport called hangup),
       // re-throw the exit error — it's not a save failure.
-      if (this.hungUp) {
+      if (error.name.includes('ExitError')) {
         throw error;
       }
       this.logger.error('Error saving report:', error);
