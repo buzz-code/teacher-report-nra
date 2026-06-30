@@ -12,7 +12,7 @@ import {
     BooleanInput,
     useDataProvider,
     useListContext,
-    useRecordContext
+    useRecordContext,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
 import { useState, useEffect } from 'react';
