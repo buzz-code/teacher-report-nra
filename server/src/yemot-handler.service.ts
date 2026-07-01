@@ -151,7 +151,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       teacherTypeName,
       name: this.teacher.name,
     });
-    this.sendMessage(welcomeMessage);
+    await this.sendMessage(welcomeMessage);
 
     await this.askForReportDataAndSave();
   }
@@ -331,13 +331,13 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     // Validate date
     if (isNaN(reportDate.getTime())) {
-      this.sendMessage(await this.getTextByUserId('VALIDATION.INVALID_DATE'));
+      await this.sendMessage(await this.getTextByUserId('VALIDATION.INVALID_DATE'));
       return this.getAndValidateReportDate();
     }
 
     const reportDateIsFuture = reportDate > new Date();
     if (reportDateIsFuture) {
-      this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_FUTURE'));
+      await this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_FUTURE'));
       return this.getAndValidateReportDate();
     }
 
@@ -345,7 +345,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const dateStr = reportDate.toISOString().split('T')[0]; // YYYY-MM-DD format
     const isWorkingDay = await this.validateWorkingDateForTeacher(dateStr);
     if (!isWorkingDay) {
-      this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_NON_WORKING_DAY'));
+      await this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_NON_WORKING_DAY'));
       return this.getAndValidateReportDate();
     }
 
@@ -368,7 +368,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     if (this.existingReport) {
       if (this.existingReport.salaryReport) {
-        this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
+        await this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_SALARY_REPORT'));
         return this.getAndValidateReportDate();
       }
       // if (this.existingReport.isConfirmed) {
@@ -376,7 +376,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       // this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_CONFIRMED'));
       // return this.getAndValidateReportDate();
       // }
-      this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
+      await this.sendMessage(await this.getTextByUserId('VALIDATION.EXISTING_REPORT_WILL_BE_DELETED'));
     }
     // }
 
@@ -444,8 +444,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         await this.getSpecialEducationReport();
         break;
       default:
-        this.hangupWithMessage(await this.getTextByUserId('TEACHER.TYPE_NOT_RECOGNIZED'));
-        break;
+        return this.hangupWithMessage(await this.getTextByUserId('TEACHER.TYPE_NOT_RECOGNIZED'));
     }
 
     // Ask for confirmation after data collection
@@ -503,7 +502,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         throw error;
       }
       this.logger.error('Error saving report:', error);
-      this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_NOT_SAVED'));
+      return this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_NOT_SAVED'));
     }
   }
 
@@ -751,7 +750,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const teachers = await this.getTeachersByFourLastDigits(fourLastDigits);
 
     if (teachers.length === 0) {
-      this.sendMessage(await this.getTextByUserId('TEACHER.NO_TEACHER_FOUND_BY_DIGITS'));
+      await this.sendMessage(await this.getTextByUserId('TEACHER.NO_TEACHER_FOUND_BY_DIGITS'));
       return this.getTeacherFourLastDigits();
     } else if (teachers.length > 1) {
       const teacherList = teachers.map((teacher, index) => `${teacher.name} ${index + 1}`).join(', ');
@@ -766,7 +765,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
       const selectedIndex = parseInt(selection) - 1;
       if (selectedIndex < 0 || selectedIndex >= teachers.length) {
-        this.sendMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
+        await this.sendMessage(await this.getTextByUserId('GENERAL.INVALID_INPUT'));
         return this.getTeacherFourLastDigits();
       }
 
@@ -809,7 +808,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     const student = await this.getStudentByTz(studentTz);
     if (!student) {
-      this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
+      await this.sendMessage(await this.getTextByUserId('STUDENT.NOT_FOUND'));
       return this.getTeachedStudentTz(number);
     }
 
@@ -929,7 +928,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     if (isManhaAndOnOthers) {
       // בסיום האם תרצי לדווח על מורה נוספת
-      this.sendMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+      await this.sendMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
       const anotherTeacherReport = await this.askForInput(await this.getTextByUserId('REPORT.ANOTHER_TEACHER_REPORT'), {
         max_digits: 1,
         min_digits: 1,
@@ -938,11 +937,11 @@ export class YemotHandlerService extends BaseYemotHandlerService {
       if (anotherTeacherReport === '1') {
         return this.askForReportDataAndSave();
       } else {
-        this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+        return this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
       }
     } else if (isSeminarKita) {
       // האם תרצי לדווח על יום נוסף
-      this.sendMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+      await this.sendMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
       const anotherDateReport = await this.askForInput(await this.getTextByUserId('REPORT.ANOTHER_DATE_REPORT'), {
         max_digits: 1,
         min_digits: 1,
@@ -954,10 +953,10 @@ export class YemotHandlerService extends BaseYemotHandlerService {
         await this.getAndValidateReportDate();
         return this.getReportAndSave();
       } else {
-        this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+        return this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
       }
     } else {
-      this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
+      return this.hangupWithMessage(await this.getTextByUserId('REPORT.DATA_SAVED_SUCCESS'));
     }
   }
 
@@ -981,15 +980,15 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const reports = await this.getAllReportsByDateRange(startDate, endDate);
 
     if (reports.length === 0) {
-      this.hangupWithMessage(await this.getTextByUserId('REPORT.NO_REPORT_FOUND'));
+      return this.hangupWithMessage(await this.getTextByUserId('REPORT.NO_REPORT_FOUND'));
     } else {
       for (const report of reports) {
         // Just read the report message, no user interaction
         const message = await this.getReportMessage(report);
-        this.sendMessage(message);
+        await this.sendMessage(message);
       }
       // After reading all reports, hangup
-      this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+      return this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
     }
   }
 
@@ -1065,7 +1064,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     if (existingAbsences + newAbsences - existingReportAbsences > 10) {
       // יותר מ-10 חיסורים - נותן למורה הזדמנות להקליד שוב
-      this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES'));
+      await this.sendMessage(await this.getTextByUserId('VALIDATION.CANNOT_REPORT_MORE_THAN_TEN_ABSENCES'));
 
       // קוראים לפונקציה שוב מההתחלה
       return this.getSeminarKitaReport();
@@ -1084,7 +1083,7 @@ export class YemotHandlerService extends BaseYemotHandlerService {
 
     if (totalCount !== reportedCount) {
       // המספר לא תואם - נותן למורה הזדמנות להקליד שוב
-      this.sendMessage(await this.getTextByUserId('VALIDATION.SEMINAR_KITA_LESSON_COUNT'));
+      await this.sendMessage(await this.getTextByUserId('VALIDATION.SEMINAR_KITA_LESSON_COUNT'));
 
       // קוראים לפונקציה שוב מההתחלה
       return this.getSeminarKitaReport();
