@@ -8,6 +8,7 @@ import AdminAppShell from '@shared/components/app/AdminAppShell';
 import CommonRoutes from '@shared/components/app/CommonRoutes';
 import CommonAdminResources from '@shared/components/app/CommonAdminResources';
 import CommonSettingsResources from '@shared/components/app/CommonSettingsResources';
+import CommonPhoneResources from '@shared/components/app/CommonPhoneResources';
 
 import { Dashboard, Layout } from 'src/GeneralLayout';
 
@@ -34,11 +35,9 @@ import reportableItemWithPrice from 'src/entities/reportable-item-with-price';
 import answerWithPrice from 'src/entities/answer-with-price';
 import salaryReportByTeacher from 'src/entities/salary-report-by-teacher';
 import TeacherValidationPivot from 'src/pivots/TeacherValidationPivot';
-import phoneCampaign from '@shared/components/common-entities/phone-campaign';
-import phoneTemplate from '@shared/components/common-entities/phone-template';
 
 import Settings from 'src/settings/Settings';
-import { isAdmin, isPhoneCampaign } from '@shared/utils/permissionsUtil';
+import { isAdmin } from '@shared/utils/permissionsUtil';
 
 // Icons
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -53,7 +52,6 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import PhoneIcon from '@mui/icons-material/Phone';
 
 const themeOptions = { primary: blue[700], secondary: green[600] };
 
@@ -128,22 +126,7 @@ const App = () => (
                     icon={MonetizationOnIcon}
                 />
                 {CommonSettingsResources()}
-                {isPhoneCampaign(permissions) && (
-                    <>
-                        <Resource
-                            name="phone_template"
-                            {...phoneTemplate}
-                            options={{ menuGroup: 'phone' }}
-                            icon={PhoneIcon}
-                        />
-                        <Resource
-                            name="phone_campaign"
-                            {...phoneCampaign}
-                            options={{ menuGroup: 'phone' }}
-                            icon={PhoneIcon}
-                        />
-                    </>
-                )}
+                {CommonPhoneResources({ permissions })}
 
                 {/* Extra admin resources for this project */}
                 {isAdmin(permissions) && (
