@@ -981,15 +981,15 @@ export class YemotHandlerService extends BaseYemotHandlerService {
     const reports = await this.getAllReportsByDateRange(startDate, endDate);
 
     if (reports.length === 0) {
-      this.hangupWithMessage(await this.getTextByUserId('REPORT.NO_REPORT_FOUND'));
+      return this.hangupWithMessage(await this.getTextByUserId('REPORT.NO_REPORT_FOUND'));
     } else {
       for (const report of reports) {
         // Just read the report message, no user interaction
         const message = await this.getReportMessage(report);
-        this.sendMessage(message);
+        await this.sendMessage(message);
       }
       // After reading all reports, hangup
-      this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
+      return this.hangupWithMessage(await this.getTextByUserId('REPORT.GOODBYE_TO_MANHA_TEACHER'));
     }
   }
 
